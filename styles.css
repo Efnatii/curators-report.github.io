@@ -113,9 +113,10 @@ main {
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
 .section-counter {
@@ -263,7 +264,7 @@ textarea:focus {
 
 .footer__content {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
@@ -272,6 +273,7 @@ textarea:focus {
 .footer__links {
   display: flex;
   gap: 14px;
+  align-items: center;
 }
 
 .footnote {
