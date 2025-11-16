@@ -24,7 +24,7 @@
         <section class="form-section" aria-labelledby="section-general">
           <div class="section-header">
             <div>
-              <p class="section-counter">Раздел 1 из 1</p>
+              <p class="section-counter">Раздел 1 из 10</p>
               <h2 id="section-general">Общие сведения о кураторе</h2>
               <p class="muted">Вводная информация для идентификации куратора и его группы.</p>
             </div>
@@ -122,7 +122,32 @@
                 <span>Военный учебный центр при ГУАП (ВУЦ)</span>
               </label>
             </div>
-            <p class="helper">Выберите один или несколько вариантов.</p>
+          <p class="helper">Выберите один или несколько вариантов.</p>
+        </fieldset>
+      </section>
+
+        <section class="form-section" aria-labelledby="section-curator-hours">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 3 из 10</p>
+              <h2 id="section-curator-hours">Информация о проведении кураторских часов</h2>
+              <p class="muted">Данные о количестве, тематиках и направлениях проведённых кураторских часов</p>
+            </div>
+            <span class="chip">Обязательный</span>
+          </div>
+
+          <fieldset class="choice-card">
+            <legend class="field__label">Проведение не менее трех кураторских часов за отчетный период *</legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="radio" name="curatorHoursHeld" value="Да" required />
+                <span>Да</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="curatorHoursHeld" value="Нет" required />
+                <span>Нет</span>
+              </label>
+            </div>
           </fieldset>
         </section>
 
@@ -208,6 +233,11 @@
       return Array.from(form.querySelectorAll('input[name="faculty"]:checked')).map((input) => input.value);
     }
 
+    function getSelectedRadio(name) {
+      const selected = form.querySelector(`input[name="${name}"]:checked`);
+      return selected ? selected.value : '';
+    }
+
     function getValue(name) {
       return form.elements[name]?.value.trim() || '';
     }
@@ -231,6 +261,7 @@
         groupNumbers: collectList('groupNumbers'),
         baseBuilding: getValue('baseBuilding'),
         baseRoom: getValue('baseRoom'),
+        curatorHoursHeld: getSelectedRadio('curatorHoursHeld'),
         faculties: collectFaculties(),
       };
       return JSON.stringify(payload, null, 2);
