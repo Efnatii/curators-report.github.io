@@ -1,13 +1,13 @@
 :root {
-  --bg: #f5f7fb;
-  --panel: #ffffff;
-  --card: #edf2fb;
-  --border: #dbe4f3;
-  --accent: #005baa;
-  --accent-soft: rgba(0, 91, 170, 0.1);
-  --text: #0f172a;
-  --muted: #52607a;
-  --shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
+  --bg: #0c0f16;
+  --panel: #0f1522;
+  --card: #111a2b;
+  --border: #1f2a3d;
+  --accent: #f2b138;
+  --accent-soft: rgba(242, 177, 56, 0.15);
+  --text: #e9ecf2;
+  --muted: #b3b9c6;
+  --shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -18,7 +18,7 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(180deg, #f5f7fb 0%, #eef3fb 45%, #f5f7fb 100%);
+  background: radial-gradient(circle at 20% 20%, #12182b, #0b0f18 40%), #0b0f18;
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
@@ -36,11 +36,11 @@ a {
 
 .hero {
   padding: 72px 0 52px;
-  background: linear-gradient(120deg, rgba(0, 91, 170, 0.12), transparent 50%),
-    linear-gradient(180deg, rgba(0, 91, 170, 0.9), rgba(0, 69, 130, 0.92));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: linear-gradient(135deg, rgba(242, 177, 56, 0.1), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(119, 169, 255, 0.12), transparent 35%),
+    linear-gradient(180deg, rgba(17, 23, 39, 0.9), rgba(12, 15, 22, 0.95));
+  border-bottom: 1px solid var(--border);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .hero__content {
@@ -53,13 +53,13 @@ a {
   display: inline-flex;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.85rem;
-  color: #ffffff;
+  color: var(--accent);
 }
 
 h1 {
@@ -74,7 +74,7 @@ h2 {
 }
 
 .lede {
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--muted);
   max-width: 720px;
 }
 
@@ -131,12 +131,12 @@ main {
 }
 
 .chip {
-  background: var(--accent-soft);
-  border: 1px solid rgba(0, 91, 170, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   padding: 6px 12px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--muted);
 }
 
 .field-grid {
@@ -161,9 +161,9 @@ textarea {
   padding: 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: #f8fbff;
+  background: #0a0f1a;
   color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 textarea {
@@ -173,7 +173,7 @@ textarea {
 
 input:focus,
 textarea:focus {
-  outline: 2px solid rgba(0, 91, 170, 0.35);
+  outline: 2px solid rgba(242, 177, 56, 0.5);
   outline-offset: 1px;
 }
 
@@ -181,7 +181,7 @@ textarea:focus {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
-  background: linear-gradient(180deg, rgba(0, 91, 170, 0.04), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
   display: grid;
   gap: 12px;
 }
@@ -203,15 +203,14 @@ textarea:focus {
   gap: 10px;
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 91, 170, 0.12);
-  background: rgba(255, 255, 255, 0.8);
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 120ms ease, background 120ms ease;
 }
 
 .choice:hover {
-  border-color: rgba(0, 91, 170, 0.35);
-  background: #f2f7ff;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  border-color: rgba(242, 177, 56, 0.4);
+  background: rgba(242, 177, 56, 0.05);
 }
 
 .choice input {
@@ -238,7 +237,7 @@ textarea:focus {
   gap: 8px;
   padding: 12px 18px;
   background: var(--accent);
-  color: #ffffff;
+  color: #0b0f18;
   border-radius: 10px;
   font-weight: 700;
   border: none;
@@ -248,7 +247,7 @@ textarea:focus {
 
 .button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(0, 91, 170, 0.35);
+  box-shadow: 0 10px 30px rgba(242, 177, 56, 0.35);
 }
 
 .button:active {
@@ -257,7 +256,7 @@ textarea:focus {
 
 .footer {
   border-top: 1px solid var(--border);
-  background: #ffffff;
+  background: #090d14;
   padding: 28px 0;
   color: var(--muted);
 }
