@@ -106,6 +106,8 @@ main {
 .form {
   display: grid;
   gap: 24px;
+  max-width: 820px;
+  margin: 0 auto;
 }
 
 .form-section {
@@ -167,6 +169,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-width: 720px;
 }
 
 .field__label-row {
@@ -178,6 +181,7 @@ main {
 
 .field--wide {
   grid-column: 1 / -1;
+  max-width: none;
 }
 
 .field__label {
@@ -279,15 +283,17 @@ textarea:focus {
 
 .choice input {
   appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-content: center;
+  border-radius: 8px;
   border: 2px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
   margin-top: 2px;
   position: relative;
   cursor: pointer;
-  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
 .choice input:focus-visible {
@@ -295,18 +301,28 @@ textarea:focus {
   outline-offset: 2px;
 }
 
+.choice input::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border: 2px solid #0b0f18;
+  border-top: 0;
+  border-left: 0;
+  transform: rotate(45deg) scale(0.6);
+  opacity: 0;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
 .choice input:checked {
   background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 6px 16px rgba(242, 177, 56, 0.25);
+  transform: translateY(-1px);
 }
 
 .choice input:checked::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 4px;
-  background: #0b0f18;
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
 }
 
 .helper {
