@@ -146,16 +146,34 @@ main {
   color: var(--muted);
 }
 
+.chip--interactive {
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.chip--interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(242, 177, 56, 0.25);
+  border-color: rgba(242, 177, 56, 0.5);
+}
+
 .field-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
 }
 
-.field { 
+.field {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.field__label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .field--wide {
@@ -164,6 +182,38 @@ main {
 
 .field__label {
   font-weight: 700;
+}
+
+.multi-input {
+  display: grid;
+  gap: 8px;
+}
+
+.multi-input__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.multi-input__remove {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.multi-input__remove:hover:not(:disabled) {
+  background: rgba(242, 177, 56, 0.1);
+  border-color: rgba(242, 177, 56, 0.4);
+}
+
+.multi-input__remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 input,

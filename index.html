@@ -35,10 +35,18 @@
               <span class="field__label">Фамилия Имя Отчество *</span>
               <input type="text" name="fullName" required />
             </label>
-            <label class="field">
-              <span class="field__label">Должность *</span>
-              <input type="text" name="position" required />
-            </label>
+            <div class="field field--wide">
+              <div class="field__label-row">
+                <span class="field__label">Должность *</span>
+                <button type="button" class="chip chip--interactive" data-add="positions">Добавить</button>
+              </div>
+              <div class="multi-input" data-name="positions">
+                <div class="multi-input__row">
+                  <input type="text" name="position" required />
+                  <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
+                </div>
+              </div>
+            </div>
             <label class="field">
               <span class="field__label">Кафедра *</span>
               <input type="text" name="department" required />
@@ -55,10 +63,19 @@
               <span class="field__label">E-mail *</span>
               <input type="email" name="email" required />
             </label>
-            <label class="field field--wide">
-              <span class="field__label">Номера курируемых групп (последующие номера групп с новой строки) *</span>
-              <textarea name="groupNumbers" required></textarea>
-            </label>
+            <div class="field field--wide">
+              <div class="field__label-row">
+                <span class="field__label">Номера курируемых групп *</span>
+                <button type="button" class="chip chip--interactive" data-add="groupNumbers">Добавить</button>
+              </div>
+              <div class="multi-input" data-name="groupNumbers">
+                <div class="multi-input__row">
+                  <input type="text" name="groupNumber" required />
+                  <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
+                </div>
+              </div>
+              <p class="helper">Добавьте по одному номеру группы в каждую строку.</p>
+            </div>
             <label class="field field--wide">
               <span class="field__label">Корпус и аудитория основного пребывания куратора *</span>
               <input type="text" name="baseLocation" required />
@@ -124,6 +141,64 @@
     const form = document.getElementById('curator-form');
     const downloadButton = document.getElementById('download');
 
+    function createRow(inputName, placeholder = '') {
+      const row = document.createElement('div');
+      row.className = 'multi-input__row';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = inputName;
+      input.required = true;
+      input.placeholder = placeholder;
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'multi-input__remove';
+      removeButton.setAttribute('aria-label', 'Удалить запись');
+      removeButton.textContent = '×';
+
+      row.append(input, removeButton);
+      return row;
+    }
+
+    function setupMultiInput({ name, inputName, placeholder = '' }) {
+      const container = form.querySelector(`[data-name="${name}"]`);
+      const addButton = form.querySelector(`[data-add="${name}"]`);
+
+      if (!container || !addButton) return;
+
+      function updateRemoveState() {
+        const rows = container.querySelectorAll('.multi-input__row');
+        rows.forEach((row) => {
+          const removeButton = row.querySelector('.multi-input__remove');
+          if (!removeButton) return;
+          const isDisabled = rows.length === 1;
+          removeButton.disabled = isDisabled;
+        });
+      }
+
+      function attachRemove(row) {
+        const removeButton = row.querySelector('.multi-input__remove');
+        if (!removeButton) return;
+        removeButton.addEventListener('click', () => {
+          if (container.querySelectorAll('.multi-input__row').length === 1) return;
+          row.remove();
+          updateRemoveState();
+        });
+      }
+
+      container.querySelectorAll('.multi-input__row').forEach((row) => attachRemove(row));
+
+      addButton.addEventListener('click', () => {
+        const newRow = createRow(inputName, placeholder);
+        attachRemove(newRow);
+        container.append(newRow);
+        updateRemoveState();
+      });
+
+      updateRemoveState();
+    }
+
     function collectFaculties() {
       return Array.from(form.querySelectorAll('input[name="faculty"]:checked')).map((input) => input.value);
     }
@@ -132,23 +207,40 @@
       return form.elements[name]?.value.trim() || '';
     }
 
+    function collectList(name) {
+      const container = form.querySelector(`[data-name="${name}"]`);
+      if (!container) return [];
+      return Array.from(container.querySelectorAll('input'))
+        .map((input) => input.value.trim())
+        .filter(Boolean);
+    }
+
     function buildReport() {
       const payload = {
         fullName: getValue('fullName'),
-        position: getValue('position'),
+        position: collectList('positions'),
         department: getValue('department'),
         phone: getValue('phone'),
         telegramHandle: getValue('telegramHandle'),
         email: getValue('email'),
-        groupNumbers: getValue('groupNumbers')
-          .split('\n')
-          .map((group) => group.trim())
-          .filter(Boolean),
+        groupNumbers: collectList('groupNumbers'),
         baseLocation: getValue('baseLocation'),
         faculties: collectFaculties(),
       };
       return JSON.stringify(payload, null, 2);
     }
+
+    setupMultiInput({
+      name: 'positions',
+      inputName: 'position',
+      placeholder: 'Например, доцент кафедры информационных технологий',
+    });
+
+    setupMultiInput({
+      name: 'groupNumbers',
+      inputName: 'groupNumber',
+      placeholder: 'Например, 1234',
+    });
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();
