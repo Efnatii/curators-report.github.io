@@ -3,68 +3,219 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Раздел 2 из 10 — Общие сведения о кураторе</title>
+  <title>Отчет по кураторской деятельности</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="page">
-    <header class="section-bar">
-      <div class="section-bar__title">Раздел 2 из 10</div>
-      <div class="section-bar__actions" aria-hidden="true">
-        <span class="dots">⋮</span>
+  <header class="hero">
+    <div class="container hero__content">
+      <div class="hero__badge">Анкета</div>
+      <h1>Отчет по кураторской деятельности</h1>
+      <p class="lede">Заполните анкету, чтобы зафиксировать работу за семестр: состав группы, посещаемость, вовлеченность и другие важные показатели.</p>
+      <div class="hero__meta">
+        <span class="pill">10 разделов</span>
+        <span class="pill">Ориентир на 8–10 минут</span>
+        <span class="pill">Выгрузка ответов в файл</span>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <main class="form-shell">
-      <section class="form-card form-card--intro" aria-labelledby="heading-intro">
-        <h1 id="heading-intro">Общие сведения о кураторе</h1>
-        <p class="lead">Вводная информация для идентификации куратора и его группы</p>
-      </section>
+  <main>
+    <div class="container">
+      <form id="curator-form" class="form">
+        <section class="form-section" aria-labelledby="section-curator">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 1 из 10</p>
+              <h2 id="section-curator">Основные данные куратора</h2>
+              <p class="muted">Введите контактные данные, чтобы идентифицировать вас и вашу группу.</p>
+            </div>
+            <span class="chip">Обязательный</span>
+          </div>
+          <div class="field-grid">
+            <label class="field">
+              <span class="field__label">ФИО куратора *</span>
+              <input name="fullname" type="text" placeholder="Иванова Елена Сергеевна" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Контактный email *</span>
+              <input name="email" type="email" placeholder="you@example.com" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Учебная группа *</span>
+              <input name="group" type="text" placeholder="Б9123" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Телефон</span>
+              <input name="phone" type="tel" placeholder="+7 (999) 000-00-00" />
+            </label>
+          </div>
+        </section>
 
-      <form class="form-card" aria-labelledby="faculty-heading">
-        <div class="card-header">
-          <h2 id="faculty-heading">Институт/Факультет <span class="required">*</span></h2>
-          <p class="hint">Отметьте один или несколько подходящих вариантов.</p>
-        </div>
-        <div class="checkbox-list">
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Институт аэрокосмических приборов и систем" />
-            <span>Институт аэрокосмических приборов и систем</span>
+        <section class="form-section" aria-labelledby="section-general">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 2 из 10</p>
+              <h2 id="section-general">Общие сведения о кураторе</h2>
+              <p class="muted">Вводная информация для идентификации куратора и его группы.</p>
+            </div>
+            <span class="chip">Обязательный</span>
+          </div>
+          <fieldset class="choice-card">
+            <legend>Институт/Факультет *</legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Институт аэрокосмических приборов и систем" />
+                <span>Институт аэрокосмических приборов и систем</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Институт радиотехники и инфокоммуникационных технологий" />
+                <span>Институт радиотехники и инфокоммуникационных технологий</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Институт кибербезопасности и цифровых технологий" />
+                <span>Институт кибербезопасности и цифровых технологий</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Институт информационных технологий и программирования" />
+                <span>Институт информационных технологий и программирования</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Институт фундаментальной подготовки и технологических инноваций" />
+                <span>Институт фундаментальной подготовки и технологических инноваций</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Гуманитарный факультет" />
+                <span>Гуманитарный факультет</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Институт технологий предпринимательства и права" />
+                <span>Институт технологий предпринимательства и права</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" name="faculty" value="Военный учебный центр при ГУАП (ВУЦ)" />
+                <span>Военный учебный центр при ГУАП (ВУЦ)</span>
+              </label>
+            </div>
+            <p class="helper">Выберите один или несколько вариантов.</p>
+          </fieldset>
+        </section>
+
+        <section class="form-section" aria-labelledby="section-work">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 3 из 10</p>
+              <h2 id="section-work">Работа с группой</h2>
+              <p class="muted">Расскажите о ключевых активностях с группой и встречах за семестр.</p>
+            </div>
+          </div>
+          <div class="field-grid">
+            <label class="field">
+              <span class="field__label">Количество встреч *</span>
+              <input name="meetings" type="number" min="0" placeholder="Например, 12" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Среднее количество участников *</span>
+              <input name="attendees" type="number" min="0" placeholder="Например, 18" required />
+            </label>
+          </div>
+          <label class="field">
+            <span class="field__label">Основные темы встреч *</span>
+            <textarea name="topics" rows="3" placeholder="Профориентация, подготовка к сессии, адаптация первокурсников..." required></textarea>
           </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Институт радиотехники и инфокоммуникационных технологий" />
-            <span>Институт радиотехники и инфокоммуникационных технологий</span>
+        </section>
+
+        <section class="form-section" aria-labelledby="section-result">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 4 из 10</p>
+              <h2 id="section-result">Итоги и обратная связь</h2>
+              <p class="muted">Коротко оцените результаты работы и укажите, какая поддержка нужна.</p>
+            </div>
+          </div>
+          <label class="field">
+            <span class="field__label">Главные достижения группы</span>
+            <textarea name="achievements" rows="3" placeholder="Например, 80% группы прошли практику, организован клуб по интересам..."></textarea>
           </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Институт кибербезопасности и цифровых технологий" />
-            <span>Институт кибербезопасности и цифровых технологий</span>
+          <label class="field">
+            <span class="field__label">Сложности и потребности</span>
+            <textarea name="challenges" rows="3" placeholder="Какие ресурсы или консультации помогут в следующем семестре"></textarea>
           </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Институт информационных технологий и программирования" />
-            <span>Институт информационных технологий и программирования</span>
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Институт фундаментальной подготовки и технологических инноваций" />
-            <span>Институт фундаментальной подготовки и технологических инноваций</span>
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Гуманитарный факультет" />
-            <span>Гуманитарный факультет</span>
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Институт технологий предпринимательства и права" />
-            <span>Институт технологий предпринимательства и права</span>
-          </label>
-          <label class="checkbox">
-            <input type="checkbox" name="faculty" value="Военный учебный центр при ГУАП (ВУЦ)" />
-            <span>Военный учебный центр при ГУАП (ВУЦ)</span>
-          </label>
+        </section>
+
+        <div class="actions">
+          <button type="button" id="download" class="button">Скачать ответы</button>
+          <p class="muted">Кнопка сформирует текстовый файл с вашими ответами.</p>
         </div>
       </form>
-    </main>
-  </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__content">
+      <div>
+        <p class="eyebrow">Отчет по кураторской деятельности</p>
+        <p class="footnote">Анкета для фиксации работы с группой и планирования поддержки.</p>
+      </div>
+      <div class="footer__links">
+        <a href="#section-curator">К началу формы</a>
+        <a href="mailto:hello@curators.report">Написать нам</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById('curator-form');
+    const downloadButton = document.getElementById('download');
+
+    function collectFaculties() {
+      return Array.from(form.querySelectorAll('input[name="faculty"]:checked')).map((input) => input.value);
+    }
+
+    function buildReport() {
+      const data = new FormData(form);
+      const faculties = collectFaculties();
+      const lines = [
+        'Отчет по кураторской деятельности',
+        '================================',
+        '',
+        `ФИО: ${data.get('fullname') || '-'}`,
+        `Email: ${data.get('email') || '-'}`,
+        `Группа: ${data.get('group') || '-'}`,
+        `Телефон: ${data.get('phone') || '-'}`,
+        '',
+        `Институт/Факультет: ${faculties.length ? faculties.join(', ') : '-'}`,
+        '',
+        `Количество встреч: ${data.get('meetings') || '-'}`,
+        `Среднее количество участников: ${data.get('attendees') || '-'}`,
+        '',
+        'Темы встреч:',
+        data.get('topics') || '-',
+        '',
+        'Достижения:',
+        data.get('achievements') || '-',
+        '',
+        'Сложности и потребности:',
+        data.get('challenges') || '-',
+      ];
+      return lines.join('\n');
+    }
+
+    downloadButton.addEventListener('click', () => {
+      const report = buildReport();
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'curator-report.txt';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+  </script>
 </body>
 </html>
