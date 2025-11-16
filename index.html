@@ -33,7 +33,7 @@
           <div class="field-grid">
             <label class="field">
               <span class="field__label">Фамилия Имя Отчество *</span>
-              <input type="text" name="fullName" required />
+              <input type="text" name="fullName" placeholder="Например, Иванов Иван Иванович" required />
             </label>
             <div class="field field--wide">
               <div class="field__label-row">
@@ -42,26 +42,27 @@
               </div>
               <div class="multi-input" data-name="positions">
                 <div class="multi-input__row">
-                  <input type="text" name="position" required />
+                  <input type="text" name="position" placeholder="Например, старший преподаватель" required />
                   <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
                 </div>
               </div>
+              <p class="helper">Добавляйте по одной должности в каждую строку.</p>
             </div>
             <label class="field">
               <span class="field__label">Кафедра *</span>
-              <input type="text" name="department" required />
+              <input type="text" name="department" placeholder="Например, кафедра компьютерных систем" required />
             </label>
             <label class="field">
               <span class="field__label">Контактный телефон (подключенный к Telegram) *</span>
-              <input type="tel" name="phone" required />
+              <input type="tel" name="phone" placeholder="Например, +7 999 000-00-00" required />
             </label>
             <label class="field">
               <span class="field__label">Ник в Telegram *</span>
-              <input type="text" name="telegramHandle" required />
+              <input type="text" name="telegramHandle" placeholder="Например, @curator_help" required />
             </label>
             <label class="field">
               <span class="field__label">E-mail *</span>
-              <input type="email" name="email" required />
+              <input type="email" name="email" placeholder="Например, curator@example.ru" required />
             </label>
             <div class="field field--wide">
               <div class="field__label-row">
@@ -70,15 +71,21 @@
               </div>
               <div class="multi-input" data-name="groupNumbers">
                 <div class="multi-input__row">
-                  <input type="text" name="groupNumber" required />
+                  <input type="text" name="groupNumber" placeholder="Например, 1234 или 4102" required />
                   <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
                 </div>
               </div>
               <p class="helper">Добавьте по одному номеру группы в каждую строку.</p>
             </div>
-            <label class="field field--wide">
-              <span class="field__label">Корпус и аудитория основного пребывания куратора *</span>
-              <input type="text" name="baseLocation" required />
+            <label class="field">
+              <span class="field__label">Корпус основного пребывания куратора *</span>
+              <input type="text" name="baseBuilding" placeholder="Например, корпус 1" required />
+              <p class="helper">Укажите корпус, где куратора можно найти чаще всего.</p>
+            </label>
+            <label class="field">
+              <span class="field__label">Аудитория основного пребывания куратора *</span>
+              <input type="text" name="baseRoom" placeholder="Например, аудитория 301" required />
+              <p class="helper">Записывайте аудиторию, где чаще всего проводятся встречи.</p>
             </label>
           </div>
           <fieldset class="choice-card">
@@ -224,7 +231,8 @@
         telegramHandle: getValue('telegramHandle'),
         email: getValue('email'),
         groupNumbers: collectList('groupNumbers'),
-        baseLocation: getValue('baseLocation'),
+        baseBuilding: getValue('baseBuilding'),
+        baseRoom: getValue('baseRoom'),
         faculties: collectFaculties(),
       };
       return JSON.stringify(payload, null, 2);
@@ -233,13 +241,13 @@
     setupMultiInput({
       name: 'positions',
       inputName: 'position',
-      placeholder: 'Например, доцент кафедры информационных технологий',
+      placeholder: 'Например, преподаватель-практик или тьютор',
     });
 
     setupMultiInput({
       name: 'groupNumbers',
       inputName: 'groupNumber',
-      placeholder: 'Например, 1234',
+      placeholder: 'Например, 1234 или 4102',
     });
 
     downloadButton.addEventListener('click', () => {
