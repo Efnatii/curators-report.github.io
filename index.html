@@ -14,51 +14,17 @@
     <div class="container hero__content">
       <div class="hero__badge">Анкета</div>
       <h1>Отчет по кураторской деятельности</h1>
-      <p class="lede">Заполните анкету, чтобы зафиксировать работу за семестр: состав группы, посещаемость, вовлеченность и другие важные показатели.</p>
-      <div class="hero__meta">
-        <span class="pill">10 разделов</span>
-        <span class="pill">Ориентир на 8–10 минут</span>
-        <span class="pill">Выгрузка ответов в файл</span>
-      </div>
+      <p class="lede">Анкета для фиксации данных кураторской деятельности.</p>
     </div>
   </header>
 
   <main>
     <div class="container">
       <form id="curator-form" class="form">
-        <section class="form-section" aria-labelledby="section-curator">
-          <div class="section-header">
-            <div>
-              <p class="section-counter">Раздел 1 из 10</p>
-              <h2 id="section-curator">Основные данные куратора</h2>
-              <p class="muted">Введите контактные данные, чтобы идентифицировать вас и вашу группу.</p>
-            </div>
-            <span class="chip">Обязательный</span>
-          </div>
-          <div class="field-grid">
-            <label class="field">
-              <span class="field__label">ФИО куратора *</span>
-              <input name="fullname" type="text" placeholder="Иванова Елена Сергеевна" required />
-            </label>
-            <label class="field">
-              <span class="field__label">Контактный email *</span>
-              <input name="email" type="email" placeholder="you@example.com" required />
-            </label>
-            <label class="field">
-              <span class="field__label">Учебная группа *</span>
-              <input name="group" type="text" placeholder="Б9123" required />
-            </label>
-            <label class="field">
-              <span class="field__label">Телефон</span>
-              <input name="phone" type="tel" placeholder="+7 (999) 000-00-00" />
-            </label>
-          </div>
-        </section>
-
         <section class="form-section" aria-labelledby="section-general">
           <div class="section-header">
             <div>
-              <p class="section-counter">Раздел 2 из 10</p>
+              <p class="section-counter">Раздел 1 из 1</p>
               <h2 id="section-general">Общие сведения о кураторе</h2>
               <p class="muted">Вводная информация для идентификации куратора и его группы.</p>
             </div>
@@ -104,51 +70,9 @@
           </fieldset>
         </section>
 
-        <section class="form-section" aria-labelledby="section-work">
-          <div class="section-header">
-            <div>
-              <p class="section-counter">Раздел 3 из 10</p>
-              <h2 id="section-work">Работа с группой</h2>
-              <p class="muted">Расскажите о ключевых активностях с группой и встречах за семестр.</p>
-            </div>
-          </div>
-          <div class="field-grid">
-            <label class="field">
-              <span class="field__label">Количество встреч *</span>
-              <input name="meetings" type="number" min="0" placeholder="Например, 12" required />
-            </label>
-            <label class="field">
-              <span class="field__label">Среднее количество участников *</span>
-              <input name="attendees" type="number" min="0" placeholder="Например, 18" required />
-            </label>
-          </div>
-          <label class="field">
-            <span class="field__label">Основные темы встреч *</span>
-            <textarea name="topics" rows="3" placeholder="Профориентация, подготовка к сессии, адаптация первокурсников..." required></textarea>
-          </label>
-        </section>
-
-        <section class="form-section" aria-labelledby="section-result">
-          <div class="section-header">
-            <div>
-              <p class="section-counter">Раздел 4 из 10</p>
-              <h2 id="section-result">Итоги и обратная связь</h2>
-              <p class="muted">Коротко оцените результаты работы и укажите, какая поддержка нужна.</p>
-            </div>
-          </div>
-          <label class="field">
-            <span class="field__label">Главные достижения группы</span>
-            <textarea name="achievements" rows="3" placeholder="Например, 80% группы прошли практику, организован клуб по интересам..."></textarea>
-          </label>
-          <label class="field">
-            <span class="field__label">Сложности и потребности</span>
-            <textarea name="challenges" rows="3" placeholder="Какие ресурсы или консультации помогут в следующем семестре"></textarea>
-          </label>
-        </section>
-
         <div class="actions">
           <button type="button" id="download" class="button">Скачать ответы</button>
-          <p class="muted">Кнопка сформирует текстовый файл с вашими ответами.</p>
+          <p class="muted">Кнопка сформирует JSON-файл с вашими ответами.</p>
         </div>
       </form>
     </div>
@@ -161,7 +85,7 @@
         <p class="footnote">Анкета для фиксации работы с группой и планирования поддержки.</p>
       </div>
       <div class="footer__links">
-        <a href="#section-curator">К началу формы</a>
+        <a href="#section-general">К началу формы</a>
         <a href="mailto:hello@curators.report">Написать нам</a>
       </div>
     </div>
@@ -176,41 +100,20 @@
     }
 
     function buildReport() {
-      const data = new FormData(form);
       const faculties = collectFaculties();
-      const lines = [
-        'Отчет по кураторской деятельности',
-        '================================',
-        '',
-        `ФИО: ${data.get('fullname') || '-'}`,
-        `Email: ${data.get('email') || '-'}`,
-        `Группа: ${data.get('group') || '-'}`,
-        `Телефон: ${data.get('phone') || '-'}`,
-        '',
-        `Институт/Факультет: ${faculties.length ? faculties.join(', ') : '-'}`,
-        '',
-        `Количество встреч: ${data.get('meetings') || '-'}`,
-        `Среднее количество участников: ${data.get('attendees') || '-'}`,
-        '',
-        'Темы встреч:',
-        data.get('topics') || '-',
-        '',
-        'Достижения:',
-        data.get('achievements') || '-',
-        '',
-        'Сложности и потребности:',
-        data.get('challenges') || '-',
-      ];
-      return lines.join('\n');
+      const payload = {
+        faculties,
+      };
+      return JSON.stringify(payload, null, 2);
     }
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();
-      const blob = new Blob([report], { type: 'text/plain' });
+      const blob = new Blob([report], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'curator-report.txt';
+      link.download = 'curator-report.json';
       document.body.appendChild(link);
       link.click();
       link.remove();
