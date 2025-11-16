@@ -159,7 +159,7 @@ main {
 
 .field-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 
@@ -200,15 +200,16 @@ main {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
   color: var(--text);
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
 
 .multi-input__remove:hover:not(:disabled) {
   background: rgba(242, 177, 56, 0.1);
-  border-color: rgba(242, 177, 56, 0.4);
+  border-color: rgba(242, 177, 56, 0.5);
+  transform: translateY(-1px);
 }
 
 .multi-input__remove:disabled {
@@ -258,24 +259,54 @@ textarea:focus {
 }
 
 .choice {
+  position: relative;
   display: grid;
-  grid-template-columns: 20px 1fr;
+  grid-template-columns: 22px 1fr;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.02);
-  transition: border-color 120ms ease, background 120ms ease;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .choice:hover {
-  border-color: rgba(242, 177, 56, 0.4);
-  background: rgba(242, 177, 56, 0.05);
+  border-color: rgba(242, 177, 56, 0.5);
+  background: rgba(242, 177, 56, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .choice input {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
   margin-top: 2px;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.choice input:focus-visible {
+  outline: 2px solid rgba(242, 177, 56, 0.6);
+  outline-offset: 2px;
+}
+
+.choice input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(242, 177, 56, 0.25);
+}
+
+.choice input:checked::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 4px;
+  background: #0b0f18;
 }
 
 .helper {
@@ -297,22 +328,30 @@ textarea:focus {
   justify-content: center;
   gap: 8px;
   padding: 12px 18px;
-  background: var(--accent);
+  background: linear-gradient(135deg, #ffd479, #f2b138);
   color: #0b0f18;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  box-shadow: 0 12px 32px rgba(242, 177, 56, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
 }
 
 .button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(242, 177, 56, 0.35);
+  box-shadow: 0 16px 38px rgba(242, 177, 56, 0.4);
+  filter: brightness(1.02);
 }
 
 .button:active {
   transform: translateY(0);
+  box-shadow: 0 8px 22px rgba(242, 177, 56, 0.28);
+}
+
+.button:focus-visible {
+  outline: 2px solid rgba(242, 177, 56, 0.7);
+  outline-offset: 3px;
 }
 
 .footer {
