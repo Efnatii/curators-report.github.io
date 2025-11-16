@@ -33,16 +33,16 @@
           <div class="field-grid">
             <label class="field">
               <span class="field__label">Фамилия Имя Отчество *</span>
-              <input type="text" name="fullName" placeholder="Например, Иванов Иван Иванович" required />
+              <input type="text" name="full_name" placeholder="Например, Иванов Иван Иванович" required />
             </label>
             <div class="field field--wide">
               <div class="field__label-row">
                 <span class="field__label">Должность *</span>
-                <button type="button" class="chip chip--interactive" data-add="positions">Добавить</button>
+                <button type="button" class="chip chip--interactive" data-add="job_positions">Добавить</button>
               </div>
-              <div class="multi-input" data-name="positions">
+              <div class="multi-input" data-name="job_positions">
                 <div class="multi-input__row">
-                  <input type="text" name="position" placeholder="Например, старший преподаватель" required />
+                  <input type="text" name="job_position" placeholder="Например, старший преподаватель" required />
                   <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
                 </div>
               </div>
@@ -54,11 +54,11 @@
             </label>
             <label class="field">
               <span class="field__label">Контактный телефон (подключенный к Telegram) *</span>
-              <input type="tel" name="phone" placeholder="Например, +7 999 000-00-00" required />
+              <input type="tel" name="contact_phone_connected_to_telegram" placeholder="Например, +7 999 000-00-00" required />
             </label>
             <label class="field">
               <span class="field__label">Ник в Telegram *</span>
-              <input type="text" name="telegramHandle" placeholder="Например, @curator_help" required />
+              <input type="text" name="telegram_username" placeholder="Например, @curator_help" required />
             </label>
             <label class="field">
               <span class="field__label">E-mail *</span>
@@ -67,11 +67,11 @@
             <div class="field field--wide">
               <div class="field__label-row">
                 <span class="field__label">Номера курируемых групп *</span>
-                <button type="button" class="chip chip--interactive" data-add="groupNumbers">Добавить</button>
+                <button type="button" class="chip chip--interactive" data-add="curated_group_numbers">Добавить</button>
               </div>
-              <div class="multi-input" data-name="groupNumbers">
+              <div class="multi-input" data-name="curated_group_numbers">
                 <div class="multi-input__row">
-                  <input type="text" name="groupNumber" placeholder="Например, 1234 или 4102" required />
+                  <input type="text" name="curated_group_number" placeholder="Например, 1234 или 4102" required />
                   <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
                 </div>
               </div>
@@ -79,46 +79,46 @@
             </div>
             <label class="field">
               <span class="field__label">Корпус основного пребывания куратора *</span>
-              <input type="text" name="baseBuilding" placeholder="Например, корпус 1" required />
+              <input type="text" name="curator_primary_building" placeholder="Например, корпус 1" required />
             </label>
             <label class="field">
               <span class="field__label">Аудитория основного пребывания куратора *</span>
-              <input type="text" name="baseRoom" placeholder="Например, аудитория 301" required />
+              <input type="text" name="curator_primary_room" placeholder="Например, аудитория 301" required />
             </label>
           </div>
           <fieldset class="choice-card">
             <legend>Институт/Факультет *</legend>
             <div class="choices">
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Институт аэрокосмических приборов и систем" />
+                <input type="checkbox" name="institute_or_faculty" value="Институт аэрокосмических приборов и систем" />
                 <span>Институт аэрокосмических приборов и систем</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Институт радиотехники и инфокоммуникационных технологий" />
+                <input type="checkbox" name="institute_or_faculty" value="Институт радиотехники и инфокоммуникационных технологий" />
                 <span>Институт радиотехники и инфокоммуникационных технологий</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Институт кибербезопасности и цифровых технологий" />
+                <input type="checkbox" name="institute_or_faculty" value="Институт кибербезопасности и цифровых технологий" />
                 <span>Институт кибербезопасности и цифровых технологий</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Институт информационных технологий и программирования" />
+                <input type="checkbox" name="institute_or_faculty" value="Институт информационных технологий и программирования" />
                 <span>Институт информационных технологий и программирования</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Институт фундаментальной подготовки и технологических инноваций" />
+                <input type="checkbox" name="institute_or_faculty" value="Институт фундаментальной подготовки и технологических инноваций" />
                 <span>Институт фундаментальной подготовки и технологических инноваций</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Гуманитарный факультет" />
+                <input type="checkbox" name="institute_or_faculty" value="Гуманитарный факультет" />
                 <span>Гуманитарный факультет</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Институт технологий предпринимательства и права" />
+                <input type="checkbox" name="institute_or_faculty" value="Институт технологий предпринимательства и права" />
                 <span>Институт технологий предпринимательства и права</span>
               </label>
               <label class="choice">
-                <input type="checkbox" name="faculty" value="Военный учебный центр при ГУАП (ВУЦ)" />
+                <input type="checkbox" name="institute_or_faculty" value="Военный учебный центр при ГУАП (ВУЦ)" />
                 <span>Военный учебный центр при ГУАП (ВУЦ)</span>
               </label>
             </div>
@@ -140,11 +140,11 @@
             <legend class="field__label">Проведение не менее трех кураторских часов за отчетный период *</legend>
             <div class="choices">
               <label class="choice">
-                <input type="radio" name="curatorHoursHeld" value="Да" required />
+                <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="Да" required />
                 <span>Да</span>
               </label>
               <label class="choice">
-                <input type="radio" name="curatorHoursHeld" value="Нет" required />
+                <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="Нет" required />
                 <span>Нет</span>
               </label>
             </div>
@@ -230,7 +230,7 @@
     }
 
     function collectFaculties() {
-      return Array.from(form.querySelectorAll('input[name="faculty"]:checked')).map((input) => input.value);
+      return Array.from(form.querySelectorAll('input[name="institute_or_faculty"]:checked')).map((input) => input.value);
     }
 
     function getSelectedRadio(name) {
@@ -252,30 +252,30 @@
 
     function buildReport() {
       const payload = {
-        fullName: getValue('fullName'),
-        position: collectList('positions'),
+        full_name: getValue('full_name'),
+        job_positions: collectList('job_positions'),
         department: getValue('department'),
-        phone: getValue('phone'),
-        telegramHandle: getValue('telegramHandle'),
+        contact_phone_connected_to_telegram: getValue('contact_phone_connected_to_telegram'),
+        telegram_username: getValue('telegram_username'),
         email: getValue('email'),
-        groupNumbers: collectList('groupNumbers'),
-        baseBuilding: getValue('baseBuilding'),
-        baseRoom: getValue('baseRoom'),
-        curatorHoursHeld: getSelectedRadio('curatorHoursHeld'),
-        faculties: collectFaculties(),
+        curated_group_numbers: collectList('curated_group_numbers'),
+        curator_primary_building: getValue('curator_primary_building'),
+        curator_primary_room: getValue('curator_primary_room'),
+        held_minimum_three_curator_sessions_in_reporting_period: getSelectedRadio('held_minimum_three_curator_sessions_in_reporting_period'),
+        institute_or_faculty: collectFaculties(),
       };
       return JSON.stringify(payload, null, 2);
     }
 
     setupMultiInput({
-      name: 'positions',
-      inputName: 'position',
+      name: 'job_positions',
+      inputName: 'job_position',
       placeholder: 'Например, преподаватель-практик или тьютор',
     });
 
     setupMultiInput({
-      name: 'groupNumbers',
-      inputName: 'groupNumber',
+      name: 'curated_group_numbers',
+      inputName: 'curated_group_number',
       placeholder: 'Например, 1234 или 4102',
     });
 
