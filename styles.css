@@ -152,10 +152,14 @@ main {
   gap: 12px;
 }
 
-.field {
+.field { 
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
 }
 
 .field__label {

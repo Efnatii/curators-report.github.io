@@ -30,6 +30,40 @@
             </div>
             <span class="chip">Обязательный</span>
           </div>
+          <div class="field-grid">
+            <label class="field">
+              <span class="field__label">Фамилия Имя Отчество *</span>
+              <input type="text" name="fullName" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Должность *</span>
+              <input type="text" name="position" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Кафедра *</span>
+              <input type="text" name="department" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Контактный телефон (подключенный к Telegram) *</span>
+              <input type="tel" name="phone" required />
+            </label>
+            <label class="field">
+              <span class="field__label">Ник в Telegram *</span>
+              <input type="text" name="telegramHandle" required />
+            </label>
+            <label class="field">
+              <span class="field__label">E-mail *</span>
+              <input type="email" name="email" required />
+            </label>
+            <label class="field field--wide">
+              <span class="field__label">Номера курируемых групп (последующие номера групп с новой строки) *</span>
+              <textarea name="groupNumbers" required></textarea>
+            </label>
+            <label class="field field--wide">
+              <span class="field__label">Корпус и аудитория основного пребывания куратора *</span>
+              <input type="text" name="baseLocation" required />
+            </label>
+          </div>
           <fieldset class="choice-card">
             <legend>Институт/Факультет *</legend>
             <div class="choices">
@@ -94,10 +128,24 @@
       return Array.from(form.querySelectorAll('input[name="faculty"]:checked')).map((input) => input.value);
     }
 
+    function getValue(name) {
+      return form.elements[name]?.value.trim() || '';
+    }
+
     function buildReport() {
-      const faculties = collectFaculties();
       const payload = {
-        faculties,
+        fullName: getValue('fullName'),
+        position: getValue('position'),
+        department: getValue('department'),
+        phone: getValue('phone'),
+        telegramHandle: getValue('telegramHandle'),
+        email: getValue('email'),
+        groupNumbers: getValue('groupNumbers')
+          .split('\n')
+          .map((group) => group.trim())
+          .filter(Boolean),
+        baseLocation: getValue('baseLocation'),
+        faculties: collectFaculties(),
       };
       return JSON.stringify(payload, null, 2);
     }
