@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curators Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="container hero__content">
+      <p class="eyebrow">Curators Report</p>
+      <h1>Простой сайт для вашей коллекции идей и проектов</h1>
+      <p class="lede">Подборки вдохновляющих материалов, заметок и ссылок, оформленные в одном месте. Делиться стало проще.</p>
+      <div class="hero__actions">
+        <a class="button" href="#stories">Смотреть подборки</a>
+        <a class="link" href="#about">Узнать больше</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="highlights">
+      <div class="container">
+        <h2>Что внутри</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Тематические подборки</h3>
+            <p>Готовые коллекции статей, видео и инструментов по темам: дизайн, исследования, визуализация данных и другие.</p>
+          </article>
+          <article class="card">
+            <h3>Короткие заметки</h3>
+            <p>Основные мысли и выводы из прочитанного — компактно и без лишней воды. Удобно перечитывать перед встречами.</p>
+          </article>
+          <article class="card">
+            <h3>Полезные ссылки</h3>
+            <p>Каталог проверенных ресурсов: от библиотек и гайдов до сервисов для совместной работы.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--accent" id="stories">
+      <div class="container">
+        <div class="split">
+          <div>
+            <p class="eyebrow">Новая подборка</p>
+            <h2>Исследования в креативных индустриях</h2>
+            <p class="lede">Как создавать инсайты и быстро проверять гипотезы: методички, чек-листы и примеры успешных кейсов.</p>
+            <ul class="list">
+              <li>Методы быстрых интервью и коротких сессий тестирования.</li>
+              <li>Лучшие форматы презентации результатов для команд.</li>
+              <li>Инструменты для сбора обратной связи и аналитики.</li>
+            </ul>
+            <a class="button" href="#newsletter">Получить подборку</a>
+          </div>
+          <div class="panel">
+            <p class="panel__title">Содержание</p>
+            <ul class="panel__list">
+              <li><strong>5</strong> практических гайдов</li>
+              <li><strong>12</strong> примеров презентаций</li>
+              <li><strong>18</strong> инструментов и сервисов</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container">
+        <h2>О проекте</h2>
+        <div class="split split--stack">
+          <p>Curators Report собирает материалы, которые помогают командам принимать решения быстрее. Мы тестируем инструменты, общаемся с экспертами и делимся практикой, которая реально работает.</p>
+          <div class="pill-group">
+            <span class="pill">Дизайн</span>
+            <span class="pill">Аналитика</span>
+            <span class="pill">Исследования</span>
+            <span class="pill">Продакт-менеджмент</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--muted" id="newsletter">
+      <div class="container">
+        <div class="newsletter">
+          <div>
+            <p class="eyebrow">Подписка</p>
+            <h2>Получайте свежие подборки раз в месяц</h2>
+            <p class="lede">Никакого спама — только короткие письма с лучшими материалами и обновлениями проекта.</p>
+          </div>
+          <form class="newsletter__form">
+            <label class="sr-only" for="email">Email</label>
+            <input id="email" type="email" name="email" placeholder="you@example.com" required />
+            <button type="submit" class="button">Подписаться</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__content">
+      <div>
+        <p class="eyebrow">Curators Report</p>
+        <p class="footnote">Простой статический сайт на GitHub Pages.</p>
+      </div>
+      <div class="footer__links">
+        <a href="#highlights">Секции</a>
+        <a href="#about">О нас</a>
+        <a href="mailto:hello@curators.report">Написать нам</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
