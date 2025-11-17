@@ -373,7 +373,7 @@ select:focus {
 
 .curator-hours__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
 }
 
@@ -489,6 +489,10 @@ select:focus {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
+}
+
+.date-range input {
+  min-width: 0;
 }
 
 .date-range__dash {
