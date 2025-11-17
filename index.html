@@ -140,15 +140,29 @@
             <legend class="field__label">Проведение не менее трех кураторских часов за отчетный период *</legend>
             <div class="choices">
               <label class="choice">
-                <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="Да" required />
+                <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="true" required />
                 <span>Да</span>
               </label>
               <label class="choice">
-                <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="Нет" required />
+                <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="false" required />
                 <span>Нет</span>
               </label>
             </div>
           </fieldset>
+
+          <div id="curator-hours-details" class="form-subsection" hidden>
+            <div class="section-header section-header--sub">
+              <div>
+                <p class="section-counter">Дополнительный вопрос</p>
+                <h3>Даты проведения трех кураторских часов в течение отчетного периода</h3>
+                <p class="muted">Заполните данные по каждому проведенному кураторскому часу.</p>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-curator-hour-row">Добавить строку</button>
+            </div>
+
+            <div class="curator-hours" id="curator-hours-rows"></div>
+            <p class="helper">Укажите минимум три записи с деталями каждого кураторского часа.</p>
+          </div>
         </section>
 
         <div class="actions">
@@ -170,6 +184,25 @@
   <script>
     const form = document.getElementById('curator-form');
     const downloadButton = document.getElementById('download');
+    const curatorHoursDetails = document.getElementById('curator-hours-details');
+    const curatorHoursRows = document.getElementById('curator-hours-rows');
+    const addCuratorHourRowButton = document.getElementById('add-curator-hour-row');
+
+    const directionsOptions = [
+      'Гражданская',
+      'Патриотическая',
+      'Духовно-нравственная',
+      'Волонтерская (добровольческая)',
+      'Культурно-творческая',
+      'Научно-образовательная',
+      'Спортивно-оздоровительная',
+      'Экологическая',
+      'Информационная (коммуникационная)',
+      'Туристическая',
+      'Предпринимательская',
+      'Корпоративная идентичность',
+      'Профессионально-трудовая',
+    ];
 
     function createRow(inputName, placeholder = '') {
       const row = document.createElement('div');
@@ -233,6 +266,12 @@
       return Array.from(form.querySelectorAll('input[name="institute_or_faculty"]:checked')).map((input) => input.value);
     }
 
+    function getBooleanRadio(name) {
+      const selected = form.querySelector(`input[name="${name}"]:checked`);
+      if (!selected) return null;
+      return selected.value === 'true';
+    }
+
     function getSelectedRadio(name) {
       const selected = form.querySelector(`input[name="${name}"]:checked`);
       return selected ? selected.value : '';
@@ -250,7 +289,221 @@
         .filter(Boolean);
     }
 
+    function createListRow(placeholder = '') {
+      const row = document.createElement('div');
+      row.className = 'multi-input__row';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = placeholder;
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'multi-input__remove';
+      removeButton.setAttribute('aria-label', 'Удалить запись');
+      removeButton.textContent = '×';
+
+      row.append(input, removeButton);
+      return row;
+    }
+
+    function setupRowList({ row, target, placeholder = '' }) {
+      const listContainer = row.querySelector(`[data-list="${target}"]`);
+      const addButton = row.querySelector(`.curator-hours__add-item[data-target="${target}"]`);
+
+      if (!listContainer || !addButton) return;
+
+      function updateRemoveState() {
+        const rows = listContainer.querySelectorAll('.multi-input__row');
+        rows.forEach((currentRow) => {
+          const removeButton = currentRow.querySelector('.multi-input__remove');
+          if (!removeButton) return;
+          removeButton.disabled = rows.length === 1;
+        });
+      }
+
+      function attachRemove(listRow) {
+        const removeButton = listRow.querySelector('.multi-input__remove');
+        if (!removeButton) return;
+        removeButton.addEventListener('click', () => {
+          if (listContainer.querySelectorAll('.multi-input__row').length === 1) return;
+          listRow.remove();
+          updateRemoveState();
+        });
+      }
+
+      const firstRow = createListRow(placeholder);
+      attachRemove(firstRow);
+      listContainer.append(firstRow);
+      updateRemoveState();
+
+      addButton.addEventListener('click', () => {
+        const newRow = createListRow(placeholder);
+        attachRemove(newRow);
+        listContainer.append(newRow);
+        updateRemoveState();
+      });
+    }
+
+    function createDirectionChip(value, container) {
+      if (!value || container.querySelector(`[data-direction-value="${value}"]`)) return;
+      const chip = document.createElement('span');
+      chip.className = 'pill pill--compact';
+      chip.dataset.directionValue = value;
+      chip.textContent = value;
+
+      const removeButton = document.createElement('button');
+      removeButton.type = 'button';
+      removeButton.className = 'pill__remove';
+      removeButton.setAttribute('aria-label', 'Удалить направление');
+      removeButton.textContent = '×';
+      removeButton.addEventListener('click', () => chip.remove());
+
+      chip.append(removeButton);
+      container.append(chip);
+    }
+
+    function setupDirections(row) {
+      const select = row.querySelector('.curator-hours__direction-input');
+      const addButton = row.querySelector('.curator-hours__add-direction');
+      const listContainer = row.querySelector('[data-list="directions"]');
+
+      if (!select || !addButton || !listContainer) return;
+
+      directionsOptions.forEach((option) => {
+        const opt = document.createElement('option');
+        opt.value = option;
+        opt.textContent = option;
+        select.append(opt);
+      });
+
+      addButton.addEventListener('click', () => {
+        createDirectionChip(select.value, listContainer);
+      });
+    }
+
+    function collectDirections(container) {
+      if (!container) return [];
+      return Array.from(container.querySelectorAll('[data-direction-value]')).map((chip) => chip.dataset.directionValue);
+    }
+
+    function collectDynamicList(container) {
+      if (!container) return [];
+      return Array.from(container.querySelectorAll('input'))
+        .map((input) => input.value.trim())
+        .filter(Boolean);
+    }
+
+    function createCuratorHoursRow() {
+      const row = document.createElement('div');
+      row.className = 'curator-hours__row';
+      row.innerHTML = `
+        <div class="curator-hours__grid">
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Группы</span>
+              <button type="button" class="chip chip--interactive curator-hours__add-item" data-target="groups">Добавить</button>
+            </div>
+            <div class="multi-input" data-list="groups"></div>
+          </div>
+          <div class="field field--compact">
+            <span class="field__label">Дата или период</span>
+            <div class="date-range">
+              <input type="date" class="date-range__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="date-range__end" aria-label="Дата окончания" />
+            </div>
+            <p class="helper">Оставьте конечную дату пустой, если указана одна дата.</p>
+          </div>
+          <label class="field field--compact">
+            <span class="field__label">Тема</span>
+            <input type="text" class="curator-hours__topic" placeholder="Например, профилактическая беседа" />
+          </label>
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Направленность</span>
+              <button type="button" class="chip chip--interactive curator-hours__add-direction">+</button>
+            </div>
+            <div class="curator-hours__direction-select">
+              <select class="curator-hours__direction-input"></select>
+            </div>
+            <div class="pill-list" data-list="directions"></div>
+          </div>
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Специалисты</span>
+              <button type="button" class="chip chip--interactive curator-hours__add-item" data-target="specialists">Добавить</button>
+            </div>
+            <div class="multi-input" data-list="specialists"></div>
+          </div>
+        </div>
+        <div class="curator-hours__row-actions">
+          <button type="button" class="multi-input__remove curator-hours__remove-row" aria-label="Удалить строку">×</button>
+        </div>
+      `;
+
+      setupRowList({ row, target: 'groups', placeholder: 'Например, 1234' });
+      setupRowList({ row, target: 'specialists', placeholder: 'Например, приглашенный спикер' });
+      setupDirections(row);
+
+      return row;
+    }
+
+    function updateRowRemovalState() {
+      const rows = curatorHoursRows.querySelectorAll('.curator-hours__row');
+      rows.forEach((row) => {
+        const removeButton = row.querySelector('.curator-hours__remove-row');
+        if (!removeButton) return;
+        removeButton.disabled = rows.length === 1;
+      });
+    }
+
+    function addCuratorHourRow() {
+      const row = createCuratorHoursRow();
+      const removeButton = row.querySelector('.curator-hours__remove-row');
+
+      if (removeButton) {
+        removeButton.addEventListener('click', () => {
+          if (curatorHoursRows.querySelectorAll('.curator-hours__row').length === 1) return;
+          row.remove();
+          updateRowRemovalState();
+        });
+      }
+
+      curatorHoursRows.append(row);
+      updateRowRemovalState();
+    }
+
+    function collectCuratorHoursRows() {
+      return Array.from(curatorHoursRows.querySelectorAll('.curator-hours__row'))
+        .map((row) => {
+          const groups = collectDynamicList(row.querySelector('[data-list="groups"]'));
+          const specialists = collectDynamicList(row.querySelector('[data-list="specialists"]'));
+          const dateStart = row.querySelector('.date-range__start')?.value || '';
+          const dateEnd = row.querySelector('.date-range__end')?.value || '';
+          const topic = row.querySelector('.curator-hours__topic')?.value.trim() || '';
+          const directions = collectDirections(row.querySelector('[data-list="directions"]'));
+
+          if (!groups.length && !specialists.length && !dateStart && !dateEnd && !topic && !directions.length) {
+            return null;
+          }
+
+          return { groups, date_start: dateStart, date_end: dateEnd, topic, directions, specialists };
+        })
+        .filter(Boolean);
+    }
+
+    function toggleCuratorHoursDetails() {
+      const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
+      curatorHoursDetails.hidden = !isHeld;
+
+      if (isHeld && !curatorHoursRows.children.length) {
+        addCuratorHourRow();
+      }
+    }
+
     function buildReport() {
+      const heldMinimumThreeCuratorSessions = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       const payload = {
         full_name: getValue('full_name'),
         job_positions: collectList('job_positions'),
@@ -261,8 +514,9 @@
         curated_group_numbers: collectList('curated_group_numbers'),
         curator_primary_building: getValue('curator_primary_building'),
         curator_primary_room: getValue('curator_primary_room'),
-        held_minimum_three_curator_sessions_in_reporting_period: getSelectedRadio('held_minimum_three_curator_sessions_in_reporting_period'),
+        held_minimum_three_curator_sessions_in_reporting_period: heldMinimumThreeCuratorSessions,
         institute_or_faculty: collectFaculties(),
+        curator_hours_details: heldMinimumThreeCuratorSessions ? collectCuratorHoursRows() : [],
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -291,6 +545,14 @@
       inputName: 'curated_group_number',
       placeholder: 'Например, 1234 или 4102',
     });
+
+    addCuratorHourRowButton.addEventListener('click', addCuratorHourRow);
+
+    form
+      .querySelectorAll('input[name="held_minimum_three_curator_sessions_in_reporting_period"]')
+      .forEach((radio) => radio.addEventListener('change', toggleCuratorHoursDetails));
+
+    toggleCuratorHoursDetails();
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();
