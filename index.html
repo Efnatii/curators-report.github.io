@@ -267,6 +267,19 @@
       return JSON.stringify(payload, null, 2);
     }
 
+    function generateFileName() {
+      const [lastName = '', firstName = '', patronymic = ''] = getValue('full_name')
+        .split(/\s+/)
+        .filter(Boolean);
+      const parts = ['Отчёт_о_кураторской_деятельности'];
+
+      if (firstName) parts.push(firstName);
+      if (lastName) parts.push(lastName);
+      if (patronymic) parts.push(patronymic);
+
+      return `${parts.join('_')}.json`;
+    }
+
     setupMultiInput({
       name: 'job_positions',
       inputName: 'job_position',
@@ -285,7 +298,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'curator-report.json';
+      link.download = generateFileName();
       document.body.appendChild(link);
       link.click();
       link.remove();
