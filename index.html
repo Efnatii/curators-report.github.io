@@ -431,7 +431,7 @@
           </div>
           <div class="field field--compact">
             <div class="field__label-row">
-              <span class="field__label">Специалисты</span>
+              <span class="field__label">Приглашённые специалисты</span>
               <button type="button" class="chip chip--interactive curator-hours__add-item" data-target="specialists">Добавить</button>
             </div>
             <div class="multi-input" data-list="specialists"></div>
@@ -443,7 +443,7 @@
       `;
 
       setupRowList({ row, target: 'groups', placeholder: 'Например, 1234' });
-      setupRowList({ row, target: 'specialists', placeholder: 'Например, приглашенный спикер' });
+      setupRowList({ row, target: 'specialists', placeholder: 'Например, приглашённый специалист' });
       setupDirections(row);
 
       return row;
