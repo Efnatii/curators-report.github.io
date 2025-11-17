@@ -363,17 +363,30 @@ textarea:focus {
 
 .curator-hours__direction-select {
   position: relative;
+  padding: 2px;
+  border-radius: 12px;
+  border: 1px solid rgba(242, 177, 56, 0.2);
+  background: linear-gradient(135deg, rgba(242, 177, 56, 0.2), rgba(119, 169, 255, 0.12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 28px rgba(0, 0, 0, 0.25);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.curator-hours__direction-select:focus-within {
+  border-color: var(--accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 34px rgba(242, 177, 56, 0.25);
+  transform: translateY(-1px);
 }
 
 .curator-hours__direction-select select {
   width: 100%;
-  padding: 12px 42px 12px 12px;
+  padding: 12px 48px 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)), #0a0f1a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), #0a0f1a;
   color: var(--text);
   appearance: none;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
@@ -391,11 +404,12 @@ textarea:focus {
 .curator-hours__direction-select::after {
   content: '▾';
   position: absolute;
-  inset: 0 12px 0 auto;
+  inset: 0 18px 0 auto;
   display: grid;
   place-items: center;
   color: var(--muted);
   pointer-events: none;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .field--compact {
