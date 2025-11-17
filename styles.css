@@ -377,6 +377,13 @@ select:focus {
   gap: 12px;
 }
 
+.curator-hours__topic {
+  min-height: 96px;
+  resize: vertical;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
 .curator-hours__direction-select {
   position: relative;
   padding: 2px;
