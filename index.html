@@ -38,13 +38,7 @@
             <div class="field field--wide">
               <div class="field__label-row">
                 <span class="field__label">Должность *</span>
-                <div class="field__label-actions">
-                  <span class="tooltip">
-                    <button type="button" class="tooltip__icon" aria-label="Подсказка: добавляйте по одной должности в каждую строку">?</button>
-                    <span class="tooltip__content">Добавляйте по одной должности в каждую строку.</span>
-                  </span>
-                  <button type="button" class="chip chip--interactive" data-add="job_positions">Добавить</button>
-                </div>
+                <button type="button" class="chip chip--interactive" data-add="job_positions">Добавить</button>
               </div>
               <div class="multi-input" data-name="job_positions">
                 <div class="multi-input__row">
@@ -52,6 +46,7 @@
                   <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
                 </div>
               </div>
+              <p class="helper">Добавляйте по одной должности в каждую строку.</p>
             </div>
             <label class="field">
               <span class="field__label">Кафедра *</span>
@@ -72,13 +67,7 @@
             <div class="field field--wide">
               <div class="field__label-row">
                 <span class="field__label">Номера курируемых групп *</span>
-                <div class="field__label-actions">
-                  <span class="tooltip">
-                    <button type="button" class="tooltip__icon" aria-label="Подсказка: добавьте по одному номеру группы в каждую строку">?</button>
-                    <span class="tooltip__content">Добавьте по одному номеру группы в каждую строку.</span>
-                  </span>
-                  <button type="button" class="chip chip--interactive" data-add="curated_group_numbers">Добавить</button>
-                </div>
+                <button type="button" class="chip chip--interactive" data-add="curated_group_numbers">Добавить</button>
               </div>
               <div class="multi-input" data-name="curated_group_numbers">
                 <div class="multi-input__row">
@@ -86,6 +75,7 @@
                   <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
                 </div>
               </div>
+              <p class="helper">Добавьте по одному номеру группы в каждую строку.</p>
             </div>
             <label class="field">
               <span class="field__label">Корпус основного пребывания куратора *</span>
@@ -419,18 +409,13 @@
             <div class="multi-input" data-list="groups"></div>
           </div>
           <div class="field field--compact">
-            <div class="field__label-row">
-              <span class="field__label">Дата или период</span>
-              <span class="tooltip">
-                <button type="button" class="tooltip__icon" aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата">?</button>
-                <span class="tooltip__content">Оставьте конечную дату пустой, если указана одна дата.</span>
-              </span>
-            </div>
+            <span class="field__label">Дата или период</span>
             <div class="date-range">
               <input type="date" class="date-range__start" aria-label="Дата начала" />
               <span class="date-range__dash">—</span>
               <input type="date" class="date-range__end" aria-label="Дата окончания" />
             </div>
+            <p class="helper">Оставьте конечную дату пустой, если указана одна дата.</p>
           </div>
           <label class="field field--compact">
             <span class="field__label">Тема</span>
@@ -439,18 +424,13 @@
           <div class="field field--compact">
             <div class="field__label-row">
               <span class="field__label">Направленность</span>
-              <div class="field__label-actions">
-                <span class="tooltip">
-                  <button type="button" class="tooltip__icon" aria-label="Подсказка: выберите направление в списке и нажмите «+», чтобы добавить его">?</button>
-                  <span class="tooltip__content">Выберите направление в списке выше и нажмите «+», чтобы добавить его. Можно указать несколько направлений; для удаления используйте крестик на метке.</span>
-                </span>
-                <button type="button" class="chip chip--interactive curator-hours__add-direction">+</button>
-              </div>
+              <button type="button" class="chip chip--interactive curator-hours__add-direction">+</button>
             </div>
             <div class="curator-hours__direction-select">
               <select class="curator-hours__direction-input"></select>
             </div>
             <div class="pill-list" data-list="directions"></div>
+            <p class="helper">Выберите направление в списке выше и нажмите «+», чтобы добавить его. Можно указать несколько направлений; для удаления используйте крестик на метке.</p>
           </div>
           <div class="field field--compact">
             <div class="field__label-row">
