@@ -179,12 +179,6 @@ main {
   gap: 10px;
 }
 
-.field__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .field--wide {
   grid-column: 1 / -1;
   max-width: none;
@@ -350,76 +344,6 @@ select:focus {
 .helper {
   color: var(--muted);
   font-size: 0.95rem;
-}
-
-.tooltip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.tooltip__trigger {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  font-weight: 800;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
-}
-
-.tooltip__trigger:hover,
-.tooltip--active .tooltip__trigger {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
-  border-color: rgba(242, 177, 56, 0.6);
-}
-
-.tooltip__trigger:focus-visible {
-  outline: 2px solid rgba(242, 177, 56, 0.6);
-  outline-offset: 2px;
-}
-
-.tooltip__bubble {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  min-width: 240px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #0f1522;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-6px);
-  transition: opacity 140ms ease, transform 140ms ease;
-  z-index: 10;
-}
-
-.tooltip:hover .tooltip__bubble,
-.tooltip:focus-within .tooltip__bubble,
-.tooltip--active .tooltip__bubble {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.tooltip--standalone {
-  align-self: center;
-}
-
-.legend-with-tooltip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .form-subsection {
