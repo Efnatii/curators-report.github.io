@@ -86,19 +86,157 @@ def load_json_files(input_dir: Path) -> List[Tuple[Path, JsonRecord]]:
     return records
 
 
-def determine_columns(records: Iterable[Tuple[Path, JsonRecord]]) -> List[str]:
-    questions: set[str] = set()
-    for _, record in records:
-        questions.update(record.keys())
-    return sorted(questions)
+QUESTION_ORDER: List[Dict[str, object]] = [
+    {
+        "key": "reporting_period",
+        "label": "Отчётный период",
+    },
+    {"key": "full_name", "label": "1. Фамилия Имя Отчество"},
+    {"key": "job_positions", "label": "2. Должность"},
+    {"key": "department", "label": "3. Кафедра"},
+    {
+        "key": "contact_phone_connected_to_telegram",
+        "label": "4. Контактный телефон (подключенный к Telegram)",
+    },
+    {"key": "telegram_username", "label": "5. Ник в Telegram"},
+    {"key": "email", "label": "6. E-mail"},
+    {"key": "curated_group_numbers", "label": "7. Номера курируемых групп"},
+    {"key": "curator_primary_building", "label": "8. Корпус основного пребывания куратора"},
+    {"key": "curator_primary_room", "label": "9. Аудитория основного пребывания куратора"},
+    {"key": "institute_or_faculty", "label": "10. Институт/Факультет"},
+    {
+        "key": "held_minimum_three_curator_sessions_in_reporting_period",
+        "label": "11. Проведение не менее трёх кураторских часов за отчётный период",
+    },
+    {
+        "key": "curator_hours_details",
+        "label": "12. Даты проведения трёх и более кураторских часов в течение отчётного периода",
+        "subfields": {
+            "groups": "Группы",
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "topic": "Тема",
+            "directions": "Направленность",
+            "specialists": "Приглашённые специалисты",
+        },
+    },
+    {"key": "manages_group_chat", "label": "13. Ведение чата с каждой группой или общего чата"},
+    {
+        "key": "inform_group_about_events",
+        "label": "14. Информирование группы о мероприятиях и событиях различного уровня",
+    },
+    {
+        "key": "achievements",
+        "label": "15. Призовое место обучающегося во внеучебных мероприятиях",
+        "subfields": {
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "event": "Мероприятие",
+            "group": "Группа",
+            "student": "ФИО студента",
+            "result": "Итог",
+        },
+    },
+    {
+        "key": "participated_in_two_events_with_group",
+        "label": "16. Совместное участие с группой не менее чем в двух мероприятиях",
+    },
+    {
+        "key": "joint_participation_events",
+        "label": "17. Даты проведения двух и более мероприятий в течение отчётного периода",
+        "subfields": {
+            "groups": "Группы",
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "event": "Мероприятие",
+        },
+    },
+    {
+        "key": "participated_in_two_curator_events",
+        "label": "18. Участие не менее чем в двух мероприятиях для кураторов",
+    },
+    {
+        "key": "curator_personal_events",
+        "label": "19. Даты участия в мероприятиях для кураторов",
+        "subfields": {
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "event": "Мероприятие",
+        },
+    },
+    {
+        "key": "personal_program_participation",
+        "label": "20. Личное участие в программах и конкурсах",
+        "subfields": {
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "event": "Мероприятие",
+        },
+    },
+    {
+        "key": "mentor_support_events",
+        "label": "21. Участие куратора в роли наставника проекта",
+        "subfields": {
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "event": "Мероприятие",
+            "group": "Группа",
+            "student": "ФИО студента",
+            "result": "Итог",
+        },
+    },
+    {
+        "key": "scientific_publications",
+        "label": "22. Опубликование научной работы",
+        "subfields": {
+            "description": "Описание",
+            "link": "Ссылка",
+        },
+    },
+    {
+        "key": "media_materials",
+        "label": "23. Интервью и статьи для \"Дзен.Гуап\", соцсетей и сайта ГУАП",
+        "subfields": {"link": "Ссылка"},
+    },
+    {
+        "key": "qualification_courses",
+        "label": "24. Курсы повышения квалификации",
+        "subfields": {
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+            "event": "Мероприятие",
+        },
+    },
+]
 
 
-def write_workbook(records: List[Tuple[Path, JsonRecord]], questions: List[str], output_path: Path) -> None:
+def determine_columns(records: Iterable[Tuple[Path, JsonRecord]]) -> List[Tuple[str, str | None, str]]:
+    columns: List[Tuple[str, str | None, str]] = []
+    for question in QUESTION_ORDER:
+        key = question["key"]  # type: ignore[index]
+        label = question["label"]  # type: ignore[index]
+        subfields: Dict[str, str] | None = question.get("subfields")  # type: ignore[assignment]
+
+        if subfields:
+            for subkey, sublabel in subfields.items():
+                columns.append((key, subkey, f"{label}\n{sublabel}"))
+        else:
+            columns.append((key, None, label))
+
+    present_keys = {key for _, record in records for key in record.keys()}
+    return [col for col in columns if col[0] in present_keys]
+
+
+def write_workbook(
+    records: List[Tuple[Path, JsonRecord]],
+    questions: List[Tuple[str, str | None, str]],
+    output_path: Path,
+) -> None:
     wb = Workbook()
     ws = wb.active
     ws.title = "Responses"
 
-    headers = ["Source file", *questions]
+    headers = ["Источник", *[header for _, _, header in questions]]
     ws.append(headers)
 
     for file_path, record in records:
@@ -111,25 +249,43 @@ def write_workbook(records: List[Tuple[Path, JsonRecord]], questions: List[str],
         )
         for row_offset in range(block_height):
             row_values = [file_path.name if row_offset == 0 else ""]
-            for question in questions:
-                value = record.get(question)
+            for question_key, subkey, _ in questions:
+                value = record.get(question_key)
                 if isinstance(value, list):
                     if row_offset < len(value):
-                        cell_value = normalize_cell_value(value[row_offset])
+                        item = value[row_offset]
+                        if subkey and isinstance(item, dict):
+                            cell_value = normalize_cell_value(item.get(subkey))
+                        else:
+                            cell_value = normalize_cell_value(item)
                     else:
                         cell_value = ""
                 else:
-                    cell_value = normalize_cell_value(value) if row_offset == 0 else ""
+                    if subkey is not None:
+                        cell_value = ""
+                    else:
+                        cell_value = normalize_cell_value(value) if row_offset == 0 else ""
                 row_values.append(cell_value)
             ws.append(row_values)
 
         # Apply highlighting to list ranges per question
         start_row = ws.max_row - block_height + 1
-        for col_index, question in enumerate(questions, start=2):
-            value = record.get(question)
+        for col_index, (question_key, _subkey, _header) in enumerate(questions, start=2):
+            value = record.get(question_key)
             if isinstance(value, list) and value:
                 for row_index in range(start_row, start_row + len(value)):
                     ws.cell(row=row_index, column=col_index).fill = HIGHLIGHT_FILL
+
+    for column_cells in ws.columns:
+        max_length = 0
+        for cell in column_cells:
+            if cell.value is None:
+                continue
+            for line in str(cell.value).split("\n"):
+                max_length = max(max_length, len(line))
+
+        if max_length:
+            ws.column_dimensions[column_cells[0].column_letter].width = max_length + 2
 
     wb.save(output_path)
 
