@@ -211,6 +211,81 @@
           </div>
         </section>
 
+        <section class="form-section" aria-labelledby="section-collaboration">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 3 из 10</p>
+              <h2 id="section-collaboration">Совместные мероприятия с курируемой группой</h2>
+              <p class="muted">Отражает совместную активность куратора и студентов.</p>
+            </div>
+            <span class="chip">Обязательный</span>
+          </div>
+
+          <fieldset class="choice-card">
+            <legend class="field__label">Информирование группы о мероприятиях и событиях различного уровня *</legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="radio" name="inform_group_about_events" value="true" required />
+                <span>Да</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="inform_group_about_events" value="false" required />
+                <span>Нет</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="joint-activities-details" class="form-subsection" hidden>
+            <div class="section-header section-header--sub">
+              <div>
+                <p class="section-counter">Дополнительные вопросы</p>
+                <h3>Данные о совместных мероприятиях и информировании</h3>
+                <p class="muted">Заполните сведения только при положительном ответе на главный вопрос.</p>
+              </div>
+            </div>
+
+            <div class="form-subsection">
+              <div class="section-header section-header--sub">
+                <div>
+                  <p class="section-counter">Таблица</p>
+                  <h3>Призовое место обучающегося во внеучебных мероприятиях, конкурсах, получение грантов</h3>
+                  <p class="muted">Добавьте записи только при наличии результатов. Таблица по умолчанию пустая.</p>
+                </div>
+                <button type="button" class="chip chip--interactive" id="add-achievement-row">Добавить строку</button>
+              </div>
+              <div class="achievement-table" id="achievement-rows"></div>
+            </div>
+
+            <fieldset class="choice-card">
+              <legend class="field__label">Ведение чата с каждой группой или общего чата со всеми группами *</legend>
+              <div class="choices">
+                <label class="choice">
+                  <input type="radio" name="manages_group_chat" value="true" />
+                  <span>Да</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="manages_group_chat" value="false" />
+                  <span>Нет</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="choice-card">
+              <legend class="field__label">Совместное участие с группой не менее чем в двух мероприятиях в течение отчетного периода *</legend>
+              <div class="choices">
+                <label class="choice">
+                  <input type="radio" name="participated_in_two_events_with_group" value="true" />
+                  <span>Да</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="participated_in_two_events_with_group" value="false" />
+                  <span>Нет</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
         <div class="actions">
           <button type="button" id="download" class="button">Скачать ответы</button>
           <p class="muted">Кнопка сформирует JSON-файл с вашими ответами.</p>
@@ -233,6 +308,9 @@
     const curatorHoursDetails = document.getElementById('curator-hours-details');
     const curatorHoursRows = document.getElementById('curator-hours-rows');
     const addCuratorHourRowButton = document.getElementById('add-curator-hour-row');
+    const jointActivitiesDetails = document.getElementById('joint-activities-details');
+    const addAchievementRowButton = document.getElementById('add-achievement-row');
+    const achievementRowsContainer = document.getElementById('achievement-rows');
 
     const directionsOptions = [
       'Гражданская',
@@ -259,6 +337,42 @@
           trigger.setAttribute('aria-expanded', 'false');
         }
       });
+    }
+
+    function createAchievementRow() {
+      const row = document.createElement('div');
+      row.className = 'achievement-row';
+
+      row.innerHTML = `
+        <div class="achievement-grid">
+          <label class="field">
+            <span class="field__label">Дата (дата либо период)</span>
+            <input type="text" name="achievement_date" placeholder="Например, 12.03.2024 или март 2024" />
+          </label>
+          <label class="field">
+            <span class="field__label">Мероприятие</span>
+            <textarea name="achievement_event" placeholder="Например, участие в городском конкурсе проектов"></textarea>
+          </label>
+          <label class="field">
+            <span class="field__label">Группа</span>
+            <input type="text" name="achievement_group" placeholder="Например, 4102" />
+          </label>
+          <label class="field">
+            <span class="field__label">ФИО студента</span>
+            <input type="text" name="achievement_student" placeholder="Например, Петрова Анна Сергеевна" />
+          </label>
+          <label class="field">
+            <span class="field__label">Итог</span>
+            <textarea name="achievement_result" placeholder="Например, 2 место, грант на разработку проекта"></textarea>
+          </label>
+        </div>
+        <button type="button" class="multi-input__remove achievement-row__remove" aria-label="Удалить запись">&times;</button>
+      `;
+
+      const removeButton = row.querySelector('.achievement-row__remove');
+      removeButton.addEventListener('click', () => row.remove());
+
+      return row;
     }
 
     function setupTooltips() {
@@ -620,12 +734,46 @@
         .filter(Boolean);
     }
 
+    function collectAchievements() {
+      return Array.from(achievementRowsContainer.querySelectorAll('.achievement-row'))
+        .map((row) => {
+          const date = row.querySelector('input[name="achievement_date"]')?.value.trim() || '';
+          const event = row.querySelector('textarea[name="achievement_event"]')?.value.trim() || '';
+          const group = row.querySelector('input[name="achievement_group"]')?.value.trim() || '';
+          const student = row.querySelector('input[name="achievement_student"]')?.value.trim() || '';
+          const result = row.querySelector('textarea[name="achievement_result"]')?.value.trim() || '';
+
+          if (!date && !event && !group && !student && !result) {
+            return null;
+          }
+
+          return { date, event, group, student, result };
+        })
+        .filter(Boolean);
+    }
+
     function toggleCuratorHoursDetails() {
       const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       curatorHoursDetails.hidden = !isHeld;
 
       if (isHeld && !curatorHoursRows.children.length) {
         addCuratorHourRow();
+      }
+    }
+
+    function toggleJointActivitiesDetails() {
+      const isInforming = getBooleanRadio('inform_group_about_events');
+      jointActivitiesDetails.hidden = !isInforming;
+
+      if (!isInforming) {
+        achievementRowsContainer.innerHTML = '';
+        form
+          .querySelectorAll(
+            'input[name="manages_group_chat"], input[name="participated_in_two_events_with_group"]'
+          )
+          .forEach((input) => {
+            input.checked = false;
+          });
       }
     }
 
@@ -644,6 +792,10 @@
         held_minimum_three_curator_sessions_in_reporting_period: heldMinimumThreeCuratorSessions,
         institute_or_faculty: collectFaculties(),
         curator_hours_details: heldMinimumThreeCuratorSessions ? collectCuratorHoursRows() : [],
+        inform_group_about_events: getBooleanRadio('inform_group_about_events'),
+        achievements: getBooleanRadio('inform_group_about_events') ? collectAchievements() : [],
+        manages_group_chat: getBooleanRadio('manages_group_chat'),
+        participated_in_two_events_with_group: getBooleanRadio('participated_in_two_events_with_group'),
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -677,11 +829,22 @@
 
     addCuratorHourRowButton.addEventListener('click', addCuratorHourRow);
 
+    if (addAchievementRowButton) {
+      addAchievementRowButton.addEventListener('click', () => {
+        achievementRowsContainer.append(createAchievementRow());
+      });
+    }
+
     form
       .querySelectorAll('input[name="held_minimum_three_curator_sessions_in_reporting_period"]')
       .forEach((radio) => radio.addEventListener('change', toggleCuratorHoursDetails));
 
+    form
+      .querySelectorAll('input[name="inform_group_about_events"]')
+      .forEach((radio) => radio.addEventListener('change', toggleJointActivitiesDetails));
+
     toggleCuratorHoursDetails();
+    toggleJointActivitiesDetails();
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();

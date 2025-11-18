@@ -599,6 +599,31 @@ select:focus {
   color: var(--muted);
 }
 
+.achievement-table {
+  display: grid;
+  gap: 12px;
+}
+
+.achievement-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.achievement-row__remove {
+  align-self: start;
+}
+
 .actions {
   display: flex;
   align-items: center;
