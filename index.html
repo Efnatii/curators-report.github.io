@@ -280,6 +280,17 @@
                 </label>
               </div>
             </fieldset>
+
+            <div id="joint-events-details" class="form-subsection" hidden>
+              <div class="section-header section-header--sub">
+                <div>
+                  <h3>Даты проведения двух и более мероприятий в течение отчетного периода</h3>
+                  <p class="muted">Добавьте отдельную строку для каждого мероприятия.</p>
+                </div>
+                <button type="button" class="chip chip--interactive" id="add-joint-event-row">Добавить строку</button>
+              </div>
+              <div class="joint-events" id="joint-event-rows"></div>
+            </div>
           </div>
         </section>
 
@@ -308,6 +319,9 @@
     const jointActivitiesDetails = document.getElementById('joint-activities-details');
     const addAchievementRowButton = document.getElementById('add-achievement-row');
     const achievementRowsContainer = document.getElementById('achievement-rows');
+    const jointEventsDetails = document.getElementById('joint-events-details');
+    const jointEventRowsContainer = document.getElementById('joint-event-rows');
+    const addJointEventRowButton = document.getElementById('add-joint-event-row');
 
     const directionsOptions = [
       'Гражданская',
@@ -385,6 +399,67 @@
 
       const removeButton = row.querySelector('.achievement-row__remove');
       removeButton.addEventListener('click', () => row.remove());
+
+      return row;
+    }
+
+    function createJointEventRow() {
+      const row = document.createElement('div');
+      row.className = 'joint-events__row';
+
+      row.innerHTML = `
+        <div class="joint-events__grid">
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Группы</span>
+              <button
+                type="button"
+                class="chip chip--interactive curator-hours__add-item joint-events__add-item"
+                data-target="groups"
+              >
+                Добавить группу
+              </button>
+            </div>
+            <div class="multi-input" data-list="groups"></div>
+          </div>
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Дата (дата или период)</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Оставьте конечную дату пустой, если указана одна дата.</div>
+              </div>
+            </div>
+            <div class="date-range">
+              <input type="date" class="joint-events-date__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="joint-events-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
+          <label class="field field--compact">
+            <span class="field__label">Мероприятия</span>
+            <textarea name="joint_event_description" placeholder="Например, участие в двух выставках"></textarea>
+          </label>
+        </div>
+        <button type="button" class="multi-input__remove joint-events__row-remove" aria-label="Удалить запись">&times;</button>
+      `;
+
+      const listContainer = row.querySelector('[data-list="groups"]');
+      const addButton = row.querySelector('.joint-events__add-item[data-target="groups"]');
+
+      if (listContainer && addButton) {
+        setupRowList({ row, target: 'groups', placeholder: 'Например, 4102', startEmpty: false });
+      }
+
+      const removeButton = row.querySelector('.joint-events__row-remove');
+      removeButton?.addEventListener('click', () => row.remove());
 
       return row;
     }
@@ -767,6 +842,25 @@
         .filter(Boolean);
     }
 
+    function collectJointEvents() {
+      if (!jointEventsDetails || jointEventRowsContainer.children.length === 0) return [];
+
+      return Array.from(jointEventRowsContainer.querySelectorAll('.joint-events__row'))
+        .map((row) => {
+          const groups = collectDynamicList(row.querySelector('[data-list="groups"]'));
+          const dateStart = row.querySelector('.joint-events-date__start')?.value || '';
+          const dateEnd = row.querySelector('.joint-events-date__end')?.value || '';
+          const event = row.querySelector('textarea[name="joint_event_description"]')?.value.trim() || '';
+
+          if (!groups.length && !dateStart && !dateEnd && !event) {
+            return null;
+          }
+
+          return { groups, date_start: dateStart, date_end: dateEnd, event };
+        })
+        .filter(Boolean);
+    }
+
     function toggleCuratorHoursDetails() {
       const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       curatorHoursDetails.hidden = !isHeld;
@@ -782,6 +876,8 @@
 
       if (!isInforming) {
         achievementRowsContainer.innerHTML = '';
+        jointEventsDetails.hidden = true;
+        jointEventRowsContainer.innerHTML = '';
         form
           .querySelectorAll(
             'input[name="manages_group_chat"], input[name="participated_in_two_events_with_group"]'
@@ -789,6 +885,20 @@
           .forEach((input) => {
             input.checked = false;
           });
+      }
+    }
+
+    function toggleJointParticipationDetails() {
+      const isParticipating = getBooleanRadio('participated_in_two_events_with_group');
+      jointEventsDetails.hidden = !isParticipating;
+
+      if (!isParticipating) {
+        jointEventRowsContainer.innerHTML = '';
+        return;
+      }
+
+      if (!jointEventRowsContainer.children.length) {
+        jointEventRowsContainer.append(createJointEventRow());
       }
     }
 
@@ -811,6 +921,9 @@
         achievements: getBooleanRadio('inform_group_about_events') ? collectAchievements() : [],
         manages_group_chat: getBooleanRadio('manages_group_chat'),
         participated_in_two_events_with_group: getBooleanRadio('participated_in_two_events_with_group'),
+        joint_participation_events: getBooleanRadio('participated_in_two_events_with_group')
+          ? collectJointEvents()
+          : [],
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -850,6 +963,12 @@
       });
     }
 
+    if (addJointEventRowButton) {
+      addJointEventRowButton.addEventListener('click', () => {
+        jointEventRowsContainer.append(createJointEventRow());
+      });
+    }
+
     form
       .querySelectorAll('input[name="held_minimum_three_curator_sessions_in_reporting_period"]')
       .forEach((radio) => radio.addEventListener('change', toggleCuratorHoursDetails));
@@ -858,8 +977,13 @@
       .querySelectorAll('input[name="inform_group_about_events"]')
       .forEach((radio) => radio.addEventListener('change', toggleJointActivitiesDetails));
 
+    form
+      .querySelectorAll('input[name="participated_in_two_events_with_group"]')
+      .forEach((radio) => radio.addEventListener('change', toggleJointParticipationDetails));
+
     toggleCuratorHoursDetails();
     toggleJointActivitiesDetails();
+    toggleJointParticipationDetails();
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();

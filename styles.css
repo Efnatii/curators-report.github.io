@@ -634,6 +634,31 @@ select:focus {
   align-self: start;
 }
 
+.joint-events {
+  display: grid;
+  gap: 12px;
+}
+
+.joint-events__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.joint-events__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.joint-events__row-remove {
+  align-self: start;
+}
+
 .actions {
   display: flex;
   align-items: center;
