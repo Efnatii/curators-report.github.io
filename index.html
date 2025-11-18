@@ -30,7 +30,7 @@
         <section class="form-section" aria-labelledby="section-general">
           <div class="section-header">
             <div>
-              <p class="section-counter">Раздел 1 из 10</p>
+              <p class="section-counter">Раздел 1 из 5</p>
               <h2 id="section-general">Общие сведения о кураторе</h2>
               <p class="muted">Вводная информация для идентификации куратора и его группы.</p>
             </div>
@@ -170,7 +170,7 @@
         <section class="form-section" aria-labelledby="section-curator-hours">
           <div class="section-header">
             <div>
-              <p class="section-counter">Раздел 2 из 10</p>
+              <p class="section-counter">Раздел 2 из 5</p>
               <h2 id="section-curator-hours">Информация о проведении кураторских часов</h2>
               <p class="muted">Данные о количестве, тематиках и направлениях проведённых кураторских часов</p>
             </div>
@@ -218,7 +218,7 @@
         <section class="form-section" aria-labelledby="section-collaboration">
           <div class="section-header">
             <div>
-              <p class="section-counter">Раздел 3 из 10</p>
+              <p class="section-counter">Раздел 3 из 5</p>
               <h2 id="section-collaboration">Совместные мероприятия с курируемой группой</h2>
               <p class="muted">Отражает совместную активность куратора и студентов.</p>
             </div>
@@ -312,7 +312,7 @@
         <section class="form-section" aria-labelledby="section-curator-extracurricular">
           <div class="section-header">
             <div>
-              <p class="section-counter">Раздел 4 из 10</p>
+              <p class="section-counter">Раздел 4 из 5</p>
               <h2 id="section-curator-extracurricular">Внеучебная деятельность куратора</h2>
               <p class="muted">Личное участие и наставничество куратора в программах, форумах и конкурсах.</p>
             </div>
@@ -390,6 +390,27 @@
           </div>
         </section>
 
+        <section class="form-section" aria-labelledby="section-academic">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 5 из 5</p>
+              <h2 id="section-academic">Научная и методическая деятельность куратора</h2>
+              <p class="muted">Публикации, методические материалы, повышение квалификации.</p>
+            </div>
+          </div>
+
+          <div class="form-subsection form-subsection--borderless">
+            <div class="section-header section-header--sub">
+              <div>
+                <h3>22. Научные публикации, методические материалы и повышение квалификации</h3>
+                <p class="muted">Добавьте записи при наличии результатов за отчётный период.</p>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-academic-activity-row">Добавить строку</button>
+            </div>
+            <div class="curator-hours" id="academic-activity-rows"></div>
+          </div>
+        </section>
+
         <div class="actions">
           <button type="button" id="download" class="button">Скачать ответы</button>
           <p class="muted">Кнопка сформирует JSON-файл с вашими ответами.</p>
@@ -432,6 +453,8 @@
     const addPersonalProgramRowButton = document.getElementById('add-personal-program-row');
     const mentorSupportRowsContainer = document.getElementById('mentor-support-rows');
     const addMentorSupportRowButton = document.getElementById('add-mentor-support-row');
+    const academicActivityRowsContainer = document.getElementById('academic-activity-rows');
+    const addAcademicActivityRowButton = document.getElementById('add-academic-activity-row');
 
     const directionsOptions = [
       'Гражданская',
@@ -551,6 +574,13 @@
         group: 'Группа, с которой работал куратор.',
         student: 'ФИО студента или команды.',
         result: 'Результат участия: итог, статус, достижение.',
+      },
+      academic_and_methodical_activities: {
+        _comment: 'Сведения о публикациях, методических материалах и повышении квалификации куратора.',
+        date_start: 'Дата начала или единственная дата активности.',
+        date_end: 'Дата завершения периода, если применимо.',
+        type: 'Тип активности: публикация, методический материал или повышение квалификации.',
+        description: 'Краткое описание активности и ключевые результаты.',
       },
     };
 
@@ -870,6 +900,67 @@
     function addPersonalProgramRow() {
       const row = createPersonalProgramRow();
       personalProgramRowsContainer.append(row);
+      setupTooltips();
+    }
+
+    function createAcademicActivityRow() {
+      const row = document.createElement('div');
+      row.className = 'curator-hours__row academic-activity-row';
+
+      row.innerHTML = `
+        <div class="curator-hours__grid">
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Тип активности</span>
+            </div>
+            <select class="academic-activity__type">
+              <option value="Публикация">Публикация</option>
+              <option value="Методический материал">Методический материал</option>
+              <option value="Повышение квалификации">Повышение квалификации</option>
+            </select>
+          </div>
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Дата (дата или период)</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Оставьте конечную дату пустой, если указана одна дата.</div>
+              </div>
+            </div>
+            <div class="date-range">
+              <input type="date" class="academic-activity-date__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="academic-activity-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
+          <label class="field field--compact">
+            <span class="field__label">Описание</span>
+            <textarea class="academic-activity__description" placeholder="Например, публикация статьи или участие в курсе повышения квалификации" rows="3"></textarea>
+          </label>
+        </div>
+        <div class="curator-hours__row-actions">
+          <button type="button" class="multi-input__remove academic-activity-row__remove" aria-label="Удалить строку">×</button>
+        </div>
+      `;
+
+      const removeButton = row.querySelector('.academic-activity-row__remove');
+      if (removeButton) {
+        removeButton.addEventListener('click', () => row.remove());
+      }
+
+      return row;
+    }
+
+    function addAcademicActivityRow() {
+      const row = createAcademicActivityRow();
+      academicActivityRowsContainer.append(row);
       setupTooltips();
     }
 
@@ -1361,6 +1452,25 @@
         .filter(Boolean);
     }
 
+    function collectAcademicActivities() {
+      if (!academicActivityRowsContainer || academicActivityRowsContainer.children.length === 0) return [];
+
+      return Array.from(academicActivityRowsContainer.querySelectorAll('.academic-activity-row'))
+        .map((row) => {
+          const dateStart = row.querySelector('.academic-activity-date__start')?.value || '';
+          const dateEnd = row.querySelector('.academic-activity-date__end')?.value || '';
+          const type = row.querySelector('.academic-activity__type')?.value || '';
+          const description = row.querySelector('.academic-activity__description')?.value.trim() || '';
+
+          if (!dateStart && !dateEnd && !description) {
+            return null;
+          }
+
+          return { date_start: dateStart, date_end: dateEnd, type, description };
+        })
+        .filter(Boolean);
+    }
+
     function toggleCuratorHoursDetails() {
       const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       curatorHoursDetails.hidden = !isHeld;
@@ -1449,6 +1559,7 @@
         curator_personal_events: participatedInCuratorEvents ? collectExtracurricularRows() : [],
         personal_program_participation: collectPersonalProgramRows(),
         mentor_support_events: collectMentorSupportRows(),
+        academic_and_methodical_activities: collectAcademicActivities(),
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -1507,6 +1618,12 @@
       addMentorSupportRowButton.addEventListener('click', () => {
         mentorSupportRowsContainer.append(createMentorSupportRow());
         setupTooltips();
+      });
+    }
+
+    if (addAcademicActivityRowButton) {
+      addAcademicActivityRowButton.addEventListener('click', () => {
+        addAcademicActivityRow();
       });
     }
 
