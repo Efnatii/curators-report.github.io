@@ -455,6 +455,10 @@ select:focus {
   margin: 4px 0 0;
 }
 
+.section-header--sub .additional-title {
+  color: var(--accent);
+}
+
 .curator-hours {
   display: grid;
   gap: 12px;
