@@ -284,10 +284,23 @@
             <div id="joint-events-details" class="form-subsection" hidden>
               <div class="section-header section-header--sub">
                 <div>
-                  <h3>Даты проведения двух и более мероприятий в течение отчетного периода</h3>
+                  <div class="field__label-row">
+                    <h3>Даты проведения двух и более мероприятий в течение отчетного периода</h3>
+                    <div class="tooltip tooltip--standalone">
+                      <button
+                        type="button"
+                        class="tooltip__trigger"
+                        aria-label="Подсказка: укажите минимум три записи с деталями каждого мероприятия"
+                        aria-expanded="false"
+                      >
+                        ?
+                      </button>
+                      <div class="tooltip__bubble" role="tooltip">Укажите минимум три записи с деталями каждого мероприятия.</div>
+                    </div>
+                  </div>
                   <p class="muted">Добавьте отдельную строку для каждого мероприятия.</p>
                 </div>
-                <button type="button" class="chip chip--interactive" id="add-joint-event-row">Добавить строку</button>
+                <button type="button" class="chip chip--interactive" id="add-joint-event-row">Добавить</button>
               </div>
               <div class="joint-events" id="joint-event-rows"></div>
             </div>
@@ -403,7 +416,7 @@
       return row;
     }
 
-    function createJointEventRow() {
+    function createJointEventRow({ isRemovable = true } = {}) {
       const row = document.createElement('div');
       row.className = 'joint-events__row';
 
@@ -417,7 +430,7 @@
                 class="chip chip--interactive curator-hours__add-item joint-events__add-item"
                 data-target="groups"
               >
-                Добавить группу
+                Добавить
               </button>
             </div>
             <div class="multi-input" data-list="groups"></div>
@@ -459,7 +472,15 @@
       }
 
       const removeButton = row.querySelector('.joint-events__row-remove');
-      removeButton?.addEventListener('click', () => row.remove());
+
+      if (removeButton) {
+        if (!isRemovable) {
+          removeButton.disabled = true;
+          removeButton.setAttribute('aria-disabled', 'true');
+        } else {
+          removeButton.addEventListener('click', () => row.remove());
+        }
+      }
 
       return row;
     }
@@ -898,7 +919,7 @@
       }
 
       if (!jointEventRowsContainer.children.length) {
-        jointEventRowsContainer.append(createJointEventRow());
+        jointEventRowsContainer.append(createJointEventRow({ isRemovable: false }));
       }
     }
 
