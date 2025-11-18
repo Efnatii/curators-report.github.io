@@ -43,6 +43,15 @@ JsonRecord = Dict[str, JsonValue]
 HIGHLIGHT_FILL = PatternFill(start_color="FFF8DC", end_color="FFF8DC", fill_type="solid")
 
 
+def normalize_cell_value(value: JsonValue) -> ScalarValue:
+    """Convert any JSON value into something openpyxl can store."""
+
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    # Fallback for types like dicts or lists of non-scalar values
+    return json.dumps(value, ensure_ascii=False)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Merge JSON files into a single Excel workbook where each question becomes a column.",
@@ -94,20 +103,23 @@ def write_workbook(records: List[Tuple[Path, JsonRecord]], questions: List[str],
 
     for file_path, record in records:
         block_height = max(
-            [
+            (
                 len(value) if isinstance(value, list) else 1
                 for value in record.values()
-            ]
-            or [1]
+            ),
+            default=1,
         )
         for row_offset in range(block_height):
             row_values = [file_path.name if row_offset == 0 else ""]
             for question in questions:
                 value = record.get(question)
                 if isinstance(value, list):
-                    cell_value = value[row_offset] if row_offset < len(value) else ""
+                    if row_offset < len(value):
+                        cell_value = normalize_cell_value(value[row_offset])
+                    else:
+                        cell_value = ""
                 else:
-                    cell_value = value if row_offset == 0 else ""
+                    cell_value = normalize_cell_value(value) if row_offset == 0 else ""
                 row_values.append(cell_value)
             ws.append(row_values)
 
