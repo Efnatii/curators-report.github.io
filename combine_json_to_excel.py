@@ -274,7 +274,7 @@ def normalize_record_values(record: JsonRecord) -> JsonRecord:
             continue
 
         if isinstance(value, list) and all(not isinstance(item, (dict, list)) for item in value):
-            normalized[key] = ", ".join(str(item) for item in value)
+            normalized[key] = ", ".join(str(item) for item in sorted(value, key=lambda item: str(item)))
         else:
             normalized[key] = value
 
@@ -352,7 +352,7 @@ def write_workbook(
                         cell_value = ""
                 elif isinstance(value, dict):
                     if subkey is not None:
-                        cell_value = normalize_cell_value(value.get(subkey))
+                        cell_value = normalize_cell_value(value.get(subkey)) if row_offset == 0 else ""
                     elif row_offset == 0:
                         cell_value = normalize_cell_value(value)
                     else:
