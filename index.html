@@ -453,6 +453,7 @@
       if (!reportingPeriodSelect) return;
 
       const currentYear = new Date().getFullYear();
+      const nextYear = currentYear + 1;
       const periods = [
         {
           id: 'period-1',
@@ -463,8 +464,8 @@
         {
           id: 'period-2',
           label: '2 отчётный период',
-          range: `01.12.${currentYear}–31.05.${currentYear}`,
-          deadline: `06.05.${currentYear}`,
+          range: `01.12.${currentYear}–31.05.${nextYear}`,
+          deadline: `06.05.${nextYear}`,
         },
       ];
 
