@@ -236,7 +236,13 @@
           </fieldset>
 
           <div id="joint-activities-details" class="form-subsection" hidden>
-            <div class="form-subsection">
+            <div class="section-header section-header--sub">
+              <div>
+                <h3>Дополнительные вопросы</h3>
+              </div>
+            </div>
+
+            <div class="form-subsection form-subsection--borderless">
               <div class="section-header section-header--sub">
                 <div>
                   <h3>Призовое место обучающегося во внеучебных мероприятиях, конкурсах, получение грантов</h3>
@@ -336,10 +342,27 @@
 
       row.innerHTML = `
         <div class="achievement-grid">
-          <label class="field field--compact">
-            <span class="field__label">Дата (дата либо период)</span>
-            <input type="text" name="achievement_date" placeholder="Например, 12.03.2024 или март 2024" />
-          </label>
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Дата (дата либо период)</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Оставьте конечную дату пустой, если указана одна дата.</div>
+              </div>
+            </div>
+            <div class="date-range">
+              <input type="date" class="achievement-date__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="achievement-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
           <label class="field field--compact">
             <span class="field__label">Мероприятие</span>
             <textarea name="achievement_event" placeholder="Например, участие в городском конкурсе проектов"></textarea>
@@ -728,17 +751,18 @@
     function collectAchievements() {
       return Array.from(achievementRowsContainer.querySelectorAll('.achievement-row'))
         .map((row) => {
-          const date = row.querySelector('input[name="achievement_date"]')?.value.trim() || '';
+          const dateStart = row.querySelector('.achievement-date__start')?.value || '';
+          const dateEnd = row.querySelector('.achievement-date__end')?.value || '';
           const event = row.querySelector('textarea[name="achievement_event"]')?.value.trim() || '';
           const group = row.querySelector('input[name="achievement_group"]')?.value.trim() || '';
           const student = row.querySelector('input[name="achievement_student"]')?.value.trim() || '';
           const result = row.querySelector('textarea[name="achievement_result"]')?.value.trim() || '';
 
-          if (!date && !event && !group && !student && !result) {
+          if (!dateStart && !dateEnd && !event && !group && !student && !result) {
             return null;
           }
 
-          return { date, event, group, student, result };
+          return { date_start: dateStart, date_end: dateEnd, event, group, student, result };
         })
         .filter(Boolean);
     }
