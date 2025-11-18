@@ -211,6 +211,60 @@
           </div>
         </section>
 
+        <section class="form-section" aria-labelledby="section-curator-extracurricular">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 4 из 10</p>
+              <h2 id="section-curator-extracurricular">Внеучебная деятельность куратора</h2>
+              <p class="muted">Личное участие и наставничество куратора в программах, форумах и конкурсах.</p>
+            </div>
+            <span class="chip">Обязательный</span>
+          </div>
+
+          <fieldset class="choice-card">
+            <legend class="field__label">
+              Участие не менее чем в двух мероприятиях  для кураторов: собрания, совещания,  тренинги, мастер-классы, конкурс
+              кураторов *
+            </legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="radio" name="participated_in_two_curator_events" value="true" required />
+                <span>Да</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="participated_in_two_curator_events" value="false" required />
+                <span>Нет</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="curator-extracurricular-details" class="form-subsection" hidden>
+            <div class="section-header section-header--sub">
+              <div>
+                <p class="section-counter">Дополнительный вопрос</p>
+                <h3>
+                  Даты участия не менее чем в двух мероприятиях  для кураторов: собрания, совещания, тренинги, мастер-классы,
+                  конкурс кураторов
+                </h3>
+                <p class="muted">Заполните данные по каждому мероприятию.</p>
+              </div>
+              <div class="tooltip tooltip--standalone">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: укажите минимум две записи с деталями каждого мероприятия"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Укажите минимум две записи с деталями каждого мероприятия.</div>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-extracurricular-row">Добавить строку</button>
+            </div>
+            <div class="curator-hours" id="extracurricular-rows"></div>
+          </div>
+        </section>
+
         <section class="form-section" aria-labelledby="section-collaboration">
           <div class="section-header">
             <div>
@@ -334,6 +388,9 @@
     const jointEventsDetails = document.getElementById('joint-events-details');
     const jointEventRowsContainer = document.getElementById('joint-event-rows');
     const addJointEventRowButton = document.getElementById('add-joint-event-row');
+    const extracurricularDetails = document.getElementById('curator-extracurricular-details');
+    const extracurricularRowsContainer = document.getElementById('extracurricular-rows');
+    const addExtracurricularRowButton = document.getElementById('add-extracurricular-row');
 
     const directionsOptions = [
       'Гражданская',
@@ -392,6 +449,13 @@
         date_start: 'Дата начала или основная дата мероприятия.',
         date_end: 'Дата окончания, если мероприятие длилось несколько дней.',
         event: 'Краткое описание или название мероприятия.',
+      },
+      participated_in_two_curator_events: 'Куратор принял участие минимум в двух мероприятиях для кураторов.',
+      curator_personal_events: {
+        _comment: 'Сведения о личном участии куратора в программах, форумах и конкурсах.',
+        date_start: 'Дата начала или единственная дата участия.',
+        date_end: 'Дата окончания периода участия, если применимо.',
+        event: 'Название или описание мероприятия.',
       },
     };
 
@@ -526,6 +590,88 @@
       }
 
       return row;
+    }
+
+    function createExtracurricularRow({ isRemovable = true } = {}) {
+      const row = document.createElement('div');
+      row.className = 'curator-hours__row extracurricular-row';
+
+      row.innerHTML = `
+        <div class="curator-hours__grid">
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Дата (дата или период)</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Оставьте конечную дату пустой, если указана одна дата.</div>
+              </div>
+            </div>
+            <div class="date-range">
+              <input type="date" class="extracurricular-date__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="extracurricular-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
+          <label class="field field--compact">
+            <span class="field__label">Мероприятие</span>
+            <textarea class="extracurricular-event__description" placeholder="Например, участие в форуме наставников" rows="3"></textarea>
+          </label>
+        </div>
+        <div class="curator-hours__row-actions">
+          <button type="button" class="multi-input__remove extracurricular-row__remove" aria-label="Удалить строку">×</button>
+        </div>
+      `;
+
+      const removeButton = row.querySelector('.extracurricular-row__remove');
+
+      if (removeButton) {
+        if (!isRemovable) {
+          removeButton.disabled = true;
+          removeButton.setAttribute('aria-disabled', 'true');
+          removeButton.dataset.fixed = 'true';
+        } else {
+          removeButton.addEventListener('click', () => row.remove());
+        }
+      }
+
+      return row;
+    }
+
+    function updateExtracurricularRowRemovalState() {
+      const rows = extracurricularRowsContainer.querySelectorAll('.extracurricular-row');
+      rows.forEach((row) => {
+        const removeButton = row.querySelector('.extracurricular-row__remove');
+        if (!removeButton) return;
+        if (removeButton.dataset.fixed === 'true') {
+          removeButton.disabled = true;
+          return;
+        }
+        removeButton.disabled = rows.length === 1;
+      });
+    }
+
+    function addExtracurricularRow(options = {}) {
+      const row = createExtracurricularRow(options);
+      const removeButton = row.querySelector('.extracurricular-row__remove');
+
+      if (removeButton && !removeButton.dataset.fixed) {
+        removeButton.addEventListener('click', () => {
+          if (extracurricularRowsContainer.querySelectorAll('.extracurricular-row').length === 1) return;
+          row.remove();
+          updateExtracurricularRowRemovalState();
+        });
+      }
+
+      extracurricularRowsContainer.append(row);
+      setupTooltips();
+      updateExtracurricularRowRemovalState();
     }
 
     function setupTooltips() {
@@ -941,6 +1087,24 @@
         .filter(Boolean);
     }
 
+    function collectExtracurricularRows() {
+      if (!extracurricularDetails || extracurricularRowsContainer.children.length === 0) return [];
+
+      return Array.from(extracurricularRowsContainer.querySelectorAll('.extracurricular-row'))
+        .map((row) => {
+          const dateStart = row.querySelector('.extracurricular-date__start')?.value || '';
+          const dateEnd = row.querySelector('.extracurricular-date__end')?.value || '';
+          const event = row.querySelector('.extracurricular-event__description')?.value.trim() || '';
+
+          if (!dateStart && !dateEnd && !event) {
+            return null;
+          }
+
+          return { date_start: dateStart, date_end: dateEnd, event };
+        })
+        .filter(Boolean);
+    }
+
     function toggleCuratorHoursDetails() {
       const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       curatorHoursDetails.hidden = !isHeld;
@@ -984,8 +1148,25 @@
       }
     }
 
+    function toggleExtracurricularDetails() {
+      const isParticipating = getBooleanRadio('participated_in_two_curator_events');
+      extracurricularDetails.hidden = !isParticipating;
+
+      if (!isParticipating) {
+        extracurricularRowsContainer.innerHTML = '';
+        return;
+      }
+
+      if (!extracurricularRowsContainer.children.length) {
+        Array.from({ length: 2 }).forEach(() => {
+          addExtracurricularRow({ isRemovable: false });
+        });
+      }
+    }
+
     function buildReport() {
       const heldMinimumThreeCuratorSessions = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
+      const participatedInCuratorEvents = getBooleanRadio('participated_in_two_curator_events');
       const payload = {
         _comments: fieldComments,
         full_name: getValue('full_name'),
@@ -1007,6 +1188,8 @@
         joint_participation_events: getBooleanRadio('participated_in_two_events_with_group')
           ? collectJointEvents()
           : [],
+        participated_in_two_curator_events: participatedInCuratorEvents,
+        curator_personal_events: participatedInCuratorEvents ? collectExtracurricularRows() : [],
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -1052,6 +1235,10 @@
       });
     }
 
+    if (addExtracurricularRowButton) {
+      addExtracurricularRowButton.addEventListener('click', () => addExtracurricularRow());
+    }
+
     form
       .querySelectorAll('input[name="held_minimum_three_curator_sessions_in_reporting_period"]')
       .forEach((radio) => radio.addEventListener('change', toggleCuratorHoursDetails));
@@ -1064,9 +1251,14 @@
       .querySelectorAll('input[name="participated_in_two_events_with_group"]')
       .forEach((radio) => radio.addEventListener('change', toggleJointParticipationDetails));
 
+    form
+      .querySelectorAll('input[name="participated_in_two_curator_events"]')
+      .forEach((radio) => radio.addEventListener('change', toggleExtracurricularDetails));
+
     toggleCuratorHoursDetails();
     toggleJointActivitiesDetails();
     toggleJointParticipationDetails();
+    toggleExtracurricularDetails();
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();
