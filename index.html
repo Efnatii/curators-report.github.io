@@ -2049,6 +2049,11 @@
       return items.join(', ');
     }
 
+    function formatDateRange(start, end) {
+      if (start && end) return `${start} — ${end}`;
+      return start || end || '—';
+    }
+
     function buildPdfContent(data) {
       const lines = [];
 
@@ -2094,8 +2099,11 @@
         '12. Даты проведения трех и более кураторских часов в течение отчетного периода',
         data.curator_hours_details,
         (hour, index) =>
-          `${index + 1}. Группы: ${formatList(hour.groups)}, Дата/период: ${hour.date || '—'}, ` +
-          `Направления: ${formatList(hour.directions)}, Тема: ${hour.topic || '—'}`
+          `${index + 1}. Группы: ${formatList(hour.groups)}, Специалисты: ${formatList(
+            hour.specialists
+          )}, Период: ${formatDateRange(hour.date_start, hour.date_end)}, Направления: ${formatList(
+            hour.directions
+          )}, Тема: ${hour.topic || '—'}`
       );
       addLine(
         '13. Ведение чата с каждой группой или общего чата со всеми группами *',
@@ -2109,9 +2117,10 @@
         '15. Призовое место обучающегося во внеучебных мероприятиях, конкурсах, получение грантов',
         data.achievements,
         (achievement, index) =>
-          `${index + 1}. ${achievement.student_name || '—'} — ${achievement.achievement_type || '—'}, ${
-            achievement.achievement_description || '—'
-          }`
+          `${index + 1}. Период: ${formatDateRange(achievement.date_start, achievement.date_end)}, ` +
+          `Событие: ${achievement.event || '—'}, группа: ${achievement.group || '—'}, студент(ы): ${
+            achievement.student || '—'
+          }, результат: ${achievement.result || '—'}`
       );
       addLine(
         '16. Совместное участие с группой не менее чем в двух мероприятиях в течение отчетного периода *',
@@ -2121,9 +2130,10 @@
         '17. Даты проведения двух и более мероприятий в течение отчетного периода',
         data.joint_participation_events,
         (event, index) =>
-          `${index + 1}. ${event.event_name || '—'} — ${event.event_date || '—'}, формат: ${
-            event.event_type || '—'
-          }, роль: ${event.role || '—'}`
+          `${index + 1}. Группы: ${formatList(event.groups)}, Период: ${formatDateRange(
+            event.date_start,
+            event.date_end
+          )}, Мероприятие: ${event.event || '—'}`
       );
       addLine(
         '18. Участие не менее чем в двух мероприятиях  для кураторов: собрания, совещания,  тренинги, мастер-классы, конкурс кураторов *',
@@ -2133,44 +2143,46 @@
         '19. Даты участия не менее чем в двух мероприятиях  для кураторов: собрания, совещания, тренинги, мастер-классы, конкурс кураторов',
         data.curator_personal_events,
         (event, index) =>
-          `${index + 1}. ${event.event_name || '—'} — ${event.event_date || '—'}, формат: ${
-            event.event_type || '—'
-          }, организатор: ${event.organizer || '—'}`
+          `${index + 1}. Период: ${formatDateRange(event.date_start, event.date_end)}, Мероприятие: ${
+            event.event || '—'
+          }`
       );
       addList(
         '20. Личное участие в региональных, межмуниципальных, федеральных программах, конкурсах, мероприятиях по работе с детьми и молодежью, воспитательной работе, молодежной политике (форумы, «Голос поколения», конкурс кураторов РГПУ им. Герцена и т.д.)',
         data.personal_program_participation,
         (event, index) =>
-          `${index + 1}. ${event.student_name || '—'} — ${event.support_direction || '—'}, результат: ${
-            event.result || '—'
+          `${index + 1}. Период: ${formatDateRange(event.date_start, event.date_end)}, Мероприятие: ${
+            event.event || '—'
           }`
       );
       addList(
         '21. Участие куратора в роли наставника проекта, а также в подготовке к чемпионату, конкурсу, конференции и др.',
         data.mentor_support_events,
         (event, index) =>
-          `${index + 1}. ${event.event_name || '—'} — ${event.event_date || '—'}, формат: ${
-            event.event_type || '—'
-          }, участники: ${formatList(event.participants)}`
+          `${index + 1}. Период: ${formatDateRange(event.date_start, event.date_end)}, Мероприятие: ${
+            event.event || '—'
+          }, группа: ${event.group || '—'}, студент(ы): ${event.student || '—'}, результат: ${
+            event.result || '—'
+          }`
       );
       addList(
         '22. Опубликование научной работы (в том числе монографии, научной статьи, доклада, тезисов доклада и т.д. на темы, связанные с молодежной политикой и воспитательной деятельностью, с указанием принадлежности автора к ГУАП (в том числе в форме электронного издания))',
         data.scientific_publications,
         (publication, index) =>
-          `${index + 1}. ${publication.title || '—'} — ${publication.authors || '—'}, ${
-            publication.output || '—'
-          }`
+          `${index + 1}. ${publication.description || '—'}${publication.link ? ` — ${publication.link}` : ''}`
       );
       addList(
         '23. Интервью и статьи для «Дзен.ГУАП», соцсетей и сайта ГУАП',
         data.media_materials,
-        (material, index) => `${index + 1}. ${material.title || '—'} — ${material.format || '—'}, ${material.link || '—'}`
+        (material, index) => `${index + 1}. Ссылка: ${material.link || '—'}`
       );
       addList(
         '24. Курсы повышения квалификации в области молодежной политики и воспитательной деятельности',
         data.qualification_courses,
         (course, index) =>
-          `${index + 1}. ${course.course_name || '—'} — ${course.provider || '—'}, ${course.completion_date || '—'}`
+          `${index + 1}. Период: ${formatDateRange(course.date_start, course.date_end)}, Курс: ${
+            course.event || '—'
+          }`
       );
 
       return lines;
