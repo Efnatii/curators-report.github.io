@@ -33,6 +33,7 @@ ensure_openpyxl_installed()
 
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
+from openpyxl.utils import get_column_letter
 
 
 ListValue = List[str]
@@ -321,7 +322,7 @@ def write_workbook(
                         ws.cell(row=row_index, column=column_start + offset).fill = HIGHLIGHT_FILL
             column_start += span
 
-    for column_cells in ws.columns:
+    for col_idx, column_cells in enumerate(ws.columns, start=1):
         max_length = 0
         for cell in column_cells:
             if cell.value is None:
@@ -330,7 +331,8 @@ def write_workbook(
                 max_length = max(max_length, len(line))
 
         if max_length:
-            ws.column_dimensions[column_cells[0].column_letter].width = max_length + 2
+            column_letter = get_column_letter(col_idx)
+            ws.column_dimensions[column_letter].width = max_length + 2
 
     wb.save(output_path)
 
