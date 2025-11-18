@@ -15,6 +15,12 @@
       <div class="hero__badge">Анкета</div>
       <h1>Отчет по кураторской деятельности</h1>
       <p class="lede">Анкета для фиксации данных кураторской деятельности.</p>
+      <div class="hero__meta" aria-label="Выбор отчетного периода">
+        <div class="period-picker">
+          <span class="period-picker__label">Отчетный период</span>
+          <select id="reporting-period" class="period-picker__select" aria-label="Выберите отчетный период"></select>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -408,6 +414,7 @@
 
   <script>
     const form = document.getElementById('curator-form');
+    const reportingPeriodSelect = document.getElementById('reporting-period');
     const downloadButton = document.getElementById('download');
     const curatorHoursDetails = document.getElementById('curator-hours-details');
     const curatorHoursRows = document.getElementById('curator-hours-rows');
@@ -442,7 +449,40 @@
       'Профессионально-трудовая',
     ];
 
+    function buildReportingPeriodOptions() {
+      if (!reportingPeriodSelect) return;
+
+      const currentYear = new Date().getFullYear();
+      const periods = [
+        {
+          id: 'period-1',
+          label: '1 отчётный период',
+          range: `01.09.${currentYear}–30.11.${currentYear}`,
+          deadline: `06.12.${currentYear}`,
+        },
+        {
+          id: 'period-2',
+          label: '2 отчётный период',
+          range: `01.12.${currentYear}–31.05.${currentYear}`,
+          deadline: `06.05.${currentYear}`,
+        },
+      ];
+
+      reportingPeriodSelect.innerHTML = '';
+
+      periods.forEach(({ id, label, range, deadline }) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = `${label}: ${range} (Прислать отчёт до ${deadline})`;
+        option.dataset.range = range;
+        option.dataset.deadline = deadline;
+        option.dataset.label = label;
+        reportingPeriodSelect.append(option);
+      });
+    }
+
     const fieldComments = {
+      reporting_period: 'Выбранный отчётный период и крайний срок отправки отчёта.',
       _meta: 'Комментарии добавлены для ориентира и не влияют на валидацию данных.',
       full_name: 'Фамилия Имя Отчество куратора.',
       job_positions: 'Список должностей куратора; каждая строка — отдельная должность.',
@@ -1058,6 +1098,24 @@
         .filter(Boolean);
     }
 
+    function collectReportingPeriod() {
+      if (!reportingPeriodSelect) return {};
+
+      const selectedOption = reportingPeriodSelect.options[reportingPeriodSelect.selectedIndex];
+
+      if (!selectedOption) return {};
+
+      const { dataset, value, textContent } = selectedOption;
+
+      return {
+        id: value,
+        label: dataset.label || '',
+        range: dataset.range || '',
+        deadline: dataset.deadline || '',
+        display: textContent || '',
+      };
+    }
+
     function createCuratorHoursRow({ isRemovable = true } = {}) {
       const row = document.createElement('div');
       row.className = 'curator-hours__row';
@@ -1363,6 +1421,7 @@
       const participatedInCuratorEvents = getBooleanRadio('participated_in_two_curator_events');
       const payload = {
         _comments: fieldComments,
+        reporting_period: collectReportingPeriod(),
         full_name: getValue('full_name'),
         job_positions: collectList('job_positions'),
         department: getValue('department'),
@@ -1403,6 +1462,7 @@
       return `${parts.join('_')}.json`;
     }
 
+    buildReportingPeriodOptions();
     setupTooltips();
 
     setupMultiInput({
