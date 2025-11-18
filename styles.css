@@ -22,6 +22,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 a {
@@ -30,8 +31,10 @@ a {
 }
 
 .container {
-  width: min(1100px, 92vw);
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .hero {
