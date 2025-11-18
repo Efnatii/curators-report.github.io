@@ -438,8 +438,10 @@
         </section>
 
         <div class="actions">
+          <button type="button" id="import-json-button" class="button button--secondary">Загрузить ответы</button>
           <button type="button" id="download" class="button">Скачать ответы</button>
-          <p class="muted">Кнопка сформирует JSON-файл с вашими ответами.</p>
+          <p class="muted">Используйте кнопки, чтобы загрузить или сохранить ответы в формате JSON.</p>
+          <input type="file" id="import-json-input" accept="application/json" hidden />
         </div>
       </form>
     </div>
@@ -462,6 +464,8 @@
   <script>
     const form = document.getElementById('curator-form');
     const reportingPeriodSelect = document.getElementById('reporting-period');
+    const importButton = document.getElementById('import-json-button');
+    const importInput = document.getElementById('import-json-input');
     const downloadButton = document.getElementById('download');
     const curatorHoursDetails = document.getElementById('curator-hours-details');
     const curatorHoursRows = document.getElementById('curator-hours-rows');
@@ -536,6 +540,28 @@
         option.dataset.label = label;
         reportingPeriodSelect.append(option);
       });
+    }
+
+    function selectReportingPeriod(period) {
+      if (!reportingPeriodSelect || !period) return;
+
+      const { id, label = '', range = '', deadline = '', display = '' } = period;
+      const matchedOption = Array.from(reportingPeriodSelect.options).find((option) => option.value === id);
+
+      if (matchedOption) {
+        reportingPeriodSelect.value = matchedOption.value;
+        return;
+      }
+
+      const option = document.createElement('option');
+      option.value = id || 'custom-period';
+      option.textContent = display || `${label}: ${range}${deadline ? ` (Прислать отчёт до ${deadline})` : ''}`;
+      option.dataset.range = range;
+      option.dataset.deadline = deadline;
+      option.dataset.label = label;
+
+      reportingPeriodSelect.append(option);
+      reportingPeriodSelect.value = option.value;
     }
 
     const fieldComments = {
@@ -1246,6 +1272,83 @@
       return row;
     }
 
+    function setRadioValue(name, value) {
+      const inputs = form.querySelectorAll(`input[name="${name}"]`);
+      if (!inputs.length) return;
+
+      if (value === null || value === undefined) {
+        inputs.forEach((input) => {
+          input.checked = false;
+        });
+        return;
+      }
+
+      const normalized = typeof value === 'boolean' ? String(value) : value;
+      const target = form.querySelector(`input[name="${name}"][value="${normalized}"]`);
+
+      inputs.forEach((input) => {
+        input.checked = input === target;
+      });
+
+      if (target) {
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+
+    function fillMultiInput(name, values = []) {
+      const container = form.querySelector(`[data-name="${name}"]`);
+      const addButton = form.querySelector(`[data-add="${name}"]`);
+
+      if (!container) return;
+
+      const desiredLength = Math.max(values.length, 1);
+      while (container.querySelectorAll('.multi-input__row').length < desiredLength) {
+        addButton?.click();
+      }
+
+      const inputs = container.querySelectorAll('input');
+      inputs.forEach((input, index) => {
+        input.value = values[index] ?? '';
+      });
+
+      const removeButtons = container.querySelectorAll('.multi-input__remove');
+      const cutoff = values.length ? values.length : 1;
+
+      for (let i = removeButtons.length - 1; i >= cutoff; i -= 1) {
+        const removeButton = removeButtons[i];
+        if (removeButton && !removeButton.disabled) {
+          removeButton.click();
+        }
+      }
+    }
+
+    function setRowList(row, target, values = []) {
+      const listContainer = row.querySelector(`[data-list="${target}"]`);
+      const addButton = row.querySelector(`[data-target="${target}"]`);
+
+      if (!listContainer || !addButton) return;
+
+      const desiredLength = Math.max(values.length, 1);
+      while (listContainer.querySelectorAll('.multi-input__row').length < desiredLength) {
+        addButton.click();
+      }
+
+      const inputs = listContainer.querySelectorAll('input');
+      inputs.forEach((input, index) => {
+        input.value = values[index] ?? '';
+      });
+
+      const removeButtons = listContainer.querySelectorAll('.multi-input__remove');
+      const cutoff = values.length ? values.length : 1;
+
+      for (let i = removeButtons.length - 1; i >= cutoff; i -= 1) {
+        const removeButton = removeButtons[i];
+        if (removeButton && !removeButton.disabled) {
+          removeButton.click();
+        }
+      }
+    }
+
     function setupRowList({ row, target, placeholder = '', startEmpty = false }) {
       const listContainer = row.querySelector(`[data-list="${target}"]`);
       const addButton = row.querySelector(`.curator-hours__add-item[data-target="${target}"]`);
@@ -1326,6 +1429,16 @@
     function collectDirections(container) {
       if (!container) return [];
       return Array.from(container.querySelectorAll('[data-direction-value]')).map((chip) => chip.dataset.directionValue);
+    }
+
+    function setDirections(row, directions = []) {
+      const listContainer = row.querySelector('[data-list="directions"]');
+      if (!listContainer) return;
+
+      listContainer.innerHTML = '';
+      directions.forEach((direction) => {
+        createDirectionChip(direction, listContainer);
+      });
     }
 
     function collectDynamicList(container) {
@@ -1499,6 +1612,28 @@
         .filter(Boolean);
     }
 
+    function fillCuratorHoursRows(rows = []) {
+      curatorHoursRows.innerHTML = '';
+
+      rows.forEach((item) => {
+        addCuratorHourRow();
+        const row = curatorHoursRows.lastElementChild;
+
+        if (!row) return;
+
+        setRowList(row, 'groups', item.groups || []);
+        setRowList(row, 'specialists', item.specialists || []);
+        row.querySelector('.date-range__start').value = item.date_start || '';
+        row.querySelector('.date-range__end').value = item.date_end || '';
+        const topicField = row.querySelector('.curator-hours__topic');
+        if (topicField) topicField.value = item.topic || '';
+        setDirections(row, item.directions || []);
+      });
+
+      updateRowRemovalState();
+      setupTooltips();
+    }
+
     function collectAchievements() {
       return Array.from(achievementRowsContainer.querySelectorAll('.achievement-row'))
         .map((row) => {
@@ -1516,6 +1651,23 @@
           return { date_start: dateStart, date_end: dateEnd, event, group, student, result };
         })
         .filter(Boolean);
+    }
+
+    function fillAchievementRows(rows = []) {
+      achievementRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        const row = createAchievementRow();
+        row.querySelector('.achievement-date__start').value = item.date_start || '';
+        row.querySelector('.achievement-date__end').value = item.date_end || '';
+        row.querySelector('textarea[name="achievement_event"]').value = item.event || '';
+        row.querySelector('input[name="achievement_group"]').value = item.group || '';
+        row.querySelector('input[name="achievement_student"]').value = item.student || '';
+        row.querySelector('textarea[name="achievement_result"]').value = item.result || '';
+        achievementRowsContainer.append(row);
+      });
+
+      setupTooltips();
     }
 
     function collectMentorSupportRows() {
@@ -1539,6 +1691,25 @@
         .filter(Boolean);
     }
 
+    function fillMentorSupportRows(rows = []) {
+      if (!mentorSupportRowsContainer) return;
+
+      mentorSupportRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        const row = createMentorSupportRow();
+        row.querySelector('.mentor-support-date__start').value = item.date_start || '';
+        row.querySelector('.mentor-support-date__end').value = item.date_end || '';
+        row.querySelector('textarea[name="mentor_support_event"]').value = item.event || '';
+        row.querySelector('input[name="mentor_support_group"]').value = item.group || '';
+        row.querySelector('input[name="mentor_support_student"]').value = item.student || '';
+        row.querySelector('textarea[name="mentor_support_result"]').value = item.result || '';
+        mentorSupportRowsContainer.append(row);
+      });
+
+      setupTooltips();
+    }
+
     function collectJointEvents() {
       if (!jointEventsDetails || jointEventRowsContainer.children.length === 0) return [];
 
@@ -1556,6 +1727,22 @@
           return { groups, date_start: dateStart, date_end: dateEnd, event };
         })
         .filter(Boolean);
+    }
+
+    function fillJointEventsRows(rows = []) {
+      jointEventRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        const row = createJointEventRow();
+        setRowList(row, 'groups', item.groups || []);
+        row.querySelector('.joint-events-date__start').value = item.date_start || '';
+        row.querySelector('.joint-events-date__end').value = item.date_end || '';
+        const description = row.querySelector('textarea[name="joint_event_description"]');
+        if (description) description.value = item.event || '';
+        jointEventRowsContainer.append(row);
+      });
+
+      setupTooltips();
     }
 
     function collectExtracurricularRows() {
@@ -1576,6 +1763,25 @@
         .filter(Boolean);
     }
 
+    function fillExtracurricularRows(rows = []) {
+      extracurricularRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        addExtracurricularRow();
+        const row = extracurricularRowsContainer.lastElementChild;
+
+        if (!row) return;
+
+        row.querySelector('.extracurricular-date__start').value = item.date_start || '';
+        row.querySelector('.extracurricular-date__end').value = item.date_end || '';
+        const description = row.querySelector('.extracurricular-event__description');
+        if (description) description.value = item.event || '';
+      });
+
+      updateExtracurricularRowRemovalState();
+      setupTooltips();
+    }
+
     function collectPersonalProgramRows() {
       if (!personalProgramRowsContainer || personalProgramRowsContainer.children.length === 0) return [];
 
@@ -1592,6 +1798,26 @@
           return { date_start: dateStart, date_end: dateEnd, event };
         })
         .filter(Boolean);
+    }
+
+    function fillPersonalProgramRows(rows = []) {
+      if (!personalProgramRowsContainer) return;
+
+      personalProgramRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        addPersonalProgramRow();
+        const row = personalProgramRowsContainer.lastElementChild;
+
+        if (!row) return;
+
+        row.querySelector('.personal-program-date__start').value = item.date_start || '';
+        row.querySelector('.personal-program-date__end').value = item.date_end || '';
+        const description = row.querySelector('.personal-program-event__description');
+        if (description) description.value = item.event || '';
+      });
+
+      setupTooltips();
     }
 
     function collectScientificWorks() {
@@ -1611,6 +1837,24 @@
         .filter(Boolean);
     }
 
+    function fillScientificWorks(rows = []) {
+      if (!scientificWorkRowsContainer) return;
+
+      scientificWorkRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        addScientificWorkRow();
+        const row = scientificWorkRowsContainer.lastElementChild;
+
+        if (!row) return;
+
+        const description = row.querySelector('.scientific-work__description');
+        const link = row.querySelector('.scientific-work__link');
+        if (description) description.value = item.description || '';
+        if (link) link.value = item.link || '';
+      });
+    }
+
     function collectInterviews() {
       if (!interviewRowsContainer || interviewRowsContainer.children.length === 0) return [];
 
@@ -1625,6 +1869,22 @@
           return { link };
         })
         .filter(Boolean);
+    }
+
+    function fillInterviews(rows = []) {
+      if (!interviewRowsContainer) return;
+
+      interviewRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        addInterviewRow();
+        const row = interviewRowsContainer.lastElementChild;
+
+        if (!row) return;
+
+        const link = row.querySelector('.interview__link');
+        if (link) link.value = item.link || '';
+      });
     }
 
     function collectQualificationCourses() {
@@ -1643,6 +1903,26 @@
           return { date_start: dateStart, date_end: dateEnd, event };
         })
         .filter(Boolean);
+    }
+
+    function fillQualificationCourses(rows = []) {
+      if (!qualificationCourseRowsContainer) return;
+
+      qualificationCourseRowsContainer.innerHTML = '';
+
+      rows.forEach((item) => {
+        addQualificationCourseRow();
+        const row = qualificationCourseRowsContainer.lastElementChild;
+
+        if (!row) return;
+
+        row.querySelector('.qualification-course-date__start').value = item.date_start || '';
+        row.querySelector('.qualification-course-date__end').value = item.date_end || '';
+        const description = row.querySelector('.qualification-course__description');
+        if (description) description.value = item.event || '';
+      });
+
+      setupTooltips();
     }
 
     function toggleCuratorHoursDetails() {
@@ -1753,6 +2033,93 @@
       return `${parts.join('_')}.json`;
     }
 
+    function populateFromJson(data) {
+      if (!data || typeof data !== 'object') {
+        alert('Не удалось загрузить файл: неверный формат данных.');
+        return;
+      }
+
+      form.reset();
+
+      curatorHoursRows.innerHTML = '';
+      achievementRowsContainer.innerHTML = '';
+      jointEventRowsContainer.innerHTML = '';
+      extracurricularRowsContainer.innerHTML = '';
+      personalProgramRowsContainer.innerHTML = '';
+      if (mentorSupportRowsContainer) mentorSupportRowsContainer.innerHTML = '';
+      if (scientificWorkRowsContainer) scientificWorkRowsContainer.innerHTML = '';
+      if (interviewRowsContainer) interviewRowsContainer.innerHTML = '';
+      if (qualificationCourseRowsContainer) qualificationCourseRowsContainer.innerHTML = '';
+
+      selectReportingPeriod(data.reporting_period);
+      form.elements.full_name.value = data.full_name || '';
+      fillMultiInput('job_positions', Array.isArray(data.job_positions) ? data.job_positions : []);
+      form.elements.department.value = data.department || '';
+      form.elements.contact_phone_connected_to_telegram.value =
+        data.contact_phone_connected_to_telegram || '';
+      form.elements.telegram_username.value = data.telegram_username || '';
+      form.elements.email.value = data.email || '';
+      fillMultiInput(
+        'curated_group_numbers',
+        Array.isArray(data.curated_group_numbers) ? data.curated_group_numbers : []
+      );
+      form.elements.curator_primary_building.value = data.curator_primary_building || '';
+      form.elements.curator_primary_room.value = data.curator_primary_room || '';
+
+      const faculties = Array.isArray(data.institute_or_faculty) ? data.institute_or_faculty : [];
+      form.querySelectorAll('input[name="institute_or_faculty"]').forEach((input) => {
+        input.checked = faculties.includes(input.value);
+      });
+
+      setRadioValue(
+        'held_minimum_three_curator_sessions_in_reporting_period',
+        data.held_minimum_three_curator_sessions_in_reporting_period
+      );
+      curatorHoursRows.innerHTML = '';
+      if (data.held_minimum_three_curator_sessions_in_reporting_period) {
+        fillCuratorHoursRows(Array.isArray(data.curator_hours_details) ? data.curator_hours_details : []);
+      }
+
+      setRadioValue('manages_group_chat', data.manages_group_chat);
+
+      setRadioValue('inform_group_about_events', data.inform_group_about_events);
+      achievementRowsContainer.innerHTML = '';
+      if (data.inform_group_about_events) {
+        fillAchievementRows(Array.isArray(data.achievements) ? data.achievements : []);
+      }
+
+      setRadioValue('participated_in_two_events_with_group', data.participated_in_two_events_with_group);
+      jointEventRowsContainer.innerHTML = '';
+      if (data.participated_in_two_events_with_group) {
+        fillJointEventsRows(
+          Array.isArray(data.joint_participation_events) ? data.joint_participation_events : []
+        );
+      }
+
+      setRadioValue('participated_in_two_curator_events', data.participated_in_two_curator_events);
+      extracurricularRowsContainer.innerHTML = '';
+      if (data.participated_in_two_curator_events) {
+        fillExtracurricularRows(
+          Array.isArray(data.curator_personal_events) ? data.curator_personal_events : []
+        );
+      }
+
+      fillPersonalProgramRows(
+        Array.isArray(data.personal_program_participation) ? data.personal_program_participation : []
+      );
+      fillMentorSupportRows(Array.isArray(data.mentor_support_events) ? data.mentor_support_events : []);
+      fillScientificWorks(Array.isArray(data.scientific_publications) ? data.scientific_publications : []);
+      fillInterviews(Array.isArray(data.media_materials) ? data.media_materials : []);
+      fillQualificationCourses(
+        Array.isArray(data.qualification_courses) ? data.qualification_courses : []
+      );
+
+      toggleCuratorHoursDetails();
+      toggleJointActivitiesDetails();
+      toggleJointParticipationDetails();
+      toggleExtracurricularDetails();
+    }
+
     buildReportingPeriodOptions();
     setupTooltips();
 
@@ -1835,6 +2202,34 @@
     toggleJointActivitiesDetails();
     toggleJointParticipationDetails();
     toggleExtracurricularDetails();
+
+    if (importButton && importInput) {
+      importButton.addEventListener('click', () => importInput.click());
+      importInput.addEventListener('change', () => {
+        const [file] = importInput.files || [];
+        if (!file) return;
+
+        file
+          .text()
+          .then((content) => {
+            let data;
+            try {
+              data = JSON.parse(content);
+            } catch (error) {
+              alert('Не удалось прочитать файл: неверный JSON.');
+              return;
+            }
+
+            populateFromJson(data);
+          })
+          .catch(() => {
+            alert('Не удалось прочитать файл. Попробуйте еще раз.');
+          })
+          .finally(() => {
+            importInput.value = '';
+          });
+      });
+    }
 
     downloadButton.addEventListener('click', () => {
       const report = buildReport();
