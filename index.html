@@ -222,6 +222,20 @@
           </div>
 
           <fieldset class="choice-card">
+            <legend class="field__label">Ведение чата с каждой группой или общего чата со всеми группами *</legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="radio" name="manages_group_chat" value="true" />
+                <span>Да</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="manages_group_chat" value="false" />
+                <span>Нет</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="choice-card">
             <legend class="field__label">Информирование группы о мероприятиях и событиях различного уровня *</legend>
             <div class="choices">
               <label class="choice">
@@ -238,7 +252,7 @@
           <div id="joint-activities-details" class="form-subsection" hidden>
             <div class="section-header section-header--sub">
               <div>
-                <h3>Дополнительные вопросы</h3>
+                <h3 class="additional-title">Дополнительные вопросы</h3>
               </div>
             </div>
 
@@ -252,20 +266,6 @@
               </div>
               <div class="achievement-table" id="achievement-rows"></div>
             </div>
-
-            <fieldset class="choice-card">
-              <legend class="field__label">Ведение чата с каждой группой или общего чата со всеми группами *</legend>
-              <div class="choices">
-                <label class="choice">
-                  <input type="radio" name="manages_group_chat" value="true" />
-                  <span>Да</span>
-                </label>
-                <label class="choice">
-                  <input type="radio" name="manages_group_chat" value="false" />
-                  <span>Нет</span>
-                </label>
-              </div>
-            </fieldset>
 
             <fieldset class="choice-card">
               <legend class="field__label">Совместное участие с группой не менее чем в двух мероприятиях в течение отчетного периода *</legend>
