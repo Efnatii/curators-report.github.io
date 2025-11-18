@@ -713,7 +713,7 @@
         .filter(Boolean);
     }
 
-    function createCuratorHoursRow() {
+    function createCuratorHoursRow({ isRemovable = true } = {}) {
       const row = document.createElement('div');
       row.className = 'curator-hours__row';
       row.innerHTML = `
@@ -795,6 +795,14 @@
       });
       setupDirections(row);
 
+      const removeButton = row.querySelector('.curator-hours__remove-row');
+
+      if (removeButton && !isRemovable) {
+        removeButton.disabled = true;
+        removeButton.setAttribute('aria-disabled', 'true');
+        removeButton.dataset.fixed = 'true';
+      }
+
       return row;
     }
 
@@ -803,20 +811,28 @@
       rows.forEach((row) => {
         const removeButton = row.querySelector('.curator-hours__remove-row');
         if (!removeButton) return;
+        if (removeButton.dataset.fixed === 'true') {
+          removeButton.disabled = true;
+          return;
+        }
         removeButton.disabled = rows.length === 1;
       });
     }
 
-    function addCuratorHourRow() {
-      const row = createCuratorHoursRow();
+    function addCuratorHourRow(options = {}) {
+      const row = createCuratorHoursRow(options);
       const removeButton = row.querySelector('.curator-hours__remove-row');
 
       if (removeButton) {
-        removeButton.addEventListener('click', () => {
-          if (curatorHoursRows.querySelectorAll('.curator-hours__row').length === 1) return;
-          row.remove();
-          updateRowRemovalState();
-        });
+        if (removeButton.dataset.fixed === 'true') {
+          removeButton.disabled = true;
+        } else {
+          removeButton.addEventListener('click', () => {
+            if (curatorHoursRows.querySelectorAll('.curator-hours__row').length === 1) return;
+            row.remove();
+            updateRowRemovalState();
+          });
+        }
       }
 
       curatorHoursRows.append(row);
@@ -886,7 +902,7 @@
       curatorHoursDetails.hidden = !isHeld;
 
       if (isHeld && !curatorHoursRows.children.length) {
-        addCuratorHourRow();
+        Array.from({ length: 3 }).forEach(() => addCuratorHourRow({ isRemovable: false }));
       }
     }
 
@@ -918,7 +934,9 @@
       }
 
       if (!jointEventRowsContainer.children.length) {
-        jointEventRowsContainer.append(createJointEventRow({ isRemovable: false }));
+        Array.from({ length: 2 }).forEach(() => {
+          jointEventRowsContainer.append(createJointEventRow({ isRemovable: false }));
+        });
       }
     }
 
@@ -975,7 +993,7 @@
       placeholder: 'Например, 1234 или 4102',
     });
 
-    addCuratorHourRowButton.addEventListener('click', addCuratorHourRow);
+    addCuratorHourRowButton.addEventListener('click', () => addCuratorHourRow());
 
     if (addAchievementRowButton) {
       addAchievementRowButton.addEventListener('click', () => {
