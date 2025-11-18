@@ -373,6 +373,19 @@
             </div>
             <div class="curator-hours" id="personal-program-rows"></div>
           </div>
+
+          <div class="form-subsection form-subsection--borderless">
+            <div class="section-header section-header--sub">
+              <div>
+                <h3>
+                  21. Участие куратора в роли наставника проекта, а также в подготовке к чемпионату, конкурсу, конференции и др.
+                </h3>
+                <p class="muted">Добавьте записи только при наличии наставничества. Таблица по умолчанию пустая.</p>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-mentor-support-row">Добавить строку</button>
+            </div>
+            <div class="achievement-table" id="mentor-support-rows"></div>
+          </div>
         </section>
 
         <div class="actions">
@@ -388,6 +401,7 @@
       <div class="footer__links">
         <a href="#section-general">К началу формы</a>
       </div>
+      <p class="footnote">Copyrights</p>
     </div>
   </footer>
 
@@ -408,6 +422,8 @@
     const addExtracurricularRowButton = document.getElementById('add-extracurricular-row');
     const personalProgramRowsContainer = document.getElementById('personal-program-rows');
     const addPersonalProgramRowButton = document.getElementById('add-personal-program-row');
+    const mentorSupportRowsContainer = document.getElementById('mentor-support-rows');
+    const addMentorSupportRowButton = document.getElementById('add-mentor-support-row');
 
     const directionsOptions = [
       'Гражданская',
@@ -481,6 +497,16 @@
         date_end: 'Дата окончания участия, если мероприятие длилось несколько дней.',
         event: 'Название или описание программы, конкурса или мероприятия.',
       },
+      mentor_support_events: {
+        _comment:
+          'Наставничество куратора в проектах и подготовке к чемпионатам, конкурсам, конференциям и другим мероприятиям.',
+        date_start: 'Дата начала или единственная дата наставничества.',
+        date_end: 'Дата окончания, если наставничество длилось несколько дней.',
+        event: 'Название мероприятия или проекта.',
+        group: 'Группа, с которой работал куратор.',
+        student: 'ФИО студента или команды.',
+        result: 'Результат участия: итог, статус, достижение.',
+      },
     };
 
     function closeAllTooltips(except = null) {
@@ -536,6 +562,59 @@
           <label class="field field--compact">
             <span class="field__label">Итог</span>
             <textarea name="achievement_result" placeholder="Например, 2 место, грант на разработку проекта"></textarea>
+          </label>
+        </div>
+        <button type="button" class="multi-input__remove achievement-row__remove" aria-label="Удалить запись">&times;</button>
+      `;
+
+      const removeButton = row.querySelector('.achievement-row__remove');
+      removeButton.addEventListener('click', () => row.remove());
+
+      return row;
+    }
+
+    function createMentorSupportRow() {
+      const row = document.createElement('div');
+      row.className = 'achievement-row';
+
+      row.innerHTML = `
+        <div class="achievement-grid">
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Дата (дата либо период)</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Оставьте конечную дату пустой, если указана одна дата.</div>
+              </div>
+            </div>
+            <div class="date-range">
+              <input type="date" class="mentor-support-date__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="mentor-support-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
+          <label class="field field--compact">
+            <span class="field__label">Мероприятие</span>
+            <textarea name="mentor_support_event" placeholder="Например, подготовка к конференции или чемпионату"></textarea>
+          </label>
+          <label class="field field--compact">
+            <span class="field__label">Группа</span>
+            <input type="text" name="mentor_support_group" placeholder="Например, 4102" />
+          </label>
+          <label class="field field--compact">
+            <span class="field__label">ФИО студента</span>
+            <input type="text" name="mentor_support_student" placeholder="Например, Иванова Елена Петровна" />
+          </label>
+          <label class="field field--compact">
+            <span class="field__label">Итог</span>
+            <textarea name="mentor_support_result" placeholder="Например, вышли в финал конкурса"></textarea>
           </label>
         </div>
         <button type="button" class="multi-input__remove achievement-row__remove" aria-label="Удалить запись">&times;</button>
@@ -1143,6 +1222,27 @@
         .filter(Boolean);
     }
 
+    function collectMentorSupportRows() {
+      if (!mentorSupportRowsContainer || mentorSupportRowsContainer.children.length === 0) return [];
+
+      return Array.from(mentorSupportRowsContainer.querySelectorAll('.achievement-row'))
+        .map((row) => {
+          const dateStart = row.querySelector('.mentor-support-date__start')?.value || '';
+          const dateEnd = row.querySelector('.mentor-support-date__end')?.value || '';
+          const event = row.querySelector('textarea[name="mentor_support_event"]')?.value.trim() || '';
+          const group = row.querySelector('input[name="mentor_support_group"]')?.value.trim() || '';
+          const student = row.querySelector('input[name="mentor_support_student"]')?.value.trim() || '';
+          const result = row.querySelector('textarea[name="mentor_support_result"]')?.value.trim() || '';
+
+          if (!dateStart && !dateEnd && !event && !group && !student && !result) {
+            return null;
+          }
+
+          return { date_start: dateStart, date_end: dateEnd, event, group, student, result };
+        })
+        .filter(Boolean);
+    }
+
     function collectJointEvents() {
       if (!jointEventsDetails || jointEventRowsContainer.children.length === 0) return [];
 
@@ -1284,6 +1384,7 @@
         participated_in_two_curator_events: participatedInCuratorEvents,
         curator_personal_events: participatedInCuratorEvents ? collectExtracurricularRows() : [],
         personal_program_participation: collectPersonalProgramRows(),
+        mentor_support_events: collectMentorSupportRows(),
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -1335,6 +1436,13 @@
 
     if (addPersonalProgramRowButton) {
       addPersonalProgramRowButton.addEventListener('click', () => addPersonalProgramRow());
+    }
+
+    if (addMentorSupportRowButton) {
+      addMentorSupportRowButton.addEventListener('click', () => {
+        mentorSupportRowsContainer.append(createMentorSupportRow());
+        setupTooltips();
+      });
     }
 
     form
