@@ -236,18 +236,9 @@
           </fieldset>
 
           <div id="joint-activities-details" class="form-subsection" hidden>
-            <div class="section-header section-header--sub">
-              <div>
-                <p class="section-counter">Дополнительные вопросы</p>
-                <h3>Данные о совместных мероприятиях и информировании</h3>
-                <p class="muted">Заполните сведения только при положительном ответе на главный вопрос.</p>
-              </div>
-            </div>
-
             <div class="form-subsection">
               <div class="section-header section-header--sub">
                 <div>
-                  <p class="section-counter">Таблица</p>
                   <h3>Призовое место обучающегося во внеучебных мероприятиях, конкурсах, получение грантов</h3>
                   <p class="muted">Добавьте записи только при наличии результатов. Таблица по умолчанию пустая.</p>
                 </div>
@@ -345,23 +336,23 @@
 
       row.innerHTML = `
         <div class="achievement-grid">
-          <label class="field">
+          <label class="field field--compact">
             <span class="field__label">Дата (дата либо период)</span>
             <input type="text" name="achievement_date" placeholder="Например, 12.03.2024 или март 2024" />
           </label>
-          <label class="field">
+          <label class="field field--compact">
             <span class="field__label">Мероприятие</span>
             <textarea name="achievement_event" placeholder="Например, участие в городском конкурсе проектов"></textarea>
           </label>
-          <label class="field">
+          <label class="field field--compact">
             <span class="field__label">Группа</span>
             <input type="text" name="achievement_group" placeholder="Например, 4102" />
           </label>
-          <label class="field">
+          <label class="field field--compact">
             <span class="field__label">ФИО студента</span>
             <input type="text" name="achievement_student" placeholder="Например, Петрова Анна Сергеевна" />
           </label>
-          <label class="field">
+          <label class="field field--compact">
             <span class="field__label">Итог</span>
             <textarea name="achievement_result" placeholder="Например, 2 место, грант на разработку проекта"></textarea>
           </label>
