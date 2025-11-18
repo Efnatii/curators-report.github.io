@@ -1055,6 +1055,34 @@
       setupTooltips();
     }
 
+    let tooltipListenersAttached = false;
+
+    function updateTooltipPosition(tooltip) {
+      const bubble = tooltip.querySelector('.tooltip__bubble');
+
+      if (!bubble) return;
+
+      bubble.style.setProperty('--tooltip-shift', '0px');
+
+      const rect = bubble.getBoundingClientRect();
+      const padding = 12;
+      const overflowLeft = padding - rect.left;
+      const overflowRight = rect.right - (window.innerWidth - padding);
+      let shift = 0;
+
+      if (overflowLeft > 0) {
+        shift += overflowLeft;
+      }
+
+      if (overflowRight > 0) {
+        shift -= overflowRight;
+      }
+
+      if (shift !== 0) {
+        bubble.style.setProperty('--tooltip-shift', `${shift}px`);
+      }
+    }
+
     function setupTooltips() {
       const triggers = document.querySelectorAll('.tooltip__trigger');
 
@@ -1073,6 +1101,7 @@
 
           if (isActive) {
             closeAllTooltips(tooltip);
+            requestAnimationFrame(() => updateTooltipPosition(tooltip));
           }
         });
 
@@ -1086,10 +1115,20 @@
         });
       });
 
-      document.addEventListener('click', (event) => {
-        if (event.target.closest('.tooltip')) return;
-        closeAllTooltips();
-      });
+      if (!tooltipListenersAttached) {
+        tooltipListenersAttached = true;
+
+        document.addEventListener('click', (event) => {
+          if (event.target.closest('.tooltip')) return;
+          closeAllTooltips();
+        });
+
+        window.addEventListener('resize', () => {
+          requestAnimationFrame(() => {
+            document.querySelectorAll('.tooltip.tooltip--active').forEach(updateTooltipPosition);
+          });
+        });
+      }
     }
 
     function createRow(inputName, placeholder = '') {
