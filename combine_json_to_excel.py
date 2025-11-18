@@ -32,7 +32,7 @@ def ensure_openpyxl_installed() -> None:
 ensure_openpyxl_installed()
 
 from openpyxl import Workbook
-from openpyxl.styles import PatternFill
+from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 
 
@@ -92,6 +92,10 @@ QUESTION_ORDER: List[Dict[str, object]] = [
     {
         "key": "reporting_period",
         "label": "Отчётный период",
+        "subfields": {
+            "date_start": "Дата начала",
+            "date_end": "Дата окончания",
+        },
     },
     {"key": "full_name", "label": "1. Фамилия Имя Отчество"},
     {"key": "job_positions", "label": "2. Должность"},
@@ -239,6 +243,44 @@ def determine_columns(records: Iterable[Tuple[Path, JsonRecord]]) -> List[Questi
     return columns
 
 
+def normalize_reporting_period(value: JsonValue) -> Dict[str, ScalarValue]:
+    """Drop legacy keys and split the range into explicit dates."""
+
+    date_start: ScalarValue = None
+    date_end: ScalarValue = None
+
+    if isinstance(value, dict):
+        date_start = value.get("date_start")  # type: ignore[assignment]
+        date_end = value.get("date_end")  # type: ignore[assignment]
+
+        if date_start is None and date_end is None:
+            range_value = value.get("range")
+            if isinstance(range_value, str):
+                start, _, end = range_value.partition(" - ")
+                if start and end:
+                    date_start = start
+                    date_end = end
+
+    return {"date_start": date_start, "date_end": date_end}
+
+
+def normalize_record_values(record: JsonRecord) -> JsonRecord:
+    """Merge scalar lists into comma-separated strings for single-cell output."""
+
+    normalized: JsonRecord = {}
+    for key, value in record.items():
+        if key == "reporting_period":
+            normalized[key] = normalize_reporting_period(value)
+            continue
+
+        if isinstance(value, list) and all(not isinstance(item, (dict, list)) for item in value):
+            normalized[key] = ", ".join(str(item) for item in value)
+        else:
+            normalized[key] = value
+
+    return normalized
+
+
 def write_workbook(
     records: List[Tuple[Path, JsonRecord]],
     questions: List[QuestionColumn],
@@ -279,7 +321,13 @@ def write_workbook(
 
         column_index += span
 
-    for file_path, record in records:
+    alignment_top = Alignment(vertical="top")
+    for header_cell in ws[1] + ws[2]:
+        if header_cell.value is not None:
+            header_cell.alignment = alignment_top
+
+    for file_path, raw_record in records:
+        record = normalize_record_values(raw_record)
         block_height = max(
             (
                 len(value) if isinstance(value, list) else 1
@@ -300,6 +348,13 @@ def write_workbook(
                             cell_value = normalize_cell_value(item)
                         else:
                             cell_value = ""
+                    else:
+                        cell_value = ""
+                elif isinstance(value, dict):
+                    if subkey is not None:
+                        cell_value = normalize_cell_value(value.get(subkey))
+                    elif row_offset == 0:
+                        cell_value = normalize_cell_value(value)
                     else:
                         cell_value = ""
                 else:
