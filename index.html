@@ -32,12 +32,12 @@
           </div>
           <div class="field-grid">
             <label class="field">
-              <span class="field__label">Фамилия Имя Отчество *</span>
+              <span class="field__label">1. Фамилия Имя Отчество *</span>
               <input type="text" name="full_name" placeholder="Например, Иванов Иван Иванович" required />
             </label>
             <div class="field field--wide">
               <div class="field__label-row">
-                <span class="field__label">Должность *</span>
+                <span class="field__label">2. Должность *</span>
                 <div class="field__meta">
                   <div class="tooltip">
                     <button
@@ -61,24 +61,24 @@
               </div>
             </div>
             <label class="field">
-              <span class="field__label">Кафедра *</span>
+              <span class="field__label">3. Кафедра *</span>
               <input type="text" name="department" placeholder="Например, кафедра компьютерных систем" required />
             </label>
             <label class="field">
-              <span class="field__label">Контактный телефон (подключенный к Telegram) *</span>
+              <span class="field__label">4. Контактный телефон (подключенный к Telegram) *</span>
               <input type="tel" name="contact_phone_connected_to_telegram" placeholder="Например, +7 999 000-00-00" required />
             </label>
             <label class="field">
-              <span class="field__label">Ник в Telegram *</span>
+              <span class="field__label">5. Ник в Telegram *</span>
               <input type="text" name="telegram_username" placeholder="Например, @curator_help" required />
             </label>
             <label class="field">
-              <span class="field__label">E-mail *</span>
+              <span class="field__label">6. E-mail *</span>
               <input type="email" name="email" placeholder="Например, curator@example.ru" required />
             </label>
             <div class="field field--wide">
               <div class="field__label-row">
-                <span class="field__label">Номера курируемых групп *</span>
+                <span class="field__label">7. Номера курируемых групп *</span>
                 <div class="field__meta">
                   <div class="tooltip">
                     <button
@@ -102,17 +102,17 @@
               </div>
             </div>
             <label class="field">
-              <span class="field__label">Корпус основного пребывания куратора *</span>
+              <span class="field__label">8. Корпус основного пребывания куратора *</span>
               <input type="text" name="curator_primary_building" placeholder="Например, корпус 1" required />
             </label>
             <label class="field">
-              <span class="field__label">Аудитория основного пребывания куратора *</span>
+              <span class="field__label">9. Аудитория основного пребывания куратора *</span>
               <input type="text" name="curator_primary_room" placeholder="Например, аудитория 301" required />
             </label>
           </div>
           <fieldset class="choice-card">
             <legend class="legend-with-tooltip">
-              <span>Институт/Факультет *</span>
+              <span>10. Институт/Факультет *</span>
               <div class="tooltip">
                 <button
                   type="button"
@@ -173,7 +173,7 @@
           </div>
 
           <fieldset class="choice-card">
-            <legend class="field__label">Проведение не менее трех кураторских часов за отчетный период *</legend>
+            <legend class="field__label">11. Проведение не менее трех кураторских часов за отчетный период *</legend>
             <div class="choices">
               <label class="choice">
                 <input type="radio" name="held_minimum_three_curator_sessions_in_reporting_period" value="true" required />
@@ -190,7 +190,7 @@
             <div class="section-header section-header--sub">
               <div>
                 <p class="section-counter">Дополнительный вопрос</p>
-                <h3>Даты проведения трех и более кураторских часов в течение отчетного периода</h3>
+                <h3>12. Даты проведения трех и более кураторских часов в течение отчетного периода</h3>
                 <p class="muted">Заполните данные по каждому проведенному кураторскому часу.</p>
               </div>
               <div class="tooltip tooltip--standalone">
@@ -222,7 +222,7 @@
           </div>
 
           <fieldset class="choice-card">
-            <legend class="field__label">Ведение чата с каждой группой или общего чата со всеми группами *</legend>
+            <legend class="field__label">13. Ведение чата с каждой группой или общего чата со всеми группами *</legend>
             <div class="choices">
               <label class="choice">
                 <input type="radio" name="manages_group_chat" value="true" />
@@ -236,7 +236,7 @@
           </fieldset>
 
           <fieldset class="choice-card">
-            <legend class="field__label">Информирование группы о мероприятиях и событиях различного уровня *</legend>
+            <legend class="field__label">14. Информирование группы о мероприятиях и событиях различного уровня *</legend>
             <div class="choices">
               <label class="choice">
                 <input type="radio" name="inform_group_about_events" value="true" required />
@@ -252,14 +252,14 @@
           <div id="joint-activities-details" class="form-subsection" hidden>
             <div class="section-header section-header--sub">
               <div>
-                <h3 class="additional-title">Дополнительные вопросы</h3>
+                  <h3 class="additional-title">Дополнительные вопросы</h3>
               </div>
             </div>
 
             <div class="form-subsection form-subsection--borderless">
               <div class="section-header section-header--sub">
                 <div>
-                  <h3>Призовое место обучающегося во внеучебных мероприятиях, конкурсах, получение грантов</h3>
+                  <h3>15. Призовое место обучающегося во внеучебных мероприятиях, конкурсах, получение грантов</h3>
                   <p class="muted">Добавьте записи только при наличии результатов. Таблица по умолчанию пустая.</p>
                 </div>
                 <button type="button" class="chip chip--interactive" id="add-achievement-row">Добавить строку</button>
@@ -268,7 +268,7 @@
             </div>
 
             <fieldset class="choice-card">
-              <legend class="field__label">Совместное участие с группой не менее чем в двух мероприятиях в течение отчетного периода *</legend>
+            <legend class="field__label">16. Совместное участие с группой не менее чем в двух мероприятиях в течение отчетного периода *</legend>
               <div class="choices">
                 <label class="choice">
                   <input type="radio" name="participated_in_two_events_with_group" value="true" />
@@ -285,7 +285,7 @@
               <div class="section-header section-header--sub">
                 <div>
                   <p class="section-counter">Дополнительный вопрос</p>
-                  <h3>Даты проведения двух и более мероприятий в течение отчетного периода</h3>
+                  <h3>17. Даты проведения двух и более мероприятий в течение отчетного периода</h3>
                   <p class="muted">Заполните данные по каждому совместному мероприятию.</p>
                 </div>
                 <div class="tooltip tooltip--standalone">
@@ -318,7 +318,7 @@
 
           <fieldset class="choice-card">
             <legend class="field__label">
-              Участие не менее чем в двух мероприятиях  для кураторов: собрания, совещания,  тренинги, мастер-классы, конкурс
+              18. Участие не менее чем в двух мероприятиях  для кураторов: собрания, совещания,  тренинги, мастер-классы, конкурс
               кураторов *
             </legend>
             <div class="choices">
@@ -338,7 +338,7 @@
               <div>
                 <p class="section-counter">Дополнительный вопрос</p>
                 <h3>
-                  Даты участия не менее чем в двух мероприятиях  для кураторов: собрания, совещания, тренинги, мастер-классы,
+                  19. Даты участия не менее чем в двух мероприятиях  для кураторов: собрания, совещания, тренинги, мастер-классы,
                   конкурс кураторов
                 </h3>
                 <p class="muted">Заполните данные по каждому мероприятию.</p>
@@ -357,6 +357,21 @@
               <button type="button" class="chip chip--interactive" id="add-extracurricular-row">Добавить строку</button>
             </div>
             <div class="curator-hours" id="extracurricular-rows"></div>
+          </div>
+
+          <div class="form-subsection form-subsection--borderless">
+            <div class="section-header section-header--sub">
+              <div>
+                <h3>
+                  20. Личное участие в региональных, межмуниципальных, федеральных программах, конкурсах, мероприятиях по работе с
+                  детьми и молодежью, воспитательной работе, молодежной политике (форумы, «Голос поколения», конкурс кураторов РГПУ
+                  им. Герцена и т.д.)
+                </h3>
+                <p class="muted">Добавьте записи по необходимости. Таблица по умолчанию пустая.</p>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-personal-program-row">Добавить строку</button>
+            </div>
+            <div class="curator-hours" id="personal-program-rows"></div>
           </div>
         </section>
 
@@ -391,6 +406,8 @@
     const extracurricularDetails = document.getElementById('curator-extracurricular-details');
     const extracurricularRowsContainer = document.getElementById('extracurricular-rows');
     const addExtracurricularRowButton = document.getElementById('add-extracurricular-row');
+    const personalProgramRowsContainer = document.getElementById('personal-program-rows');
+    const addPersonalProgramRowButton = document.getElementById('add-personal-program-row');
 
     const directionsOptions = [
       'Гражданская',
@@ -456,6 +473,13 @@
         date_start: 'Дата начала или единственная дата участия.',
         date_end: 'Дата окончания периода участия, если применимо.',
         event: 'Название или описание мероприятия.',
+      },
+      personal_program_participation: {
+        _comment:
+          'Участие куратора в программах, конкурсах и мероприятиях по работе с молодежью на региональном и федеральном уровнях.',
+        date_start: 'Дата начала или единственная дата участия.',
+        date_end: 'Дата окончания участия, если мероприятие длилось несколько дней.',
+        event: 'Название или описание программы, конкурса или мероприятия.',
       },
     };
 
@@ -672,6 +696,57 @@
       extracurricularRowsContainer.append(row);
       setupTooltips();
       updateExtracurricularRowRemovalState();
+    }
+
+    function createPersonalProgramRow() {
+      const row = document.createElement('div');
+      row.className = 'curator-hours__row personal-program-row';
+
+      row.innerHTML = `
+        <div class="curator-hours__grid">
+          <div class="field field--compact">
+            <div class="field__label-row">
+              <span class="field__label">Дата (дата или период)</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: оставьте конечную дату пустой, если указана одна дата"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Оставьте конечную дату пустой, если указана одна дата.</div>
+              </div>
+            </div>
+            <div class="date-range">
+              <input type="date" class="personal-program-date__start" aria-label="Дата начала" />
+              <span class="date-range__dash">—</span>
+              <input type="date" class="personal-program-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
+          <label class="field field--compact">
+            <span class="field__label">Мероприятие</span>
+            <textarea class="personal-program-event__description" placeholder="Например, участие в форуме «Голос поколения»" rows="3"></textarea>
+          </label>
+        </div>
+        <div class="curator-hours__row-actions">
+          <button type="button" class="multi-input__remove personal-program-row__remove" aria-label="Удалить строку">×</button>
+        </div>
+      `;
+
+      const removeButton = row.querySelector('.personal-program-row__remove');
+      if (removeButton) {
+        removeButton.addEventListener('click', () => row.remove());
+      }
+
+      return row;
+    }
+
+    function addPersonalProgramRow() {
+      const row = createPersonalProgramRow();
+      personalProgramRowsContainer.append(row);
+      setupTooltips();
     }
 
     function setupTooltips() {
@@ -1105,6 +1180,24 @@
         .filter(Boolean);
     }
 
+    function collectPersonalProgramRows() {
+      if (!personalProgramRowsContainer || personalProgramRowsContainer.children.length === 0) return [];
+
+      return Array.from(personalProgramRowsContainer.querySelectorAll('.personal-program-row'))
+        .map((row) => {
+          const dateStart = row.querySelector('.personal-program-date__start')?.value || '';
+          const dateEnd = row.querySelector('.personal-program-date__end')?.value || '';
+          const event = row.querySelector('.personal-program-event__description')?.value.trim() || '';
+
+          if (!dateStart && !dateEnd && !event) {
+            return null;
+          }
+
+          return { date_start: dateStart, date_end: dateEnd, event };
+        })
+        .filter(Boolean);
+    }
+
     function toggleCuratorHoursDetails() {
       const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       curatorHoursDetails.hidden = !isHeld;
@@ -1190,6 +1283,7 @@
           : [],
         participated_in_two_curator_events: participatedInCuratorEvents,
         curator_personal_events: participatedInCuratorEvents ? collectExtracurricularRows() : [],
+        personal_program_participation: collectPersonalProgramRows(),
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -1237,6 +1331,10 @@
 
     if (addExtracurricularRowButton) {
       addExtracurricularRowButton.addEventListener('click', () => addExtracurricularRow());
+    }
+
+    if (addPersonalProgramRowButton) {
+      addPersonalProgramRowButton.addEventListener('click', () => addPersonalProgramRow());
     }
 
     form
