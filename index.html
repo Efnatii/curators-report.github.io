@@ -1055,6 +1055,34 @@
       setupTooltips();
     }
 
+    let tooltipListenersAttached = false;
+
+    function updateTooltipPosition(tooltip) {
+      const bubble = tooltip.querySelector('.tooltip__bubble');
+
+      if (!bubble) return;
+
+      bubble.style.setProperty('--tooltip-shift', '0px');
+
+      const rect = bubble.getBoundingClientRect();
+      const padding = 12;
+      const overflowLeft = padding - rect.left;
+      const overflowRight = rect.right - (window.innerWidth - padding);
+      let shift = 0;
+
+      if (overflowLeft > 0) {
+        shift += overflowLeft;
+      }
+
+      if (overflowRight > 0) {
+        shift -= overflowRight;
+      }
+
+      if (shift !== 0) {
+        bubble.style.setProperty('--tooltip-shift', `${shift}px`);
+      }
+    }
+
     function setupTooltips() {
       const triggers = document.querySelectorAll('.tooltip__trigger');
 
@@ -1066,6 +1094,15 @@
 
         trigger.dataset.tooltipReady = 'true';
 
+        const openAndUpdate = () => {
+          if (tooltip.classList.contains('tooltip--active')) return;
+
+          closeAllTooltips(tooltip);
+          tooltip.classList.add('tooltip--active');
+          trigger.setAttribute('aria-expanded', 'true');
+          requestAnimationFrame(() => updateTooltipPosition(tooltip));
+        };
+
         trigger.addEventListener('click', (event) => {
           event.stopPropagation();
           const isActive = tooltip.classList.toggle('tooltip--active');
@@ -1073,8 +1110,12 @@
 
           if (isActive) {
             closeAllTooltips(tooltip);
+            requestAnimationFrame(() => updateTooltipPosition(tooltip));
           }
         });
+
+        trigger.addEventListener('mouseenter', openAndUpdate);
+        trigger.addEventListener('focus', openAndUpdate);
 
         trigger.addEventListener('blur', () => {
           setTimeout(() => {
@@ -1086,10 +1127,20 @@
         });
       });
 
-      document.addEventListener('click', (event) => {
-        if (event.target.closest('.tooltip')) return;
-        closeAllTooltips();
-      });
+      if (!tooltipListenersAttached) {
+        tooltipListenersAttached = true;
+
+        document.addEventListener('click', (event) => {
+          if (event.target.closest('.tooltip')) return;
+          closeAllTooltips();
+        });
+
+        window.addEventListener('resize', () => {
+          requestAnimationFrame(() => {
+            document.querySelectorAll('.tooltip.tooltip--active').forEach(updateTooltipPosition);
+          });
+        });
+      }
     }
 
     function createRow(inputName, placeholder = '') {
