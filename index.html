@@ -292,12 +292,12 @@
                   <button
                     type="button"
                     class="tooltip__trigger"
-                    aria-label="Подсказка: укажите минимум три записи с деталями каждого мероприятия"
+                    aria-label="Подсказка: укажите минимум две записи с деталями каждого мероприятия"
                     aria-expanded="false"
                   >
                     ?
                   </button>
-                  <div class="tooltip__bubble" role="tooltip">Укажите минимум три записи с деталями каждого мероприятия.</div>
+                  <div class="tooltip__bubble" role="tooltip">Укажите минимум две записи с деталями каждого мероприятия.</div>
                 </div>
                 <button type="button" class="chip chip--interactive" id="add-joint-event-row">Добавить строку</button>
               </div>
@@ -997,12 +997,12 @@
         curated_group_numbers: collectList('curated_group_numbers'),
         curator_primary_building: getValue('curator_primary_building'),
         curator_primary_room: getValue('curator_primary_room'),
-        held_minimum_three_curator_sessions_in_reporting_period: heldMinimumThreeCuratorSessions,
         institute_or_faculty: collectFaculties(),
+        held_minimum_three_curator_sessions_in_reporting_period: heldMinimumThreeCuratorSessions,
         curator_hours_details: heldMinimumThreeCuratorSessions ? collectCuratorHoursRows() : [],
+        manages_group_chat: getBooleanRadio('manages_group_chat'),
         inform_group_about_events: getBooleanRadio('inform_group_about_events'),
         achievements: getBooleanRadio('inform_group_about_events') ? collectAchievements() : [],
-        manages_group_chat: getBooleanRadio('manages_group_chat'),
         participated_in_two_events_with_group: getBooleanRadio('participated_in_two_events_with_group'),
         joint_participation_events: getBooleanRadio('participated_in_two_events_with_group')
           ? collectJointEvents()
