@@ -445,6 +445,12 @@ select:focus {
   padding-top: 16px;
 }
 
+.form-subsection--borderless {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
 .section-header--sub h3 {
   margin: 4px 0 0;
 }
