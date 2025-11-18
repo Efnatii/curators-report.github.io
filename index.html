@@ -211,60 +211,6 @@
           </div>
         </section>
 
-        <section class="form-section" aria-labelledby="section-curator-extracurricular">
-          <div class="section-header">
-            <div>
-              <p class="section-counter">Раздел 4 из 10</p>
-              <h2 id="section-curator-extracurricular">Внеучебная деятельность куратора</h2>
-              <p class="muted">Личное участие и наставничество куратора в программах, форумах и конкурсах.</p>
-            </div>
-            <span class="chip">Обязательный</span>
-          </div>
-
-          <fieldset class="choice-card">
-            <legend class="field__label">
-              Участие не менее чем в двух мероприятиях  для кураторов: собрания, совещания,  тренинги, мастер-классы, конкурс
-              кураторов *
-            </legend>
-            <div class="choices">
-              <label class="choice">
-                <input type="radio" name="participated_in_two_curator_events" value="true" required />
-                <span>Да</span>
-              </label>
-              <label class="choice">
-                <input type="radio" name="participated_in_two_curator_events" value="false" required />
-                <span>Нет</span>
-              </label>
-            </div>
-          </fieldset>
-
-          <div id="curator-extracurricular-details" class="form-subsection" hidden>
-            <div class="section-header section-header--sub">
-              <div>
-                <p class="section-counter">Дополнительный вопрос</p>
-                <h3>
-                  Даты участия не менее чем в двух мероприятиях  для кураторов: собрания, совещания, тренинги, мастер-классы,
-                  конкурс кураторов
-                </h3>
-                <p class="muted">Заполните данные по каждому мероприятию.</p>
-              </div>
-              <div class="tooltip tooltip--standalone">
-                <button
-                  type="button"
-                  class="tooltip__trigger"
-                  aria-label="Подсказка: укажите минимум две записи с деталями каждого мероприятия"
-                  aria-expanded="false"
-                >
-                  ?
-                </button>
-                <div class="tooltip__bubble" role="tooltip">Укажите минимум две записи с деталями каждого мероприятия.</div>
-              </div>
-              <button type="button" class="chip chip--interactive" id="add-extracurricular-row">Добавить строку</button>
-            </div>
-            <div class="curator-hours" id="extracurricular-rows"></div>
-          </div>
-        </section>
-
         <section class="form-section" aria-labelledby="section-collaboration">
           <div class="section-header">
             <div>
@@ -357,6 +303,60 @@
               </div>
               <div class="joint-events" id="joint-event-rows"></div>
             </div>
+          </div>
+        </section>
+
+        <section class="form-section" aria-labelledby="section-curator-extracurricular">
+          <div class="section-header">
+            <div>
+              <p class="section-counter">Раздел 4 из 10</p>
+              <h2 id="section-curator-extracurricular">Внеучебная деятельность куратора</h2>
+              <p class="muted">Личное участие и наставничество куратора в программах, форумах и конкурсах.</p>
+            </div>
+            <span class="chip">Обязательный</span>
+          </div>
+
+          <fieldset class="choice-card">
+            <legend class="field__label">
+              Участие не менее чем в двух мероприятиях  для кураторов: собрания, совещания,  тренинги, мастер-классы, конкурс
+              кураторов *
+            </legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="radio" name="participated_in_two_curator_events" value="true" required />
+                <span>Да</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="participated_in_two_curator_events" value="false" required />
+                <span>Нет</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="curator-extracurricular-details" class="form-subsection" hidden>
+            <div class="section-header section-header--sub">
+              <div>
+                <p class="section-counter">Дополнительный вопрос</p>
+                <h3>
+                  Даты участия не менее чем в двух мероприятиях  для кураторов: собрания, совещания, тренинги, мастер-классы,
+                  конкурс кураторов
+                </h3>
+                <p class="muted">Заполните данные по каждому мероприятию.</p>
+              </div>
+              <div class="tooltip tooltip--standalone">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: укажите минимум две записи с деталями каждого мероприятия"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">Укажите минимум две записи с деталями каждого мероприятия.</div>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-extracurricular-row">Добавить строку</button>
+            </div>
+            <div class="curator-hours" id="extracurricular-rows"></div>
           </div>
         </section>
 
