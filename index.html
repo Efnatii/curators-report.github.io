@@ -402,12 +402,38 @@
           <div class="form-subsection form-subsection--borderless">
             <div class="section-header section-header--sub">
               <div>
-                <h3>22. Научные публикации, методические материалы и повышение квалификации</h3>
-                <p class="muted">Добавьте записи при наличии результатов за отчётный период.</p>
+                <h3>
+                  22. Опубликование научной работы (в том числе монографии, научной статьи, доклада, тезисов доклада и т.д. на
+                  темы, связанные с молодежной политикой и воспитательной деятельностью, с указанием принадлежности автора к ГУАП
+                  (в том числе в форме электронного издания))
+                </h3>
+                <p class="muted">Добавьте записи при наличии публикаций. Таблица по умолчанию пустая.</p>
               </div>
-              <button type="button" class="chip chip--interactive" id="add-academic-activity-row">Добавить строку</button>
+              <button type="button" class="chip chip--interactive" id="add-scientific-work-row">Добавить строку</button>
             </div>
-            <div class="curator-hours" id="academic-activity-rows"></div>
+            <div class="curator-hours" id="scientific-work-rows"></div>
+          </div>
+
+          <div class="form-subsection form-subsection--borderless">
+            <div class="section-header section-header--sub">
+              <div>
+                <h3>23. Интервью и статьи для «Дзен.ГУАП», соцсетей и сайта ГУАП</h3>
+                <p class="muted">Добавьте ссылки на опубликованные материалы.</p>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-interview-row">Добавить строку</button>
+            </div>
+            <div class="curator-hours" id="interview-rows"></div>
+          </div>
+
+          <div class="form-subsection form-subsection--borderless">
+            <div class="section-header section-header--sub">
+              <div>
+                <h3>24. Курсы повышения квалификации в области молодежной политики и воспитательной деятельности</h3>
+                <p class="muted">Добавьте записи только при наличии повышения квалификации. Таблица по умолчанию пустая.</p>
+              </div>
+              <button type="button" class="chip chip--interactive" id="add-qualification-course-row">Добавить строку</button>
+            </div>
+            <div class="curator-hours" id="qualification-course-rows"></div>
           </div>
         </section>
 
@@ -453,8 +479,12 @@
     const addPersonalProgramRowButton = document.getElementById('add-personal-program-row');
     const mentorSupportRowsContainer = document.getElementById('mentor-support-rows');
     const addMentorSupportRowButton = document.getElementById('add-mentor-support-row');
-    const academicActivityRowsContainer = document.getElementById('academic-activity-rows');
-    const addAcademicActivityRowButton = document.getElementById('add-academic-activity-row');
+    const scientificWorkRowsContainer = document.getElementById('scientific-work-rows');
+    const addScientificWorkRowButton = document.getElementById('add-scientific-work-row');
+    const interviewRowsContainer = document.getElementById('interview-rows');
+    const addInterviewRowButton = document.getElementById('add-interview-row');
+    const qualificationCourseRowsContainer = document.getElementById('qualification-course-rows');
+    const addQualificationCourseRowButton = document.getElementById('add-qualification-course-row');
 
     const directionsOptions = [
       'Гражданская',
@@ -575,12 +605,21 @@
         student: 'ФИО студента или команды.',
         result: 'Результат участия: итог, статус, достижение.',
       },
-      academic_and_methodical_activities: {
-        _comment: 'Сведения о публикациях, методических материалах и повышении квалификации куратора.',
-        date_start: 'Дата начала или единственная дата активности.',
-        date_end: 'Дата завершения периода, если применимо.',
-        type: 'Тип активности: публикация, методический материал или повышение квалификации.',
-        description: 'Краткое описание активности и ключевые результаты.',
+      scientific_publications: {
+        _comment:
+          'Сведения об опубликованных научных работах по молодежной политике и воспитательной деятельности с указанием принадлежности к ГУАП.',
+        description: 'Вводные данные о публикации: название, тип, соавторы, выходные данные.',
+        link: 'Ссылка на интернет-ресурс с опубликованной работой или электронным изданием.',
+      },
+      media_materials: {
+        _comment: 'Интервью и статьи, подготовленные для «Дзен.ГУАП», соцсетей и сайта ГУАП.',
+        link: 'Ссылка на опубликованный материал.',
+      },
+      qualification_courses: {
+        _comment: 'Данные о курсах повышения квалификации в области молодежной политики и воспитательной деятельности.',
+        date_start: 'Дата начала или единственная дата обучения.',
+        date_end: 'Дата окончания курса, если обучение шло периодом.',
+        event: 'Название или описание курса.',
       },
     };
 
@@ -903,25 +942,77 @@
       setupTooltips();
     }
 
-    function createAcademicActivityRow() {
+    function createScientificWorkRow() {
       const row = document.createElement('div');
-      row.className = 'curator-hours__row academic-activity-row';
+      row.className = 'curator-hours__row scientific-work-row';
+
+      row.innerHTML = `
+        <div class="curator-hours__grid">
+          <label class="field field--compact">
+            <span class="field__label">Вводные данные</span>
+            <textarea class="scientific-work__description" placeholder="Например, монография или статья с указанием издания и соавторов" rows="3"></textarea>
+          </label>
+          <label class="field field--compact">
+            <span class="field__label">Ссылка на интернет-ресурс</span>
+            <input type="url" class="scientific-work__link" placeholder="https://example.com" />
+          </label>
+        </div>
+        <div class="curator-hours__row-actions">
+          <button type="button" class="multi-input__remove scientific-work-row__remove" aria-label="Удалить строку">×</button>
+        </div>
+      `;
+
+      const removeButton = row.querySelector('.scientific-work-row__remove');
+      if (removeButton) {
+        removeButton.addEventListener('click', () => row.remove());
+      }
+
+      return row;
+    }
+
+    function addScientificWorkRow() {
+      const row = createScientificWorkRow();
+      scientificWorkRowsContainer.append(row);
+    }
+
+    function createInterviewRow() {
+      const row = document.createElement('div');
+      row.className = 'curator-hours__row interview-row';
+
+      row.innerHTML = `
+        <div class="curator-hours__grid">
+          <label class="field field--compact">
+            <span class="field__label">Ссылка на интернет-ресурс</span>
+            <input type="url" class="interview__link" placeholder="https://example.com/material" />
+          </label>
+        </div>
+        <div class="curator-hours__row-actions">
+          <button type="button" class="multi-input__remove interview-row__remove" aria-label="Удалить строку">×</button>
+        </div>
+      `;
+
+      const removeButton = row.querySelector('.interview-row__remove');
+      if (removeButton) {
+        removeButton.addEventListener('click', () => row.remove());
+      }
+
+      return row;
+    }
+
+    function addInterviewRow() {
+      const row = createInterviewRow();
+      interviewRowsContainer.append(row);
+    }
+
+    function createQualificationCourseRow() {
+      const row = document.createElement('div');
+      row.className = 'curator-hours__row qualification-course-row';
 
       row.innerHTML = `
         <div class="curator-hours__grid">
           <div class="field field--compact">
             <div class="field__label-row">
-              <span class="field__label">Тип активности</span>
-            </div>
-            <select class="academic-activity__type">
-              <option value="Публикация">Публикация</option>
-              <option value="Методический материал">Методический материал</option>
-              <option value="Повышение квалификации">Повышение квалификации</option>
-            </select>
-          </div>
-          <div class="field field--compact">
-            <div class="field__label-row">
-              <span class="field__label">Дата (дата или период)</span>
+              <span class="field__label">Дата (Дата или период)</span>
               <div class="tooltip">
                 <button
                   type="button"
@@ -935,22 +1026,22 @@
               </div>
             </div>
             <div class="date-range">
-              <input type="date" class="academic-activity-date__start" aria-label="Дата начала" />
+              <input type="date" class="qualification-course-date__start" aria-label="Дата начала" />
               <span class="date-range__dash">—</span>
-              <input type="date" class="academic-activity-date__end" aria-label="Дата окончания" />
+              <input type="date" class="qualification-course-date__end" aria-label="Дата окончания" />
             </div>
           </div>
           <label class="field field--compact">
-            <span class="field__label">Описание</span>
-            <textarea class="academic-activity__description" placeholder="Например, публикация статьи или участие в курсе повышения квалификации" rows="3"></textarea>
+            <span class="field__label">Мероприятие</span>
+            <textarea class="qualification-course__description" placeholder="Например, курс повышения квалификации по молодежной политике" rows="3"></textarea>
           </label>
         </div>
         <div class="curator-hours__row-actions">
-          <button type="button" class="multi-input__remove academic-activity-row__remove" aria-label="Удалить строку">×</button>
+          <button type="button" class="multi-input__remove qualification-course-row__remove" aria-label="Удалить строку">×</button>
         </div>
       `;
 
-      const removeButton = row.querySelector('.academic-activity-row__remove');
+      const removeButton = row.querySelector('.qualification-course-row__remove');
       if (removeButton) {
         removeButton.addEventListener('click', () => row.remove());
       }
@@ -958,9 +1049,9 @@
       return row;
     }
 
-    function addAcademicActivityRow() {
-      const row = createAcademicActivityRow();
-      academicActivityRowsContainer.append(row);
+    function addQualificationCourseRow() {
+      const row = createQualificationCourseRow();
+      qualificationCourseRowsContainer.append(row);
       setupTooltips();
     }
 
@@ -1452,21 +1543,53 @@
         .filter(Boolean);
     }
 
-    function collectAcademicActivities() {
-      if (!academicActivityRowsContainer || academicActivityRowsContainer.children.length === 0) return [];
+    function collectScientificWorks() {
+      if (!scientificWorkRowsContainer || scientificWorkRowsContainer.children.length === 0) return [];
 
-      return Array.from(academicActivityRowsContainer.querySelectorAll('.academic-activity-row'))
+      return Array.from(scientificWorkRowsContainer.querySelectorAll('.scientific-work-row'))
         .map((row) => {
-          const dateStart = row.querySelector('.academic-activity-date__start')?.value || '';
-          const dateEnd = row.querySelector('.academic-activity-date__end')?.value || '';
-          const type = row.querySelector('.academic-activity__type')?.value || '';
-          const description = row.querySelector('.academic-activity__description')?.value.trim() || '';
+          const description = row.querySelector('.scientific-work__description')?.value.trim() || '';
+          const link = row.querySelector('.scientific-work__link')?.value.trim() || '';
 
-          if (!dateStart && !dateEnd && !description) {
+          if (!description && !link) {
             return null;
           }
 
-          return { date_start: dateStart, date_end: dateEnd, type, description };
+          return { description, link };
+        })
+        .filter(Boolean);
+    }
+
+    function collectInterviews() {
+      if (!interviewRowsContainer || interviewRowsContainer.children.length === 0) return [];
+
+      return Array.from(interviewRowsContainer.querySelectorAll('.interview-row'))
+        .map((row) => {
+          const link = row.querySelector('.interview__link')?.value.trim() || '';
+
+          if (!link) {
+            return null;
+          }
+
+          return { link };
+        })
+        .filter(Boolean);
+    }
+
+    function collectQualificationCourses() {
+      if (!qualificationCourseRowsContainer || qualificationCourseRowsContainer.children.length === 0) return [];
+
+      return Array.from(qualificationCourseRowsContainer.querySelectorAll('.qualification-course-row'))
+        .map((row) => {
+          const dateStart = row.querySelector('.qualification-course-date__start')?.value || '';
+          const dateEnd = row.querySelector('.qualification-course-date__end')?.value || '';
+          const event = row.querySelector('.qualification-course__description')?.value.trim() || '';
+
+          if (!dateStart && !dateEnd && !event) {
+            return null;
+          }
+
+          return { date_start: dateStart, date_end: dateEnd, event };
         })
         .filter(Boolean);
     }
@@ -1559,7 +1682,9 @@
         curator_personal_events: participatedInCuratorEvents ? collectExtracurricularRows() : [],
         personal_program_participation: collectPersonalProgramRows(),
         mentor_support_events: collectMentorSupportRows(),
-        academic_and_methodical_activities: collectAcademicActivities(),
+        scientific_publications: collectScientificWorks(),
+        media_materials: collectInterviews(),
+        qualification_courses: collectQualificationCourses(),
       };
       return JSON.stringify(payload, null, 2);
     }
@@ -1621,9 +1746,21 @@
       });
     }
 
-    if (addAcademicActivityRowButton) {
-      addAcademicActivityRowButton.addEventListener('click', () => {
-        addAcademicActivityRow();
+    if (addScientificWorkRowButton) {
+      addScientificWorkRowButton.addEventListener('click', () => {
+        addScientificWorkRow();
+      });
+    }
+
+    if (addInterviewRowButton) {
+      addInterviewRowButton.addEventListener('click', () => {
+        addInterviewRow();
+      });
+    }
+
+    if (addQualificationCourseRowButton) {
+      addQualificationCourseRowButton.addEventListener('click', () => {
+        addQualificationCourseRow();
       });
     }
 
