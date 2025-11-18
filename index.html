@@ -1244,15 +1244,19 @@
       return selected ? selected.value : '';
     }
 
+    function sanitizeText(value = '') {
+      return value.replace(/\s*\n\s*/g, ' ').trim();
+    }
+
     function getValue(name) {
-      return form.elements[name]?.value.trim() || '';
+      return sanitizeText(form.elements[name]?.value || '');
     }
 
     function collectList(name) {
       const container = form.querySelector(`[data-name="${name}"]`);
       if (!container) return [];
       return Array.from(container.querySelectorAll('input'))
-        .map((input) => input.value.trim())
+        .map((input) => sanitizeText(input.value))
         .filter(Boolean);
     }
 
@@ -1446,7 +1450,7 @@
     function collectDynamicList(container) {
       if (!container) return [];
       return Array.from(container.querySelectorAll('input'))
-        .map((input) => input.value.trim())
+        .map((input) => sanitizeText(input.value))
         .filter(Boolean);
     }
 
@@ -1602,7 +1606,7 @@
           const specialists = collectDynamicList(row.querySelector('[data-list="specialists"]'));
           const dateStart = row.querySelector('.date-range__start')?.value || '';
           const dateEnd = row.querySelector('.date-range__end')?.value || '';
-          const topic = row.querySelector('.curator-hours__topic')?.value.trim() || '';
+          const topic = sanitizeText(row.querySelector('.curator-hours__topic')?.value || '');
           const directions = collectDirections(row.querySelector('[data-list="directions"]'));
 
           if (!groups.length && !specialists.length && !dateStart && !dateEnd && !topic && !directions.length) {
@@ -1641,10 +1645,10 @@
         .map((row) => {
           const dateStart = row.querySelector('.achievement-date__start')?.value || '';
           const dateEnd = row.querySelector('.achievement-date__end')?.value || '';
-          const event = row.querySelector('textarea[name="achievement_event"]')?.value.trim() || '';
-          const group = row.querySelector('input[name="achievement_group"]')?.value.trim() || '';
-          const student = row.querySelector('input[name="achievement_student"]')?.value.trim() || '';
-          const result = row.querySelector('textarea[name="achievement_result"]')?.value.trim() || '';
+          const event = sanitizeText(row.querySelector('textarea[name="achievement_event"]')?.value || '');
+          const group = sanitizeText(row.querySelector('input[name="achievement_group"]')?.value || '');
+          const student = sanitizeText(row.querySelector('input[name="achievement_student"]')?.value || '');
+          const result = sanitizeText(row.querySelector('textarea[name="achievement_result"]')?.value || '');
 
           if (!dateStart && !dateEnd && !event && !group && !student && !result) {
             return null;
@@ -1679,10 +1683,10 @@
         .map((row) => {
           const dateStart = row.querySelector('.mentor-support-date__start')?.value || '';
           const dateEnd = row.querySelector('.mentor-support-date__end')?.value || '';
-          const event = row.querySelector('textarea[name="mentor_support_event"]')?.value.trim() || '';
-          const group = row.querySelector('input[name="mentor_support_group"]')?.value.trim() || '';
-          const student = row.querySelector('input[name="mentor_support_student"]')?.value.trim() || '';
-          const result = row.querySelector('textarea[name="mentor_support_result"]')?.value.trim() || '';
+          const event = sanitizeText(row.querySelector('textarea[name="mentor_support_event"]')?.value || '');
+          const group = sanitizeText(row.querySelector('input[name="mentor_support_group"]')?.value || '');
+          const student = sanitizeText(row.querySelector('input[name="mentor_support_student"]')?.value || '');
+          const result = sanitizeText(row.querySelector('textarea[name="mentor_support_result"]')?.value || '');
 
           if (!dateStart && !dateEnd && !event && !group && !student && !result) {
             return null;
@@ -1720,7 +1724,7 @@
           const groups = collectDynamicList(row.querySelector('[data-list="groups"]'));
           const dateStart = row.querySelector('.joint-events-date__start')?.value || '';
           const dateEnd = row.querySelector('.joint-events-date__end')?.value || '';
-          const event = row.querySelector('textarea[name="joint_event_description"]')?.value.trim() || '';
+          const event = sanitizeText(row.querySelector('textarea[name="joint_event_description"]')?.value || '');
 
           if (!groups.length && !dateStart && !dateEnd && !event) {
             return null;
@@ -1754,7 +1758,7 @@
         .map((row) => {
           const dateStart = row.querySelector('.extracurricular-date__start')?.value || '';
           const dateEnd = row.querySelector('.extracurricular-date__end')?.value || '';
-          const event = row.querySelector('.extracurricular-event__description')?.value.trim() || '';
+          const event = sanitizeText(row.querySelector('.extracurricular-event__description')?.value || '');
 
           if (!dateStart && !dateEnd && !event) {
             return null;
@@ -1791,7 +1795,7 @@
         .map((row) => {
           const dateStart = row.querySelector('.personal-program-date__start')?.value || '';
           const dateEnd = row.querySelector('.personal-program-date__end')?.value || '';
-          const event = row.querySelector('.personal-program-event__description')?.value.trim() || '';
+          const event = sanitizeText(row.querySelector('.personal-program-event__description')?.value || '');
 
           if (!dateStart && !dateEnd && !event) {
             return null;
@@ -1827,8 +1831,8 @@
 
       return Array.from(scientificWorkRowsContainer.querySelectorAll('.scientific-work-row'))
         .map((row) => {
-          const description = row.querySelector('.scientific-work__description')?.value.trim() || '';
-          const link = row.querySelector('.scientific-work__link')?.value.trim() || '';
+          const description = sanitizeText(row.querySelector('.scientific-work__description')?.value || '');
+          const link = sanitizeText(row.querySelector('.scientific-work__link')?.value || '');
 
           if (!description && !link) {
             return null;
@@ -1862,7 +1866,7 @@
 
       return Array.from(interviewRowsContainer.querySelectorAll('.interview-row'))
         .map((row) => {
-          const link = row.querySelector('.interview__link')?.value.trim() || '';
+          const link = sanitizeText(row.querySelector('.interview__link')?.value || '');
 
           if (!link) {
             return null;
@@ -1896,7 +1900,7 @@
         .map((row) => {
           const dateStart = row.querySelector('.qualification-course-date__start')?.value || '';
           const dateEnd = row.querySelector('.qualification-course-date__end')?.value || '';
-          const event = row.querySelector('.qualification-course__description')?.value.trim() || '';
+          const event = sanitizeText(row.querySelector('.qualification-course__description')?.value || '');
 
           if (!dateStart && !dateEnd && !event) {
             return null;
