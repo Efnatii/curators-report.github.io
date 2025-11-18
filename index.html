@@ -520,24 +520,27 @@
         {
           id: 'period-1',
           label: '1 отчётный период',
-          range: `01.09.${academicYearStart}–30.11.${academicYearStart}`,
+          dateStart: `01.09.${academicYearStart}`,
+          dateEnd: `30.11.${academicYearStart}`,
           deadline: `06.12.${academicYearStart}`,
         },
         {
           id: 'period-2',
           label: '2 отчётный период',
-          range: `01.12.${academicYearStart}–31.05.${academicYearEnd}`,
+          dateStart: `01.12.${academicYearStart}`,
+          dateEnd: `31.05.${academicYearEnd}`,
           deadline: `06.05.${academicYearEnd}`,
         },
       ];
 
       reportingPeriodSelect.innerHTML = '';
 
-      periods.forEach(({ id, label, range, deadline }) => {
+      periods.forEach(({ id, label, dateStart, dateEnd, deadline }) => {
         const option = document.createElement('option');
         option.value = id;
-        option.textContent = `${label}: ${range} (Прислать отчёт до ${deadline})`;
-        option.dataset.range = range;
+        option.textContent = `${label}: ${dateStart}–${dateEnd} (Прислать отчёт до ${deadline})`;
+        option.dataset.dateStart = dateStart;
+        option.dataset.dateEnd = dateEnd;
         option.dataset.deadline = deadline;
         option.dataset.label = label;
         reportingPeriodSelect.append(option);
@@ -547,8 +550,17 @@
     function selectReportingPeriod(period) {
       if (!reportingPeriodSelect || !period) return;
 
-      const { id, label = '', range = '', deadline = '', display = '' } = period;
-      const matchedOption = Array.from(reportingPeriodSelect.options).find((option) => option.value === id);
+      const { label = '', date_start: dateStart = '', date_end: dateEnd = '', deadline = '', display = '' } = period;
+      const { start: rangeStart, end: rangeEnd } = splitRange(period.range || '');
+      const normalizedStart = dateStart || rangeStart;
+      const normalizedEnd = dateEnd || rangeEnd;
+      const matchedOption = Array.from(reportingPeriodSelect.options).find(
+        (option) =>
+          option.dataset.label === label &&
+          option.dataset.dateStart === normalizedStart &&
+          option.dataset.dateEnd === normalizedEnd &&
+          option.dataset.deadline === deadline
+      );
 
       if (matchedOption) {
         reportingPeriodSelect.value = matchedOption.value;
@@ -556,9 +568,12 @@
       }
 
       const option = document.createElement('option');
-      option.value = id || 'custom-period';
-      option.textContent = display || `${label}: ${range}${deadline ? ` (Прислать отчёт до ${deadline})` : ''}`;
-      option.dataset.range = range;
+      option.value = 'custom-period';
+      option.textContent = display || `${label}: ${formatDateRange(normalizedStart, normalizedEnd)}${
+        deadline ? ` (Прислать отчёт до ${deadline})` : ''
+      }`;
+      option.dataset.dateStart = normalizedStart;
+      option.dataset.dateEnd = normalizedEnd;
       option.dataset.deadline = deadline;
       option.dataset.label = label;
 
@@ -1454,6 +1469,11 @@
         .filter(Boolean);
     }
 
+    function splitRange(rangeText = '') {
+      const [start = '', end = ''] = rangeText.split(/\s*[–-]\s*/);
+      return { start, end };
+    }
+
     function collectReportingPeriod() {
       if (!reportingPeriodSelect) return {};
 
@@ -1461,12 +1481,13 @@
 
       if (!selectedOption) return {};
 
-      const { dataset, value, textContent } = selectedOption;
+      const { dataset, textContent } = selectedOption;
+      const { start, end } = splitRange(dataset.range);
 
       return {
-        id: value,
         label: dataset.label || '',
-        range: dataset.range || '',
+        date_start: dataset.dateStart || start,
+        date_end: dataset.dateEnd || end,
         deadline: dataset.deadline || '',
         display: textContent || '',
       };
@@ -2058,6 +2079,26 @@
       return start || end || '—';
     }
 
+    function formatReportingPeriod(period) {
+      if (!period) return '';
+
+      const display = period.display || '';
+      if (display) return display;
+
+      const range = formatDateRange(period.date_start, period.date_end);
+      const hasRange = range && range !== '—';
+
+      if (period.label && hasRange) {
+        return `${period.label}: ${range}${period.deadline ? ` (Прислать отчёт до ${period.deadline})` : ''}`;
+      }
+
+      if (hasRange) {
+        return `${range}${period.deadline ? ` (Прислать отчёт до ${period.deadline})` : ''}`;
+      }
+
+      return period.deadline || '';
+    }
+
     function buildPdfContent(data) {
       const lines = [];
 
@@ -2076,7 +2117,7 @@
         lines.push({ ul: items.map(formatter), margin: [8, 4, 0, 8] });
       };
 
-      addLine('Отчетный период', data.reporting_period?.display || '—');
+      addLine('Отчетный период', formatReportingPeriod(data.reporting_period) || '—');
       addLine('1. Фамилия Имя Отчество *', data.full_name);
       addList('2. Должность *', data.job_positions, (position, index) => `${index + 1}. ${position || '—'}`);
       addLine('3. Кафедра *', data.department);
@@ -2195,7 +2236,7 @@
     function buildPdfDefinition(data) {
       const content = [
         { text: 'Отчёт по кураторской деятельности', style: 'header' },
-        { text: data.reporting_period?.range || data.reporting_period?.display || '', style: 'subheader' },
+        { text: formatReportingPeriod(data.reporting_period), style: 'subheader' },
         { text: 'Сводка ответов', style: 'sectionTitle', margin: [0, 12, 0, 6] },
         { stack: buildPdfContent(data), style: 'list' },
       ];
