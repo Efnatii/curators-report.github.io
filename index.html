@@ -440,7 +440,7 @@
         <div class="actions">
           <button type="button" id="import-json-button" class="button button--secondary">Загрузить ответы</button>
           <button type="button" id="download" class="button">Скачать ответы</button>
-          <p class="muted">Используйте кнопки, чтобы загрузить или сохранить ответы в формате JSON.</p>
+          <p class="muted">Используйте кнопки, чтобы загрузить ответы или сохранить их в форматах JSON и PDF.</p>
           <input type="file" id="import-json-input" accept="application/json" hidden />
         </div>
       </form>
@@ -461,6 +461,8 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
   <script>
     const form = document.getElementById('curator-form');
     const reportingPeriodSelect = document.getElementById('reporting-period');
@@ -1984,10 +1986,10 @@
       }
     }
 
-    function buildReport() {
+    function buildReportData() {
       const heldMinimumThreeCuratorSessions = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       const participatedInCuratorEvents = getBooleanRadio('participated_in_two_curator_events');
-      const payload = {
+      return {
         _comments: fieldComments,
         reporting_period: collectReportingPeriod(),
         full_name: getValue('full_name'),
@@ -2017,10 +2019,13 @@
         media_materials: collectInterviews(),
         qualification_courses: collectQualificationCourses(),
       };
-      return JSON.stringify(payload, null, 2);
     }
 
-    function generateFileName() {
+    function buildReport() {
+      return JSON.stringify(buildReportData(), null, 2);
+    }
+
+    function generateFileName(extension = 'json') {
       const [lastName = '', firstName = '', patronymic = ''] = getValue('full_name')
         .split(/\s+/)
         .filter(Boolean);
@@ -2030,7 +2035,199 @@
       if (lastName) parts.push(lastName);
       if (patronymic) parts.push(patronymic);
 
-      return `${parts.join('_')}.json`;
+      return `${parts.join('_')}.${extension}`;
+    }
+
+    function formatBoolean(value) {
+      if (value === true) return 'Да';
+      if (value === false) return 'Нет';
+      return '—';
+    }
+
+    function formatList(items, fallback = '—') {
+      if (!Array.isArray(items) || !items.length) return fallback;
+      return items.join(', ');
+    }
+
+    function buildPdfContent(data) {
+      const lines = [];
+
+      lines.push(`Отчётный период: ${data.reporting_period?.display || '—'}`);
+      lines.push(`Куратор: ${data.full_name || '—'}`);
+      lines.push(`Должности: ${formatList(data.job_positions)}`);
+      lines.push(`Кафедра: ${data.department || '—'}`);
+      lines.push(
+        `Контакты: ${data.contact_phone_connected_to_telegram || '—'}, ${data.telegram_username || '—'}, ${
+          data.email || '—'
+        }`
+      );
+      lines.push(`Группы: ${formatList(data.curated_group_numbers)}`);
+      lines.push(
+        `Локация: корпус ${data.curator_primary_building || '—'}, аудитория ${
+          data.curator_primary_room || '—'
+        }`
+      );
+      lines.push(`Институт/факультет: ${formatList(data.institute_or_faculty)}`);
+      lines.push(
+        `Кураторские часы (не менее трёх): ${formatBoolean(
+          data.held_minimum_three_curator_sessions_in_reporting_period
+        )}`
+      );
+
+      if (data.curator_hours_details?.length) {
+        lines.push('Проведённые кураторские часы:');
+        data.curator_hours_details.forEach((hour, index) => {
+          lines.push(
+            `${index + 1}. Группы: ${formatList(hour.groups)}, Дата/период: ${hour.date || '—'}, ` +
+              `Направления: ${formatList(hour.directions)}, Тема: ${hour.topic || '—'}`
+          );
+        });
+      }
+
+      lines.push(`Ведёт чат группы: ${formatBoolean(data.manages_group_chat)}`);
+      lines.push(`Информирует о мероприятиях: ${formatBoolean(data.inform_group_about_events)}`);
+
+      if (data.achievements?.length) {
+        lines.push('Достижения студентов:');
+        data.achievements.forEach((achievement, index) => {
+          lines.push(
+            `${index + 1}. ${achievement.student_name || '—'} — ${
+              achievement.achievement_type || '—'
+            }, ${achievement.achievement_description || '—'}`
+          );
+        });
+      }
+
+      lines.push(
+        `Участвовал не менее чем в 2 мероприятиях со студентами: ${formatBoolean(
+          data.participated_in_two_events_with_group
+        )}`
+      );
+
+      if (data.joint_participation_events?.length) {
+        lines.push('Совместные мероприятия со студентами:');
+        data.joint_participation_events.forEach((event, index) => {
+          lines.push(
+            `${index + 1}. ${event.event_name || '—'} — ${event.event_date || '—'}, формат: ${
+              event.event_type || '—'
+            }, роль: ${event.role || '—'}`
+          );
+        });
+      }
+
+      lines.push(
+        `Участвовал не менее чем в 2 мероприятиях кураторов: ${formatBoolean(
+          data.participated_in_two_curator_events
+        )}`
+      );
+
+      if (data.curator_personal_events?.length) {
+        lines.push('Мероприятия для кураторов:');
+        data.curator_personal_events.forEach((event, index) => {
+          lines.push(
+            `${index + 1}. ${event.event_name || '—'} — ${event.event_date || '—'}, формат: ${
+              event.event_type || '—'
+            }, организатор: ${event.organizer || '—'}`
+          );
+        });
+      }
+
+      if (data.personal_program_participation?.length) {
+        lines.push('Участие в программе "Персональный куратор":');
+        data.personal_program_participation.forEach((event, index) => {
+          lines.push(
+            `${index + 1}. ${event.student_name || '—'} — ${
+              event.support_direction || '—'
+            }, результат: ${event.result || '—'}`
+          );
+        });
+      }
+
+      if (data.mentor_support_events?.length) {
+        lines.push('Кураторские мероприятия поддержки:');
+        data.mentor_support_events.forEach((event, index) => {
+          lines.push(
+            `${index + 1}. ${event.event_name || '—'} — ${event.event_date || '—'}, формат: ${
+              event.event_type || '—'
+            }, участники: ${formatList(event.participants)}`
+          );
+        });
+      }
+
+      if (data.scientific_publications?.length) {
+        lines.push('Научные работы студентов:');
+        data.scientific_publications.forEach((publication, index) => {
+          lines.push(
+            `${index + 1}. ${publication.title || '—'} — ${publication.authors || '—'}, ${
+              publication.output || '—'
+            }`
+          );
+        });
+      }
+
+      if (data.media_materials?.length) {
+        lines.push('Материалы в медиа:');
+        data.media_materials.forEach((material, index) => {
+          lines.push(
+            `${index + 1}. ${material.title || '—'} — ${material.format || '—'}, ${
+              material.link || '—'
+            }`
+          );
+        });
+      }
+
+      if (data.qualification_courses?.length) {
+        lines.push('Повышение квалификации:');
+        data.qualification_courses.forEach((course, index) => {
+          lines.push(
+            `${index + 1}. ${course.course_name || '—'} — ${course.provider || '—'}, ${
+              course.completion_date || '—'
+            }`
+          );
+        });
+      }
+
+      return lines;
+    }
+
+    function buildPdfDefinition(data) {
+      const content = [
+        { text: 'Отчёт по кураторской деятельности', style: 'header' },
+        { text: data.reporting_period?.range || data.reporting_period?.display || '', style: 'subheader' },
+      ];
+
+      const lines = buildPdfContent(data);
+
+      content.push({ text: 'Сводка ответов', style: 'sectionTitle', margin: [0, 12, 0, 6] });
+      content.push({ ul: lines, style: 'list' });
+
+      return {
+        info: {
+          title: 'Отчёт по кураторской деятельности',
+        },
+        content,
+        defaultStyle: {
+          fontSize: 11,
+        },
+        styles: {
+          header: {
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 6],
+          },
+          subheader: {
+            fontSize: 12,
+            margin: [0, 0, 0, 12],
+          },
+          sectionTitle: {
+            fontSize: 12,
+            bold: true,
+          },
+          list: {
+            lineHeight: 1.4,
+          },
+        },
+      };
     }
 
     function populateFromJson(data) {
@@ -2232,16 +2429,20 @@
     }
 
     downloadButton.addEventListener('click', () => {
-      const report = buildReport();
+      const reportData = buildReportData();
+      const report = JSON.stringify(reportData, null, 2);
       const blob = new Blob([report], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = generateFileName();
+      link.download = generateFileName('json');
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
+
+      const pdfDefinition = buildPdfDefinition(reportData);
+      pdfMake.createPdf(pdfDefinition).download(generateFileName('pdf'));
     });
   </script>
 </body>
