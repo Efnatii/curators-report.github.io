@@ -351,6 +351,50 @@
       'Профессионально-трудовая',
     ];
 
+    const fieldComments = {
+      _meta: 'Комментарии добавлены для ориентира и не влияют на валидацию данных.',
+      full_name: 'Фамилия Имя Отчество куратора.',
+      job_positions: 'Список должностей куратора; каждая строка — отдельная должность.',
+      department: 'Кафедра или структурное подразделение, в котором работает куратор.',
+      contact_phone_connected_to_telegram: 'Контактный телефон, привязанный к аккаунту Telegram.',
+      telegram_username: 'Никнейм в Telegram, начиная с @.',
+      email: 'Рабочий адрес электронной почты.',
+      curated_group_numbers: 'Номера групп, с которыми куратор работает в отчётном периоде.',
+      curator_primary_building: 'Корпус основного пребывания куратора.',
+      curator_primary_room: 'Аудитория (кабинет), в которой куратор чаще всего находится.',
+      institute_or_faculty: 'Институты или факультеты, закреплённые за куратором.',
+      held_minimum_three_curator_sessions_in_reporting_period:
+        'Отметьте, проведены ли минимум три кураторских часа в отчётный период.',
+      curator_hours_details: {
+        _comment: 'Детализация проведённых кураторских часов.',
+        groups: 'Группы, участвовавшие в занятии (список).',
+        specialists: 'Приглашённые специалисты (список).',
+        date_start: 'Дата начала или единственная дата занятия.',
+        date_end: 'Дата окончания, если занятие длилось несколько дней.',
+        topic: 'Тема кураторского часа.',
+        directions: 'Направления воспитательной работы, раскрытые на занятии.',
+      },
+      inform_group_about_events: 'Куратор информирует обучающихся о мероприятиях для участия.',
+      achievements: {
+        _comment: 'Достижения обучающихся и групп.',
+        date_start: 'Дата начала или единственная дата достижения.',
+        date_end: 'Дата окончания, если достижение относится к периоду.',
+        event: 'Название или описание мероприятия/конкурса.',
+        group: 'Номер группы, к которой относится достижение.',
+        student: 'ФИО студента или студентов.',
+        result: 'Полученный результат: место, статус, грант и т.д.',
+      },
+      manages_group_chat: 'Куратор администрирует чат или ведёт переписку с группой.',
+      participated_in_two_events_with_group: 'Куратор посетил минимум два мероприятия вместе с группой.',
+      joint_participation_events: {
+        _comment: 'Совместные мероприятия с участием куратора и группы.',
+        groups: 'Группы-участники мероприятия (список).',
+        date_start: 'Дата начала или основная дата мероприятия.',
+        date_end: 'Дата окончания, если мероприятие длилось несколько дней.',
+        event: 'Краткое описание или название мероприятия.',
+      },
+    };
+
     function closeAllTooltips(except = null) {
       document.querySelectorAll('.tooltip.tooltip--active').forEach((tooltip) => {
         if (tooltip === except) return;
@@ -943,6 +987,7 @@
     function buildReport() {
       const heldMinimumThreeCuratorSessions = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       const payload = {
+        _comments: fieldComments,
         full_name: getValue('full_name'),
         job_positions: collectList('job_positions'),
         department: getValue('department'),
