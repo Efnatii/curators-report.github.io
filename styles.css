@@ -22,6 +22,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 a {
@@ -30,8 +31,10 @@ a {
 }
 
 .container {
-  width: min(1100px, 92vw);
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .hero {
@@ -412,11 +415,12 @@ select:focus {
 }
 
 .tooltip__bubble {
+  --tooltip-shift: 0px;
   position: absolute;
   top: calc(100% + 10px);
   left: 50%;
-  min-width: 220px;
-  max-width: min(360px, 80vw);
+  min-width: min(220px, calc(100vw - 24px));
+  max-width: min(320px, calc(100vw - 24px));
   width: max-content;
   padding: 12px 14px;
   border-radius: 12px;
@@ -428,7 +432,7 @@ select:focus {
   line-height: 1.5;
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -6px);
+  transform: translate(calc(-50% + var(--tooltip-shift)), -6px);
   transition: opacity 140ms ease, transform 140ms ease;
   z-index: 10;
   white-space: normal;
@@ -453,7 +457,7 @@ select:focus {
 .tooltip--active .tooltip__bubble {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--tooltip-shift)), 0);
 }
 
 .tooltip--standalone {
