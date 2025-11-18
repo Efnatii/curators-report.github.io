@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+from dataclasses import dataclass
 import json
 from pathlib import Path
 import subprocess
@@ -210,34 +211,72 @@ QUESTION_ORDER: List[Dict[str, object]] = [
 ]
 
 
-def determine_columns(records: Iterable[Tuple[Path, JsonRecord]]) -> List[Tuple[str, str | None, str]]:
-    columns: List[Tuple[str, str | None, str]] = []
+@dataclass(frozen=True)
+class QuestionColumn:
+    key: str
+    label: str
+    subfields: List[Tuple[str, str]] | None = None
+
+
+def determine_columns(records: Iterable[Tuple[Path, JsonRecord]]) -> List[QuestionColumn]:
+    present_keys = {key for _, record in records for key in record.keys()}
+    columns: List[QuestionColumn] = []
+
     for question in QUESTION_ORDER:
         key = question["key"]  # type: ignore[index]
+        if key not in present_keys:
+            continue
+
         label = question["label"]  # type: ignore[index]
         subfields: Dict[str, str] | None = question.get("subfields")  # type: ignore[assignment]
 
         if subfields:
-            for subkey, sublabel in subfields.items():
-                columns.append((key, subkey, f"{label}\n{sublabel}"))
+            columns.append(QuestionColumn(key=key, label=label, subfields=list(subfields.items())))
         else:
-            columns.append((key, None, label))
+            columns.append(QuestionColumn(key=key, label=label))
 
-    present_keys = {key for _, record in records for key in record.keys()}
-    return [col for col in columns if col[0] in present_keys]
+    return columns
 
 
 def write_workbook(
     records: List[Tuple[Path, JsonRecord]],
-    questions: List[Tuple[str, str | None, str]],
+    questions: List[QuestionColumn],
     output_path: Path,
 ) -> None:
     wb = Workbook()
     ws = wb.active
     ws.title = "Responses"
 
-    headers = ["Источник", *[header for _, _, header in questions]]
-    ws.append(headers)
+    ws.cell(row=1, column=1, value="Источник")
+    ws.merge_cells(start_row=1, start_column=1, end_row=2, end_column=1)
+
+    flat_columns: List[Tuple[str, str | None]] = []
+    column_index = 2
+    for question in questions:
+        span = len(question.subfields) if question.subfields else 1
+
+        if question.subfields:
+            ws.merge_cells(
+                start_row=1,
+                start_column=column_index,
+                end_row=1,
+                end_column=column_index + span - 1,
+            )
+            ws.cell(row=1, column=column_index, value=question.label)
+            for offset, (subkey, sublabel) in enumerate(question.subfields):
+                ws.cell(row=2, column=column_index + offset, value=sublabel)
+                flat_columns.append((question.key, subkey))
+        else:
+            ws.merge_cells(
+                start_row=1,
+                start_column=column_index,
+                end_row=2,
+                end_column=column_index,
+            )
+            ws.cell(row=1, column=column_index, value=question.label)
+            flat_columns.append((question.key, None))
+
+        column_index += span
 
     for file_path, record in records:
         block_height = max(
@@ -249,15 +288,17 @@ def write_workbook(
         )
         for row_offset in range(block_height):
             row_values = [file_path.name if row_offset == 0 else ""]
-            for question_key, subkey, _ in questions:
+            for question_key, subkey in flat_columns:
                 value = record.get(question_key)
                 if isinstance(value, list):
                     if row_offset < len(value):
                         item = value[row_offset]
-                        if subkey and isinstance(item, dict):
+                        if subkey is not None and isinstance(item, dict):
                             cell_value = normalize_cell_value(item.get(subkey))
-                        else:
+                        elif subkey is None:
                             cell_value = normalize_cell_value(item)
+                        else:
+                            cell_value = ""
                     else:
                         cell_value = ""
                 else:
@@ -270,11 +311,15 @@ def write_workbook(
 
         # Apply highlighting to list ranges per question
         start_row = ws.max_row - block_height + 1
-        for col_index, (question_key, _subkey, _header) in enumerate(questions, start=2):
-            value = record.get(question_key)
+        column_start = 2
+        for question in questions:
+            span = len(question.subfields) if question.subfields else 1
+            value = record.get(question.key)
             if isinstance(value, list) and value:
-                for row_index in range(start_row, start_row + len(value)):
-                    ws.cell(row=row_index, column=col_index).fill = HIGHLIGHT_FILL
+                for offset in range(span):
+                    for row_index in range(start_row, start_row + len(value)):
+                        ws.cell(row=row_index, column=column_start + offset).fill = HIGHLIGHT_FILL
+            column_start += span
 
     for column_cells in ws.columns:
         max_length = 0
