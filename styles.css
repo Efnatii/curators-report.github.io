@@ -720,6 +720,22 @@ select:focus {
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
 }
 
+.button--secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border: 1px solid rgba(242, 177, 56, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.button--secondary:hover {
+  box-shadow: 0 10px 28px rgba(242, 177, 56, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.button--secondary:active {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: none;
+}
+
 .button:hover {
   transform: translateY(-1px);
   box-shadow: 0 16px 38px rgba(242, 177, 56, 0.4);
