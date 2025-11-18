@@ -13,9 +13,22 @@ highlighted to distinguish the block of rows taken by that subtable.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import sys
 from typing import Dict, Iterable, List, Tuple
+
+
+def ensure_openpyxl_installed() -> None:
+    """Install openpyxl at runtime if it is not already available."""
+
+    if importlib.util.find_spec("openpyxl") is None:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "openpyxl"])
+
+
+ensure_openpyxl_installed()
 
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
