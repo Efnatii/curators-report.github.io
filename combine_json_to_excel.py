@@ -45,11 +45,20 @@ JsonRecord = Dict[str, JsonValue]
 HIGHLIGHT_FILL = PatternFill(start_color="FFF8DC", end_color="FFF8DC", fill_type="solid")
 
 
+def format_scalar_list(items: ListValue) -> str:
+    """Sort list items and join them with a comma for display."""
+
+    sorted_items = sorted((str(item) for item in items), key=str)
+    return ", ".join(sorted_items)
+
+
 def normalize_cell_value(value: JsonValue) -> ScalarValue:
     """Convert any JSON value into something openpyxl can store."""
 
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
+    if isinstance(value, list) and all(not isinstance(item, (dict, list)) for item in value):
+        return format_scalar_list(value)
     # Fallback for types like dicts or lists of non-scalar values
     return json.dumps(value, ensure_ascii=False)
 
@@ -274,7 +283,7 @@ def normalize_record_values(record: JsonRecord) -> JsonRecord:
             continue
 
         if isinstance(value, list) and all(not isinstance(item, (dict, list)) for item in value):
-            normalized[key] = ", ".join(str(item) for item in sorted(value, key=lambda item: str(item)))
+            normalized[key] = format_scalar_list(value)
         else:
             normalized[key] = value
 
