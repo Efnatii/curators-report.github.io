@@ -6,6 +6,10 @@ import importlib.util
 from pathlib import Path
 import subprocess
 import sys
+import os
+import base64
+
+from icon_data import ICON_BASE64
 
 
 def ensure_pyinstaller() -> None:
@@ -21,8 +25,16 @@ def build_executable() -> None:
     ensure_pyinstaller()
 
     script_path = Path(__file__).with_name("combine_json_to_excel.py")
+    icon_path = script_path.with_name("combine_json_to_excel.ico")
+    if not icon_path.exists():
+        icon_bytes = base64.b64decode("".join(ICON_BASE64))
+        icon_path.write_bytes(icon_bytes)
     if not script_path.exists():
         raise FileNotFoundError(f"Не найден файл {script_path}")
+    if not icon_path.exists():
+        raise FileNotFoundError(f"Не найден файл {icon_path}")
+
+    data_sep = os.pathsep
 
     command = [
         sys.executable,
@@ -32,7 +44,11 @@ def build_executable() -> None:
         "--onefile",
         "--windowed",
         "--name",
-        "combine_json_to_excel",
+        "Combine Json to Excel",
+        "--icon",
+        str(icon_path),
+        "--add-data",
+        f"{icon_path}{data_sep}.",
         str(script_path),
     ]
 
