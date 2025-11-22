@@ -1,8 +1,11 @@
 """
 Combine multiple JSON survey response files into a single Excel workbook.
 
-Usage:
+Usage (CLI):
     python combine_json_to_excel.py /path/to/json_dir output.xlsx
+
+If the script is launched without CLI arguments, a simple form-style GUI will
+open to select the source folder and output file path.
 
 Each JSON file should contain a flat mapping of question text to either a
 scalar answer (string/number) or a list of strings (representing sub-rows).
@@ -17,19 +20,31 @@ import importlib.util
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
 import subprocess
 import sys
 from typing import Dict, Iterable, List, Tuple
 
 
-def ensure_openpyxl_installed() -> None:
-    """Install openpyxl at runtime if it is not already available."""
-
-    if importlib.util.find_spec("openpyxl") is None:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "openpyxl"])
+REQUIRED_PACKAGES = ["openpyxl"]
 
 
-ensure_openpyxl_installed()
+def ensure_dependencies_installed() -> None:
+    """Install required third-party packages at runtime when missing."""
+
+    for package in REQUIRED_PACKAGES:
+        if importlib.util.find_spec(package) is None:
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+            except subprocess.CalledProcessError as exc:
+                raise RuntimeError(
+                    f"Не удалось автоматически установить пакет {package}. "
+                    "Убедитесь, что есть доступ в интернет или установите пакет вручную."
+                ) from exc
+
+
+ensure_dependencies_installed()
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill
@@ -401,12 +416,120 @@ def write_workbook(
     wb.save(output_path)
 
 
-def main() -> None:
-    args = parse_args()
-    records = load_json_files(args.input_dir)
+def merge_json_directory(input_dir: Path, output_path: Path) -> int:
+    """Merge JSON files from a directory into an Excel workbook."""
+
+    records = load_json_files(input_dir)
     questions = determine_columns(records)
-    write_workbook(records, questions, args.output)
-    print(f"Merged {len(records)} JSON files into {args.output}")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    write_workbook(records, questions, output_path)
+    return len(records)
+
+
+def launch_gui() -> None:
+    """Open a simple form-style interface for combining survey exports."""
+
+    root = tk.Tk()
+    root.title("Сбор анкет в Excel")
+    root.configure(bg="#f7f3eb")
+    root.resizable(False, False)
+
+    style = ttk.Style(root)
+    style.theme_use("clam")
+    style.configure("Card.TFrame", background="#ffffff", relief="ridge", borderwidth=1)
+    style.configure("Heading.TLabel", background="#f7f3eb", font=("Arial", 14, "bold"))
+    style.configure("Body.TLabel", background="#ffffff", font=("Arial", 10))
+    style.configure("Accent.TButton", font=("Arial", 10, "bold"))
+
+    content = ttk.Frame(root, padding=16, style="Card.TFrame")
+    content.grid(row=0, column=0, padx=12, pady=12, sticky="nsew")
+
+    title = ttk.Label(
+        content,
+        text="Форма выгрузки ответов",
+        style="Heading.TLabel",
+    )
+    title.grid(row=0, column=0, columnspan=3, pady=(0, 14), sticky="w")
+
+    input_dir_var = tk.StringVar()
+    output_file_var = tk.StringVar(value=str((Path.cwd() / "combined.xlsx").resolve()))
+    status_var = tk.StringVar(value="Заполните поля и нажмите «Собрать отчёт».")
+
+    def browse_input_dir() -> None:
+        path = filedialog.askdirectory(title="Папка с JSON файлами")
+        if path:
+            input_dir_var.set(path)
+
+    def browse_output_file() -> None:
+        filename = filedialog.asksaveasfilename(
+            title="Сохранить отчёт",
+            defaultextension=".xlsx",
+            filetypes=[("Excel", "*.xlsx"), ("Все файлы", "*.*")],
+            initialfile="combined.xlsx",
+        )
+        if filename:
+            output_file_var.set(filename)
+
+    def run_merge() -> None:
+        input_dir = Path(input_dir_var.get()).expanduser()
+        output_path = Path(output_file_var.get()).expanduser()
+
+        if not input_dir.exists() or not input_dir.is_dir():
+            messagebox.showerror("Ошибка", "Укажите существующую папку с JSON файлами.")
+            return
+
+        try:
+            merged = merge_json_directory(input_dir, output_path)
+        except Exception as exc:  # noqa: BLE001 - user-facing helper
+            messagebox.showerror("Не удалось собрать отчёт", str(exc))
+            status_var.set("Ошибка при сборке. Попробуйте снова.")
+            return
+
+        status_var.set(f"Готово! Объединено файлов: {merged} → {output_path}")
+        messagebox.showinfo("Готово", f"Сохранено: {output_path}\nФайлов: {merged}")
+
+    # Поля формы
+    ttk.Label(content, text="Папка с ответами", style="Body.TLabel").grid(
+        row=1, column=0, sticky="w", pady=(0, 6)
+    )
+    input_entry = ttk.Entry(content, textvariable=input_dir_var, width=48)
+    input_entry.grid(row=2, column=0, columnspan=2, sticky="we", padx=(0, 8))
+    ttk.Button(content, text="Обзор", command=browse_input_dir).grid(row=2, column=2, sticky="we")
+
+    ttk.Label(content, text="Файл отчёта", style="Body.TLabel").grid(
+        row=3, column=0, sticky="w", pady=(12, 6)
+    )
+    output_entry = ttk.Entry(content, textvariable=output_file_var, width=48)
+    output_entry.grid(row=4, column=0, columnspan=2, sticky="we", padx=(0, 8))
+    ttk.Button(content, text="Сохранить как", command=browse_output_file).grid(
+        row=4, column=2, sticky="we"
+    )
+
+    action = ttk.Button(
+        content,
+        text="Собрать отчёт",
+        style="Accent.TButton",
+        command=run_merge,
+    )
+    action.grid(row=5, column=0, columnspan=3, pady=(16, 8), sticky="we")
+
+    status_label = ttk.Label(content, textvariable=status_var, style="Body.TLabel", wraplength=420)
+    status_label.grid(row=6, column=0, columnspan=3, sticky="w")
+
+    for child in content.winfo_children():
+        child.grid_configure(padx=4, pady=2)
+
+    input_entry.focus_set()
+    root.mainloop()
+
+
+def main() -> None:
+    if len(sys.argv) > 1:
+        args = parse_args()
+        merged = merge_json_directory(args.input_dir, args.output)
+        print(f"Merged {merged} JSON files into {args.output}")
+    else:
+        launch_gui()
 
 
 if __name__ == "__main__":
