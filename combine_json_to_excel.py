@@ -19,12 +19,15 @@ import argparse
 import importlib.util
 from dataclasses import dataclass
 import json
+import base64
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import subprocess
 import sys
 from typing import Dict, Iterable, List, Tuple
+
+from icon_data import ICON_BASE64
 
 
 REQUIRED_PACKAGES = ["openpyxl"]
@@ -49,6 +52,33 @@ ensure_dependencies_installed()
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import get_column_letter
+
+
+def get_resource_path(relative_path: str) -> Path:
+    """Return an absolute path to a bundled resource (PyInstaller friendly)."""
+
+    base_path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+    return base_path / relative_path
+
+
+def ensure_icon_path() -> Path:
+    """Make sure the ICO file exists locally when not running from a bundle."""
+
+    icon_path = get_resource_path("combine_json_to_excel.ico")
+    if icon_path.exists():
+        return icon_path
+
+    if hasattr(sys, "_MEIPASS"):
+        # In a bundled executable the icon should already be present alongside the binary.
+        return icon_path
+
+    try:
+        icon_bytes = base64.b64decode("".join(ICON_BASE64))
+        icon_path.write_bytes(icon_bytes)
+    except OSError:
+        # If the path is not writable, silently continue without the icon.
+        pass
+    return icon_path
 
 
 ListValue = List[str]
@@ -433,6 +463,18 @@ def launch_gui() -> None:
     root.title("Сбор анкет в Excel")
     root.configure(bg="#0c0f16")
     root.resizable(False, False)
+
+    icon_path = ensure_icon_path()
+    if icon_path.exists():
+        try:
+            root.iconbitmap(default=str(icon_path))
+        except tk.TclError:
+            try:
+                icon_image = tk.PhotoImage(file=str(icon_path))
+                root.iconphoto(False, icon_image)
+                root._icon_image = icon_image  # prevent garbage collection
+            except tk.TclError:
+                pass
 
     palette = {
         "bg": "#0c0f16",
