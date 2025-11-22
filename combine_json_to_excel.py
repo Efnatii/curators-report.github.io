@@ -431,15 +431,79 @@ def launch_gui() -> None:
 
     root = tk.Tk()
     root.title("Сбор анкет в Excel")
-    root.configure(bg="#f7f3eb")
+    root.configure(bg="#0c0f16")
     root.resizable(False, False)
+
+    palette = {
+        "bg": "#0c0f16",
+        "panel": "#0f1522",
+        "card": "#111a2b",
+        "border": "#1f2a3d",
+        "accent": "#f2b138",
+        "text": "#e9ecf2",
+        "muted": "#b3b9c6",
+    }
 
     style = ttk.Style(root)
     style.theme_use("clam")
-    style.configure("Card.TFrame", background="#ffffff", relief="ridge", borderwidth=1)
-    style.configure("Heading.TLabel", background="#f7f3eb", font=("Arial", 14, "bold"))
-    style.configure("Body.TLabel", background="#ffffff", font=("Arial", 10))
-    style.configure("Accent.TButton", font=("Arial", 10, "bold"))
+    style.configure(
+        "Card.TFrame",
+        background=palette["card"],
+        relief="ridge",
+        borderwidth=1,
+    )
+    style.configure(
+        "Heading.TLabel",
+        background=palette["card"],
+        foreground=palette["text"],
+        font=("Inter", 14, "bold"),
+    )
+    style.configure(
+        "Body.TLabel",
+        background=palette["card"],
+        foreground=palette["muted"],
+        font=("Inter", 10),
+    )
+    style.configure(
+        "TButton",
+        font=("Inter", 10),
+        foreground=palette["text"],
+        background=palette["panel"],
+        padding=8,
+        borderwidth=0,
+    )
+    style.map(
+        "TButton",
+        background=[("active", palette["border"]), ("pressed", palette["border"])],
+        foreground=[("disabled", palette["muted"])],
+    )
+    style.configure(
+        "Accent.TButton",
+        font=("Inter", 10, "bold"),
+        foreground=palette["bg"],
+        background=palette["accent"],
+        padding=8,
+        borderwidth=0,
+        focusthickness=0,
+    )
+    style.map(
+        "Accent.TButton",
+        background=[("active", "#ffbe4c"), ("pressed", "#d89c2f")],
+        foreground=[("disabled", palette["muted"])],
+    )
+    style.configure(
+        "TEntry",
+        fieldbackground=palette["panel"],
+        background=palette["panel"],
+        foreground=palette["text"],
+        insertcolor=palette["text"],
+        relief="flat",
+        padding=6,
+    )
+    style.map(
+        "TEntry",
+        fieldbackground=[("focus", palette["panel"]), ("!focus", palette["panel"])],
+    )
 
     content = ttk.Frame(root, padding=16, style="Card.TFrame")
     content.grid(row=0, column=0, padx=12, pady=12, sticky="nsew")
