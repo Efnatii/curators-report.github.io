@@ -53,7 +53,7 @@ def ensure_dependencies_installed() -> None:
 ensure_dependencies_installed()
 
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 from fpdf import FPDF
 
@@ -722,6 +722,23 @@ def write_workbook(
                     for row_index in range(start_row, start_row + len(value)):
                         ws.cell(row=row_index, column=column_start + offset).fill = HIGHLIGHT_FILL
             column_start += span
+
+    score_column_index = next(
+        (
+            index + 2
+            for index, (key, subkey) in enumerate(flat_columns)
+            if key == "score" and subkey is None
+        ),
+        None,
+    )
+
+    if score_column_index is not None:
+        score_alignment = Alignment(horizontal="left", vertical="top")
+        for row_index in range(1, ws.max_row + 1):
+            cell = ws.cell(row=row_index, column=score_column_index)
+            if row_index >= 3 and cell.value not in (None, ""):
+                cell.font = Font(bold=True)
+            cell.alignment = score_alignment
 
     for col_idx, column_cells in enumerate(ws.columns, start=1):
         max_length = 0
