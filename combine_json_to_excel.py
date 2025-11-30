@@ -20,6 +20,7 @@ import importlib.util
 from dataclasses import dataclass
 import json
 import base64
+import re
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -30,7 +31,7 @@ from typing import Dict, Iterable, List, Tuple
 from icon_data import ICON_BASE64
 
 
-REQUIRED_PACKAGES = ["openpyxl"]
+REQUIRED_PACKAGES = ["openpyxl", "fpdf2"]
 
 
 def ensure_dependencies_installed() -> None:
@@ -52,6 +53,7 @@ ensure_dependencies_installed()
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import get_column_letter
+from fpdf import FPDF
 
 
 def get_resource_path(relative_path: str) -> Path:
@@ -123,6 +125,11 @@ def parse_args() -> argparse.Namespace:
         nargs="?",
         default=Path("combined.xlsx"),
         help="Path for the generated Excel file (default: combined.xlsx).",
+    )
+    parser.add_argument(
+        "--generate-pdf",
+        action="store_true",
+        help="Generate per-respondent PDF с подробной разбивкой баллов.",
     )
     return parser.parse_args()
 
@@ -383,8 +390,8 @@ def count_rows_with_specialists(value: JsonValue) -> int:
     return count
 
 
-def compute_points(record: JsonRecord) -> int:
-    """Calculate the total score for a single survey record."""
+def compute_point_components(record: JsonRecord) -> List[Tuple[str, int]]:
+    """Return detailed point components for a survey record."""
 
     value_11 = record.get("held_minimum_three_curator_sessions_in_reporting_period")
     value_12 = record.get("curator_hours_details")
@@ -399,7 +406,7 @@ def compute_points(record: JsonRecord) -> int:
     count_17 = count_filled_rows(value_17)
     count_19 = count_filled_rows(value_19)
 
-    points = 0
+    components: List[Tuple[str, int]] = []
 
     base_condition_met = (
         is_yes(value_11)
@@ -412,28 +419,178 @@ def compute_points(record: JsonRecord) -> int:
         and count_19 >= 2
     )
 
-    if base_condition_met:
-        points += 30
+    components.append(
+        (
+            "Базовое условие (пп. 11, 12, 13, 14, 16, 17, 18, 19)",
+            30 if base_condition_met else 0,
+        )
+    )
 
-    points += count_filled_rows(record.get("personal_program_participation")) * 10
-    points += count_filled_rows(record.get("scientific_publications")) * 20
-    points += count_filled_rows(record.get("media_materials")) * 10
-    points += count_filled_rows(record.get("mentor_support_events")) * 10
-    points += count_filled_rows(record.get("achievements")) * 10
-    points += count_filled_rows(record.get("qualification_courses")) * 20
+    components.append(
+        (
+            "Личное участие в программах и конкурсах (п.20)",
+            count_filled_rows(record.get("personal_program_participation")) * 10,
+        )
+    )
+    components.append(
+        (
+            "Опубликование научной работы (п.22)",
+            count_filled_rows(record.get("scientific_publications")) * 20,
+        )
+    )
+    components.append(
+        (
+            "Интервью и статьи для \"Дзен.Гуап\" и соцсетей (п.23)",
+            count_filled_rows(record.get("media_materials")) * 10,
+        )
+    )
+    components.append(
+        (
+            "Наставничество в проектах (п.21)",
+            count_filled_rows(record.get("mentor_support_events")) * 10,
+        )
+    )
+    components.append(
+        (
+            "Призовые места обучающихся (п.15)",
+            count_filled_rows(record.get("achievements")) * 10,
+        )
+    )
+    components.append(
+        (
+            "Курсы повышения квалификации (п.24)",
+            count_filled_rows(record.get("qualification_courses")) * 20,
+        )
+    )
 
-    points += count_rows_with_specialists(value_12) * 20
+    components.append(
+        (
+            "Приглашённые специалисты на кураторских часах (п.12)",
+            count_rows_with_specialists(value_12) * 20,
+        )
+    )
 
-    if count_12 > 3:
-        points += (count_12 - 3) * 5
+    components.append(
+        (
+            "Дополнительные кураторские часы сверх трёх (п.12)",
+            (count_12 - 3) * 5 if count_12 > 3 else 0,
+        )
+    )
 
-    if count_17 > 2:
-        points += (count_17 - 2) * 10
+    components.append(
+        (
+            "Совместные мероприятия с группой сверх двух (п.17)",
+            (count_17 - 2) * 10 if count_17 > 2 else 0,
+        )
+    )
 
-    if count_19 > 2:
-        points += (count_19 - 2) * 5
+    components.append(
+        (
+            "Мероприятия для кураторов сверх двух (п.19)",
+            (count_19 - 2) * 5 if count_19 > 2 else 0,
+        )
+    )
 
-    return points
+    return components
+
+
+def compute_points(record: JsonRecord) -> int:
+    """Calculate the total score for a single survey record."""
+
+    return sum(points for _, points in compute_point_components(record))
+
+
+def stringify_value(value: JsonValue) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, list) and all(not isinstance(item, (dict, list)) for item in value):
+        return format_scalar_list(value)
+    return str(value)
+
+
+def sanitize_filename(value: str) -> str:
+    safe_value = re.sub(r"[\\/:*?\"<>|]", "_", value).strip()
+    return safe_value or "Без_ФИО"
+
+
+def extract_full_name(record: JsonRecord, fallback: str) -> str:
+    full_name_value = record.get("full_name")
+    full_name = stringify_value(full_name_value)
+    return full_name if full_name else fallback
+
+
+def render_pdf_row(pdf: FPDF, text: str, points: int, column_width: float, points_width: float) -> None:
+    """Render a wrapped table row with aligned points column."""
+
+    line_height = 8
+    x_start = pdf.get_x()
+    y_start = pdf.get_y()
+
+    pdf.multi_cell(column_width, line_height, text, border=1)
+    y_end = pdf.get_y()
+    row_height = y_end - y_start
+
+    pdf.set_xy(x_start + column_width, y_start)
+    pdf.cell(points_width, row_height, str(points), border=1, align="R")
+    pdf.set_xy(x_start, y_end)
+
+
+def generate_score_pdf(
+    *,
+    full_name: str,
+    components: List[Tuple[str, int]],
+    output_path: Path,
+    total: int,
+) -> None:
+    pdf = FPDF()
+    pdf.add_page()
+
+    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+    if font_path.exists():
+        pdf.add_font("DejaVu", "", str(font_path), uni=True)
+        pdf.add_font("DejaVu", "B", str(font_path), uni=True)
+        body_font = ("DejaVu", "")
+        heading_font = ("DejaVu", "B")
+    else:
+        body_font = ("Arial", "")
+        heading_font = ("Arial", "B")
+
+    pdf.set_font(*heading_font, size=14)
+    pdf.cell(0, 10, "Отчёт по баллам", ln=True)
+
+    pdf.set_font(*body_font, size=12)
+    pdf.cell(0, 10, f"ФИО: {full_name}", ln=True)
+    pdf.ln(2)
+
+    table_width = pdf.w - pdf.l_margin - pdf.r_margin
+    points_width = 30
+    column_width = table_width - points_width
+
+    pdf.set_font(*heading_font, size=11)
+    pdf.cell(column_width, 8, "Критерий", border=1)
+    pdf.cell(points_width, 8, "Баллы", border=1, ln=True, align="R")
+
+    pdf.set_font(*body_font, size=11)
+    for description, points in components:
+        render_pdf_row(pdf, description, points, column_width, points_width)
+
+    pdf.set_font(*heading_font, size=12)
+    pdf.cell(column_width, 10, "Итого", border=1)
+    pdf.cell(points_width, 10, str(total), border=1, ln=True, align="R")
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    pdf.output(str(output_path))
+
+
+def generate_score_reports(records: List[Tuple[Path, JsonRecord]], target_dir: Path) -> None:
+    for file_path, raw_record in records:
+        components = compute_point_components(raw_record)
+        total_points = sum(points for _, points in components)
+        full_name = extract_full_name(raw_record, fallback=file_path.stem)
+        safe_name = sanitize_filename(full_name)
+        pdf_name = f"Баллы_{safe_name}.pdf"
+        pdf_path = target_dir / pdf_name
+        generate_score_pdf(full_name=full_name, components=components, output_path=pdf_path, total=total_points)
 
 
 def write_workbook(
@@ -548,13 +705,15 @@ def write_workbook(
     wb.save(output_path)
 
 
-def merge_json_directory(input_dir: Path, output_path: Path) -> int:
+def merge_json_directory(input_dir: Path, output_path: Path, generate_pdfs: bool = False) -> int:
     """Merge JSON files from a directory into an Excel workbook."""
 
     records = load_json_files(input_dir)
     questions = determine_columns(records)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     write_workbook(records, questions, output_path)
+    if generate_pdfs:
+        generate_score_reports(records, output_path.parent)
     return len(records)
 
 
@@ -662,6 +821,7 @@ def launch_gui() -> None:
     input_dir_var = tk.StringVar()
     output_file_var = tk.StringVar(value=str((Path.cwd() / "combined.xlsx").resolve()))
     status_var = tk.StringVar(value="Заполните поля и нажмите «Собрать отчёт».")
+    generate_pdf_var = tk.BooleanVar(value=False)
 
     def browse_input_dir() -> None:
         path = filedialog.askdirectory(title="Папка с JSON файлами")
@@ -681,20 +841,25 @@ def launch_gui() -> None:
     def run_merge() -> None:
         input_dir = Path(input_dir_var.get()).expanduser()
         output_path = Path(output_file_var.get()).expanduser()
+        generate_pdfs = bool(generate_pdf_var.get())
 
         if not input_dir.exists() or not input_dir.is_dir():
             messagebox.showerror("Ошибка", "Укажите существующую папку с JSON файлами.")
             return
 
         try:
-            merged = merge_json_directory(input_dir, output_path)
+            merged = merge_json_directory(input_dir, output_path, generate_pdfs=generate_pdfs)
         except Exception as exc:  # noqa: BLE001 - user-facing helper
             messagebox.showerror("Не удалось собрать отчёт", str(exc))
             status_var.set("Ошибка при сборке. Попробуйте снова.")
             return
 
-        status_var.set(f"Готово! Объединено файлов: {merged} → {output_path}")
-        messagebox.showinfo("Готово", f"Сохранено: {output_path}\nФайлов: {merged}")
+        pdf_note = " и PDF" if generate_pdfs else ""
+        status_var.set(f"Готово! Объединено файлов: {merged} → {output_path}{pdf_note}")
+        messagebox.showinfo(
+            "Готово",
+            f"Сохранено: {output_path}\nФайлов: {merged}" + ("\nСозданы индивидуальные PDF" if generate_pdfs else ""),
+        )
 
     # Поля формы
     ttk.Label(content, text="Папка с ответами", style="Body.TLabel").grid(
@@ -713,16 +878,23 @@ def launch_gui() -> None:
         row=4, column=2, sticky="we"
     )
 
+    ttk.Checkbutton(
+        content,
+        text="Создавать PDF с детализацией баллов для каждого ответа",
+        variable=generate_pdf_var,
+        style="TCheckbutton",
+    ).grid(row=5, column=0, columnspan=3, sticky="w", pady=(8, 0))
+
     action = ttk.Button(
         content,
         text="Собрать отчёт",
         style="Accent.TButton",
         command=run_merge,
     )
-    action.grid(row=5, column=0, columnspan=3, pady=(16, 8), sticky="we")
+    action.grid(row=6, column=0, columnspan=3, pady=(16, 8), sticky="we")
 
     status_label = ttk.Label(content, textvariable=status_var, style="Body.TLabel", wraplength=420)
-    status_label.grid(row=6, column=0, columnspan=3, sticky="w")
+    status_label.grid(row=7, column=0, columnspan=3, sticky="w")
 
     for child in content.winfo_children():
         child.grid_configure(padx=4, pady=2)
@@ -734,7 +906,7 @@ def launch_gui() -> None:
 def main() -> None:
     if len(sys.argv) > 1:
         args = parse_args()
-        merged = merge_json_directory(args.input_dir, args.output)
+        merged = merge_json_directory(args.input_dir, args.output, generate_pdfs=args.generate_pdf)
         print(f"Merged {merged} JSON files into {args.output}")
     else:
         launch_gui()
