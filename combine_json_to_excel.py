@@ -31,7 +31,7 @@ from typing import Dict, Iterable, List, Tuple
 from icon_data import ICON_BASE64
 
 
-REQUIRED_PACKAGES = ["openpyxl", "fpdf2"]
+REQUIRED_PACKAGES = [("openpyxl", "openpyxl"), ("fpdf2", "fpdf")]
 FONT_DOWNLOAD_URL = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
 
 
@@ -44,7 +44,7 @@ def ensure_dependencies_installed() -> None:
     if getattr(sys, "frozen", False):
         return
 
-    missing = [pkg for pkg in REQUIRED_PACKAGES if importlib.util.find_spec(pkg) is None]
+    missing = [pkg for pkg, module_name in REQUIRED_PACKAGES if importlib.util.find_spec(module_name) is None]
     if missing:
         raise RuntimeError(
             "Не найдены обязательные зависимости: "
