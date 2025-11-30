@@ -39,6 +39,12 @@ FONT_DOWNLOAD_URL = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf
 def ensure_dependencies_installed() -> None:
     """Install required third-party packages at runtime when missing."""
 
+    # When running from a bundled executable (PyInstaller), dependencies are
+    # already packaged. Spawning pip from within the executable would relaunch
+    # the same binary repeatedly, quickly exhausting system resources.
+    if getattr(sys, "frozen", False):
+        return
+
     for package in REQUIRED_PACKAGES:
         if importlib.util.find_spec(package) is None:
             try:
