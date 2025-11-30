@@ -556,19 +556,32 @@ def extract_full_name(record: JsonRecord, fallback: str) -> str:
     return full_name if full_name else fallback
 
 
-def render_pdf_row(pdf: FPDF, text: str, points: int, column_width: float, points_width: float) -> None:
+def render_pdf_row(
+    pdf: FPDF,
+    text: str,
+    points: int,
+    column_width: float,
+    points_width: float,
+    *,
+    body_font: Tuple[str, str],
+    points_font: Tuple[str, str],
+    font_size: int,
+) -> None:
     """Render a wrapped table row with aligned points column."""
 
     line_height = 8
     x_start = pdf.get_x()
     y_start = pdf.get_y()
 
+    pdf.set_font(*body_font, size=font_size)
     pdf.multi_cell(column_width, line_height, text, border=1)
     y_end = pdf.get_y()
     row_height = y_end - y_start
 
     pdf.set_xy(x_start + column_width, y_start)
-    pdf.cell(points_width, row_height, str(points), border=1, align="R")
+    pdf.set_font(*points_font, size=font_size)
+    pdf.cell(points_width, row_height, str(points), border=1, align="L")
+    pdf.set_font(*body_font, size=font_size)
     pdf.set_xy(x_start, y_end)
 
 
@@ -601,15 +614,24 @@ def generate_score_pdf(
 
     pdf.set_font(*heading_font, size=11)
     pdf.cell(column_width, 8, "Критерий", border=1)
-    pdf.cell(points_width, 8, "Баллы", border=1, ln=True, align="R")
+    pdf.cell(points_width, 8, "Баллы", border=1, ln=True, align="L")
 
     pdf.set_font(*body_font, size=11)
     for description, points in components:
-        render_pdf_row(pdf, description, points, column_width, points_width)
+        render_pdf_row(
+            pdf,
+            description,
+            points,
+            column_width,
+            points_width,
+            body_font=body_font,
+            points_font=heading_font,
+            font_size=11,
+        )
 
     pdf.set_font(*heading_font, size=12)
     pdf.cell(column_width, 10, "Итого", border=1)
-    pdf.cell(points_width, 10, str(total), border=1, ln=True, align="R")
+    pdf.cell(points_width, 10, str(total), border=1, ln=True, align="L")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     pdf.output(str(output_path))
