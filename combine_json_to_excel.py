@@ -18,9 +18,10 @@ from __future__ import annotations
 import argparse
 import importlib.util
 from dataclasses import dataclass
-import json
 import base64
+import json
 import re
+import urllib.request
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -32,6 +33,7 @@ from icon_data import ICON_BASE64
 
 
 REQUIRED_PACKAGES = ["openpyxl", "fpdf2"]
+FONT_DOWNLOAD_URL = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
 
 
 def ensure_dependencies_installed() -> None:
@@ -81,6 +83,41 @@ def ensure_icon_path() -> Path:
         # If the path is not writable, silently continue without the icon.
         pass
     return icon_path
+
+
+def ensure_font_path() -> Path:
+    """Locate a Unicode-capable font, downloading it if necessary."""
+
+    def download_font(target_path: Path) -> Path:
+        try:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            with urllib.request.urlopen(FONT_DOWNLOAD_URL) as response:
+                target_path.write_bytes(response.read())
+            return target_path
+        except Exception as exc:  # pragma: no cover - network errors are user facing
+            raise FileNotFoundError(
+                "Не удалось автоматически скачать DejaVuSans.ttf. "
+                "Скачайте файл вручную и положите рядом со скриптом."
+            ) from exc
+
+    bundled_font = get_resource_path("DejaVuSans.ttf")
+    if bundled_font.exists():
+        return bundled_font
+
+    system_candidates = [
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+        Path("C:/Windows/Fonts/DejaVuSans.ttf"),
+        Path.home() / "Library/Fonts/DejaVuSans.ttf",
+    ]
+    for system_font in system_candidates:
+        if system_font.exists():
+            return system_font
+
+    cache_font = Path.home() / ".cache" / "curators-report" / "DejaVuSans.ttf"
+    if cache_font.exists():
+        return cache_font
+
+    return download_font(cache_font)
 
 
 ListValue = List[str]
@@ -545,15 +582,11 @@ def generate_score_pdf(
     pdf = FPDF()
     pdf.add_page()
 
-    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-    if font_path.exists():
-        pdf.add_font("DejaVu", "", str(font_path), uni=True)
-        pdf.add_font("DejaVu", "B", str(font_path), uni=True)
-        body_font = ("DejaVu", "")
-        heading_font = ("DejaVu", "B")
-    else:
-        body_font = ("Arial", "")
-        heading_font = ("Arial", "B")
+    font_path = ensure_font_path()
+    pdf.add_font("DejaVu", "", str(font_path), uni=True)
+    pdf.add_font("DejaVu", "B", str(font_path), uni=True)
+    body_font = ("DejaVu", "")
+    heading_font = ("DejaVu", "B")
 
     pdf.set_font(*heading_font, size=14)
     pdf.cell(0, 10, "Отчёт по баллам", ln=True)
@@ -806,6 +839,19 @@ def launch_gui() -> None:
     style.map(
         "TEntry",
         fieldbackground=[("focus", palette["panel"]), ("!focus", palette["panel"])],
+    )
+    style.configure(
+        "TCheckbutton",
+        background=palette["card"],
+        foreground=palette["muted"],
+        font=("Inter", 10),
+        focuscolor=palette["card"],
+        padding=4,
+    )
+    style.map(
+        "TCheckbutton",
+        background=[("active", palette["panel"])],
+        foreground=[("active", palette["text"]), ("selected", palette["text"])],
     )
 
     content = ttk.Frame(root, padding=16, style="Card.TFrame")
