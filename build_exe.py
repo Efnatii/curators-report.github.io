@@ -5,9 +5,10 @@ from __future__ import annotations
 import base64
 import importlib.util
 from pathlib import Path
+import os
 import subprocess
 import sys
-import os
+import tempfile
 import urllib.request
 
 from icon_data import ICON_BASE64
@@ -61,7 +62,17 @@ def build_executable() -> None:
 
     script_path = Path(__file__).with_name("combine_json_to_excel.py")
     icon_path = script_path.with_name("combine_json_to_excel.ico")
-    runtime_tmpdir = script_path.parent / "_pyi_runtime"
+    # Prefer a per-user temp directory for PyInstaller's runtime extraction so
+    # the executable can run from read-only locations (e.g. Downloads or
+    # network shares) without failing with "Failed to start embedded python
+    # interpreter!". Fall back to the repository folder if the temp location is
+    # unavailable.
+    runtime_tmpdir = Path(tempfile.gettempdir()) / "curators-report-runtime"
+    try:
+        runtime_tmpdir.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        runtime_tmpdir = script_path.parent / "_pyi_runtime"
+        runtime_tmpdir.mkdir(parents=True, exist_ok=True)
     if not icon_path.exists():
         icon_bytes = base64.b64decode("".join(ICON_BASE64))
         icon_path.write_bytes(icon_bytes)
@@ -76,8 +87,6 @@ def build_executable() -> None:
     # default temp folder is unavailable (e.g. redirected to a network share or
     # containing non-ASCII characters). This avoids the
     # "Failed to start embedded python interpreter!" error on some systems.
-    runtime_tmpdir.mkdir(parents=True, exist_ok=True)
-
     data_sep = os.pathsep
 
     command = [
