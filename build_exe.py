@@ -61,6 +61,7 @@ def build_executable() -> None:
 
     script_path = Path(__file__).with_name("combine_json_to_excel.py")
     icon_path = script_path.with_name("combine_json_to_excel.ico")
+    runtime_tmpdir = script_path.parent / "_pyi_runtime"
     if not icon_path.exists():
         icon_bytes = base64.b64decode("".join(ICON_BASE64))
         icon_path.write_bytes(icon_bytes)
@@ -70,6 +71,12 @@ def build_executable() -> None:
         raise FileNotFoundError(f"Не найден файл {icon_path}")
 
     font_path = locate_font()
+
+    # Using an explicit runtime extraction directory prevents failures when the
+    # default temp folder is unavailable (e.g. redirected to a network share or
+    # containing non-ASCII characters). This avoids the
+    # "Failed to start embedded python interpreter!" error on some systems.
+    runtime_tmpdir.mkdir(parents=True, exist_ok=True)
 
     data_sep = os.pathsep
 
@@ -84,6 +91,8 @@ def build_executable() -> None:
         "Combine Json to Excel",
         "--icon",
         str(icon_path),
+        "--runtime-tmpdir",
+        str(runtime_tmpdir),
         "--add-data",
         f"{icon_path}{data_sep}.",
         "--add-data",
