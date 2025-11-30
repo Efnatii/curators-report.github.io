@@ -25,7 +25,6 @@ import urllib.request
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-import subprocess
 import sys
 from typing import Dict, Iterable, List, Tuple
 
@@ -45,15 +44,13 @@ def ensure_dependencies_installed() -> None:
     if getattr(sys, "frozen", False):
         return
 
-    for package in REQUIRED_PACKAGES:
-        if importlib.util.find_spec(package) is None:
-            try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-            except subprocess.CalledProcessError as exc:
-                raise RuntimeError(
-                    f"Не удалось автоматически установить пакет {package}. "
-                    "Убедитесь, что есть доступ в интернет или установите пакет вручную."
-                ) from exc
+    missing = [pkg for pkg in REQUIRED_PACKAGES if importlib.util.find_spec(pkg) is None]
+    if missing:
+        raise RuntimeError(
+            "Не найдены обязательные зависимости: "
+            f"{', '.join(missing)}. Установите их с помощью `pip install -r requirements.txt` "
+            "или вручную добавьте пакеты перед запуском программы."
+        )
 
 
 ensure_dependencies_installed()
