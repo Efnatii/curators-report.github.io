@@ -151,6 +151,7 @@ QUESTION_ORDER: List[Dict[str, object]] = [
             "date_end": "Дата окончания",
         },
     },
+    {"key": "score", "label": "Баллы", "always": True},
     {"key": "full_name", "label": "1. Фамилия Имя Отчество"},
     {"key": "job_positions", "label": "2. Должность"},
     {"key": "department", "label": "3. Кафедра"},
@@ -283,7 +284,8 @@ def determine_columns(records: Iterable[Tuple[Path, JsonRecord]]) -> List[Questi
 
     for question in QUESTION_ORDER:
         key = question["key"]  # type: ignore[index]
-        if key not in present_keys:
+        always_include = bool(question.get("always"))
+        if not always_include and key not in present_keys:
             continue
 
         label = question["label"]  # type: ignore[index]
@@ -335,6 +337,105 @@ def normalize_record_values(record: JsonRecord) -> JsonRecord:
     return normalized
 
 
+def is_yes(value: JsonValue) -> bool:
+    """Return True when the answer represents an affirmative response."""
+
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() == "да"
+    return False
+
+
+def row_has_content(row: JsonValue) -> bool:
+    """Check whether a list item should be counted as a filled row."""
+
+    if isinstance(row, dict):
+        return any(bool(v) for v in row.values())
+    if isinstance(row, (str, int, float, bool)):
+        return bool(row)
+    return False
+
+
+def count_filled_rows(value: JsonValue) -> int:
+    """Count non-empty rows inside a list value."""
+
+    if not isinstance(value, list):
+        return 0
+    return sum(1 for item in value if row_has_content(item))
+
+
+def count_rows_with_specialists(value: JsonValue) -> int:
+    """Count curator hour rows that include invited specialists."""
+
+    if not isinstance(value, list):
+        return 0
+
+    count = 0
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        specialists = item.get("specialists")
+        if isinstance(specialists, str) and specialists.strip():
+            count += 1
+        elif isinstance(specialists, list) and any(specialist for specialist in specialists):
+            count += 1
+    return count
+
+
+def compute_points(record: JsonRecord) -> int:
+    """Calculate the total score for a single survey record."""
+
+    value_11 = record.get("held_minimum_three_curator_sessions_in_reporting_period")
+    value_12 = record.get("curator_hours_details")
+    value_13 = record.get("manages_group_chat")
+    value_14 = record.get("inform_group_about_events")
+    value_16 = record.get("participated_in_two_events_with_group")
+    value_17 = record.get("joint_participation_events")
+    value_18 = record.get("participated_in_two_curator_events")
+    value_19 = record.get("curator_personal_events")
+
+    count_12 = count_filled_rows(value_12)
+    count_17 = count_filled_rows(value_17)
+    count_19 = count_filled_rows(value_19)
+
+    points = 0
+
+    base_condition_met = (
+        is_yes(value_11)
+        and count_12 >= 3
+        and is_yes(value_13)
+        and is_yes(value_14)
+        and is_yes(value_16)
+        and count_17 >= 2
+        and is_yes(value_18)
+        and count_19 >= 2
+    )
+
+    if base_condition_met:
+        points += 30
+
+    points += count_filled_rows(record.get("personal_program_participation")) * 10
+    points += count_filled_rows(record.get("scientific_publications")) * 20
+    points += count_filled_rows(record.get("media_materials")) * 10
+    points += count_filled_rows(record.get("mentor_support_events")) * 10
+    points += count_filled_rows(record.get("achievements")) * 10
+    points += count_filled_rows(record.get("qualification_courses")) * 20
+
+    points += count_rows_with_specialists(value_12) * 20
+
+    if count_12 > 3:
+        points += (count_12 - 3) * 5
+
+    if count_17 > 2:
+        points += (count_17 - 2) * 10
+
+    if count_19 > 2:
+        points += (count_19 - 2) * 5
+
+    return points
+
+
 def write_workbook(
     records: List[Tuple[Path, JsonRecord]],
     questions: List[QuestionColumn],
@@ -382,6 +483,7 @@ def write_workbook(
 
     for file_path, raw_record in records:
         record = normalize_record_values(raw_record)
+        record["score"] = compute_points(raw_record)
         block_height = max(
             (
                 len(value) if isinstance(value, list) else 1
