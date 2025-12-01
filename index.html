@@ -438,9 +438,10 @@
         </section>
 
         <div class="actions">
-          <button type="button" id="import-json-button" class="button button--secondary">Загрузить ответы</button>
-          <button type="button" id="download" class="button">Скачать ответы</button>
-          <p class="muted">Используйте кнопки, чтобы загрузить ответы или сохранить их в форматах JSON и PDF.</p>
+          <button type="button" id="import-json-button" class="button button--secondary">Импорт из JSON</button>
+          <button type="button" id="export-json-button" class="button">Экспорт в JSON</button>
+          <button type="button" id="export-pdf-button" class="button">Экспорт в PDF</button>
+          <p class="muted">Используйте кнопки, чтобы импортировать ответы или экспортировать их в форматах JSON и PDF.</p>
           <input type="file" id="import-json-input" accept="application/json" hidden />
         </div>
       </form>
@@ -468,7 +469,8 @@
     const reportingPeriodSelect = document.getElementById('reporting-period');
     const importButton = document.getElementById('import-json-button');
     const importInput = document.getElementById('import-json-input');
-    const downloadButton = document.getElementById('download');
+    const exportJsonButton = document.getElementById('export-json-button');
+    const exportPdfButton = document.getElementById('export-pdf-button');
     const curatorHoursDetails = document.getElementById('curator-hours-details');
     const curatorHoursRows = document.getElementById('curator-hours-rows');
     const addCuratorHourRowButton = document.getElementById('add-curator-hour-row');
@@ -2468,22 +2470,29 @@
       });
     }
 
-    downloadButton.addEventListener('click', () => {
-      const reportData = buildReportData();
-      const report = JSON.stringify(reportData, null, 2);
-      const blob = new Blob([report], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = generateFileName('json');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+    if (exportJsonButton) {
+      exportJsonButton.addEventListener('click', () => {
+        const reportData = buildReportData();
+        const report = JSON.stringify(reportData, null, 2);
+        const blob = new Blob([report], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = generateFileName('json');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
 
-      const pdfDefinition = buildPdfDefinition(reportData);
-      pdfMake.createPdf(pdfDefinition).download(generateFileName('pdf'));
-    });
+    if (exportPdfButton) {
+      exportPdfButton.addEventListener('click', () => {
+        const reportData = buildReportData();
+        const pdfDefinition = buildPdfDefinition(reportData);
+        pdfMake.createPdf(pdfDefinition).download(generateFileName('pdf'));
+      });
+    }
   </script>
 </body>
 </html>
