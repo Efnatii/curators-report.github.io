@@ -162,14 +162,15 @@ h2 {
 
 @media (min-width: 768px) {
   .period-picker {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 1fr);
     align-items: start;
   }
 
   .period-picker__hint {
     align-self: center;
-    text-align: right;
-    white-space: nowrap;
+    text-align: left;
+    white-space: normal;
+    max-width: 420px;
   }
 }
 
