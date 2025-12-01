@@ -17,8 +17,38 @@
       <p class="lede">Анкета для фиксации данных кураторской деятельности.</p>
       <div class="hero__meta" aria-label="Выбор отчетного периода">
         <div class="period-picker">
-          <span class="period-picker__label">Отчетный период</span>
-          <select id="reporting-period" class="period-picker__select" aria-label="Выберите отчетный период"></select>
+          <div class="period-picker__row">
+            <span class="period-picker__label">Отчетный период</span>
+            <select
+              id="reporting-period"
+              class="period-picker__select"
+              aria-label="Выберите отчетный период"
+            ></select>
+          </div>
+          <div class="period-picker__manual" aria-label="Ручной ввод отчетного периода">
+            <label class="period-picker__field">
+              <span class="period-picker__field-label">Название периода</span>
+              <input
+                type="text"
+                id="reporting-period-label"
+                class="period-picker__input"
+                placeholder="Например, 1 отчётный период"
+              />
+            </label>
+            <label class="period-picker__field">
+              <span class="period-picker__field-label">Дата начала</span>
+              <input type="date" id="reporting-period-start" class="period-picker__input" />
+            </label>
+            <label class="period-picker__field">
+              <span class="period-picker__field-label">Дата окончания</span>
+              <input type="date" id="reporting-period-end" class="period-picker__input" />
+            </label>
+            <label class="period-picker__field">
+              <span class="period-picker__field-label">Крайний срок отправки</span>
+              <input type="date" id="reporting-period-deadline" class="period-picker__input" />
+            </label>
+          </div>
+          <p class="period-picker__hint">Изменяйте значения вручную, если отчётные периоды меняются.</p>
         </div>
       </div>
     </div>
@@ -467,6 +497,10 @@
   <script>
     const form = document.getElementById('curator-form');
     const reportingPeriodSelect = document.getElementById('reporting-period');
+    const reportingPeriodLabelInput = document.getElementById('reporting-period-label');
+    const reportingPeriodStartInput = document.getElementById('reporting-period-start');
+    const reportingPeriodEndInput = document.getElementById('reporting-period-end');
+    const reportingPeriodDeadlineInput = document.getElementById('reporting-period-deadline');
     const importButton = document.getElementById('import-json-button');
     const importInput = document.getElementById('import-json-input');
     const exportJsonButton = document.getElementById('export-json-button');
@@ -547,6 +581,8 @@
         option.dataset.label = label;
         reportingPeriodSelect.append(option);
       });
+
+      updateManualPeriodFromSelect();
     }
 
     function selectReportingPeriod(period) {
@@ -556,6 +592,7 @@
       const { start: rangeStart, end: rangeEnd } = splitRange(period.range || '');
       const normalizedStart = dateStart || rangeStart;
       const normalizedEnd = dateEnd || rangeEnd;
+      setManualReportingPeriod({ label, dateStart: normalizedStart, dateEnd: normalizedEnd, deadline });
       const matchedOption = Array.from(reportingPeriodSelect.options).find(
         (option) =>
           option.dataset.label === label &&
@@ -571,9 +608,8 @@
 
       const option = document.createElement('option');
       option.value = 'custom-period';
-      option.textContent = display || `${label}: ${formatDateRange(normalizedStart, normalizedEnd)}${
-        deadline ? ` (Прислать отчёт до ${deadline})` : ''
-      }`;
+      option.textContent =
+        display || buildReportingPeriodDisplay({ label, dateStart: normalizedStart, dateEnd: normalizedEnd, deadline });
       option.dataset.dateStart = normalizedStart;
       option.dataset.dateEnd = normalizedEnd;
       option.dataset.deadline = deadline;
@@ -1476,6 +1512,58 @@
       return { start, end };
     }
 
+    function setManualReportingPeriod({ label = '', dateStart = '', dateEnd = '', deadline = '' } = {}) {
+      if (reportingPeriodLabelInput) reportingPeriodLabelInput.value = label;
+      if (reportingPeriodStartInput) reportingPeriodStartInput.value = dateStart;
+      if (reportingPeriodEndInput) reportingPeriodEndInput.value = dateEnd;
+      if (reportingPeriodDeadlineInput) reportingPeriodDeadlineInput.value = deadline;
+    }
+
+    function getManualReportingPeriod() {
+      const label = sanitizeText(reportingPeriodLabelInput?.value || '');
+      const dateStart = reportingPeriodStartInput?.value || '';
+      const dateEnd = reportingPeriodEndInput?.value || '';
+      const deadline = reportingPeriodDeadlineInput?.value || '';
+
+      return {
+        label,
+        date_start: dateStart,
+        date_end: dateEnd,
+        deadline,
+        display: buildReportingPeriodDisplay({ label, dateStart, dateEnd, deadline }),
+      };
+    }
+
+    function updateManualPeriodFromSelect() {
+      if (!reportingPeriodSelect) return;
+
+      const selectedOption = reportingPeriodSelect.options[reportingPeriodSelect.selectedIndex];
+      if (!selectedOption) return;
+
+      const { label, dateStart, dateEnd, deadline } = selectedOption.dataset;
+      setManualReportingPeriod({
+        label: label || '',
+        dateStart: dateStart || '',
+        dateEnd: dateEnd || '',
+        deadline: deadline || '',
+      });
+    }
+
+    function buildReportingPeriodDisplay({ label, dateStart, dateEnd, deadline }) {
+      const range = formatDateRange(dateStart, dateEnd);
+      const hasRange = range && range !== '—';
+
+      if (label && hasRange) {
+        return `${label}: ${range}${deadline ? ` (Прислать отчёт до ${deadline})` : ''}`;
+      }
+
+      if (hasRange) {
+        return `${range}${deadline ? ` (Прислать отчёт до ${deadline})` : ''}`;
+      }
+
+      return deadline || '';
+    }
+
     function collectReportingPeriod() {
       if (!reportingPeriodSelect) return {};
 
@@ -1483,15 +1571,23 @@
 
       if (!selectedOption) return {};
 
+      const manualPeriod = getManualReportingPeriod();
       const { dataset, textContent } = selectedOption;
       const { start, end } = splitRange(dataset.range);
 
+      const label = manualPeriod.label || dataset.label || '';
+      const dateStart = manualPeriod.date_start || dataset.dateStart || start || '';
+      const dateEnd = manualPeriod.date_end || dataset.dateEnd || end || '';
+      const deadline = manualPeriod.deadline || dataset.deadline || '';
+      const display =
+        manualPeriod.display || buildReportingPeriodDisplay({ label, dateStart, dateEnd, deadline }) || textContent || '';
+
       return {
-        label: dataset.label || '',
-        date_start: dataset.dateStart || start,
-        date_end: dataset.dateEnd || end,
-        deadline: dataset.deadline || '',
-        display: textContent || '',
+        label,
+        date_start: dateStart,
+        date_end: dateEnd,
+        deadline,
+        display,
       };
     }
 
@@ -2360,6 +2456,9 @@
     }
 
     buildReportingPeriodOptions();
+    if (reportingPeriodSelect) {
+      reportingPeriodSelect.addEventListener('change', updateManualPeriodFromSelect);
+    }
     setupTooltips();
 
     setupMultiInput({
