@@ -78,16 +78,42 @@
                       type="button"
                       class="tooltip__trigger"
                       aria-label="Подсказка: добавляйте по одной должности в каждую строку"
-                      aria-expanded="false"
-                    >
-                      ?
-                    </button>
-                    <div class="tooltip__bubble" role="tooltip">Добавляйте по одной должности в каждую строку.</div>
-                  </div>
-                  <button type="button" class="chip chip--interactive" data-add="job_positions">Добавить</button>
+                    aria-expanded="false"
+                  >
+                    ?
+                  </button>
+                  <div class="tooltip__bubble" role="tooltip">Выберите одну или несколько должностей через поиск.</div>
                 </div>
               </div>
-              <div class="multi-input" data-name="job_positions"></div>
+              </div>
+              <div class="multi-select" data-name="job_positions">
+                <div
+                  class="multi-select__control"
+                  role="combobox"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-owns="job-positions-list"
+                >
+                  <div class="multi-select__values" aria-live="polite"></div>
+                  <input
+                    type="text"
+                    class="multi-select__input"
+                    placeholder="Начните вводить должность"
+                    aria-label="Поиск должности"
+                  />
+                  <button type="button" class="multi-select__chevron" aria-hidden="true">▾</button>
+                </div>
+                <div class="multi-select__dropdown" id="job-positions-list" role="listbox"></div>
+                <div class="multi-select__hidden" aria-hidden="true"></div>
+                <input
+                  type="text"
+                  class="multi-select__validator"
+                  name="job_positions_validator"
+                  aria-hidden="true"
+                  tabindex="-1"
+                  required
+                />
+              </div>
             </div>
             <label class="field">
               <span class="field__label">3. Кафедра *</span>
@@ -860,6 +886,52 @@
       'Профессионально-трудовая',
     ];
 
+    const jobPositionOptions = [
+      'ассистент',
+      'преподаватель',
+      'старший преподаватель',
+      'доцент',
+      'профессор',
+      'ректор',
+      'заведующий кафедрой',
+      'Доцент военного учебного центра при ГУАП',
+      'почасовая нагрузка',
+      'почасовая оплата',
+      'с.н.с',
+      'м.н.с',
+      'канд. техн. наук',
+      'канд. юрид. наук',
+      'канд. экон. наук',
+      'канд. пед. наук',
+      'канд. физ.-мат. наук',
+      'канд. ист. наук',
+      'канд. воен. наук',
+      'канд. филос. наук',
+      'канд. культурологии',
+      'канд. филол. наук',
+      'канд. хим. наук',
+      'канд. социол. наук',
+      'канд. биол. наук',
+      'д-р юрид. наук',
+      'д-р экон. наук',
+      'д-р техн. наук',
+      'д-р филол. наук',
+      'д-р ист. наук',
+      'д-р пед. наук',
+      'д-р биол. наук',
+      'д-р социол. наук',
+      'д-р полит. наук',
+      'д-р филос. наук',
+      'д-р физ.-мат. наук',
+      'к.т.н.',
+      'к.э.н.',
+      'к.фил.н.',
+      'д.т.н.',
+      'д.э.н.',
+    ];
+
+    let jobPositionsSelect;
+
     function selectReportingPeriod(period) {
       if (!period) {
         setManualReportingPeriod();
@@ -878,7 +950,7 @@
       reporting_period: 'Выбранный отчётный период и крайний срок отправки отчёта.',
       _meta: 'Комментарии добавлены для ориентира и не влияют на валидацию данных.',
       full_name: 'Фамилия Имя Отчество куратора.',
-      job_positions: 'Список должностей куратора; каждая строка — отдельная должность.',
+      job_positions: 'Список должностей куратора; выберите подходящие варианты через поиск.',
       department: 'Кафедра или структурное подразделение, в котором работает куратор.',
       contact_phone_connected_to_telegram: 'Контактный телефон, привязанный к аккаунту Telegram.',
       telegram_username: 'Никнейм в Telegram, начиная с @.',
@@ -1583,7 +1655,10 @@
     function collectList(name) {
       const container = form.querySelector(`[data-name="${name}"]`);
       if (!container) return [];
-      return Array.from(container.querySelectorAll('input'))
+      const collectableInputs = container.querySelectorAll('input[data-collect]');
+      const inputs = collectableInputs.length ? collectableInputs : container.querySelectorAll('input');
+
+      return Array.from(inputs)
         .map((input) => sanitizeText(input.value))
         .filter(Boolean);
     }
@@ -1654,6 +1729,167 @@
           removeButton.click();
         }
       }
+    }
+
+    function setupSearchableMultiSelect({ name, options = [], placeholder = '' }) {
+      const container = form.querySelector(`[data-name="${name}"]`);
+      if (!container) return null;
+
+      const control = container.querySelector('.multi-select__control');
+      const input = container.querySelector('.multi-select__input');
+      const dropdown = container.querySelector('.multi-select__dropdown');
+      const valuesContainer = container.querySelector('.multi-select__values');
+      const hiddenContainer = container.querySelector('.multi-select__hidden');
+      const validator = container.querySelector('.multi-select__validator');
+      const chevron = container.querySelector('.multi-select__chevron');
+
+      const selected = new Set();
+      input.placeholder = placeholder;
+
+      function updateValidator() {
+        if (!validator) return;
+        validator.value = selected.size ? 'selected' : '';
+      }
+
+      function updateHiddenInputs() {
+        if (!hiddenContainer) return;
+        hiddenContainer.innerHTML = '';
+
+        if (!selected.size) {
+          const placeholder = document.createElement('input');
+          placeholder.type = 'hidden';
+          placeholder.setAttribute('data-collect', 'true');
+          hiddenContainer.append(placeholder);
+          return;
+        }
+
+        selected.forEach((value) => {
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = name;
+          hiddenInput.value = value;
+          hiddenInput.setAttribute('data-collect', 'true');
+          hiddenContainer.append(hiddenInput);
+        });
+      }
+
+      function renderSelected() {
+        if (!valuesContainer) return;
+        valuesContainer.innerHTML = '';
+
+        selected.forEach((value) => {
+          const chip = document.createElement('span');
+          chip.className = 'multi-select__chip';
+          chip.textContent = value;
+
+          const removeButton = document.createElement('button');
+          removeButton.type = 'button';
+          removeButton.className = 'multi-select__chip-remove';
+          removeButton.setAttribute('aria-label', `Удалить должность «${value}»`);
+          removeButton.textContent = '×';
+          removeButton.addEventListener('click', () => {
+            selected.delete(value);
+            renderSelected();
+            updateHiddenInputs();
+            updateValidator();
+            renderOptions(input.value.trim());
+          });
+
+          chip.append(removeButton);
+          valuesContainer.append(chip);
+        });
+      }
+
+      function closeDropdown() {
+        dropdown.classList.remove('multi-select__dropdown--open');
+        control?.setAttribute('aria-expanded', 'false');
+      }
+
+      function renderOptions(term = '') {
+        dropdown.innerHTML = '';
+        const normalized = term.toLowerCase();
+
+        const filtered = options.filter((option) => {
+          if (selected.has(option)) return false;
+          return option.toLowerCase().includes(normalized);
+        });
+
+        if (!filtered.length) {
+          const empty = document.createElement('div');
+          empty.className = 'multi-select__option';
+          empty.textContent = 'Совпадений не найдено';
+          empty.setAttribute('aria-live', 'polite');
+          dropdown.append(empty);
+          return;
+        }
+
+        filtered.forEach((option) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'multi-select__option';
+          button.setAttribute('role', 'option');
+          button.textContent = option;
+          button.addEventListener('click', () => {
+            selected.add(option);
+            input.value = '';
+            renderSelected();
+            updateHiddenInputs();
+            updateValidator();
+            renderOptions('');
+            input.focus();
+          });
+
+          dropdown.append(button);
+        });
+      }
+
+      function openDropdown() {
+        dropdown.classList.add('multi-select__dropdown--open');
+        control?.setAttribute('aria-expanded', 'true');
+        renderOptions(input.value.trim());
+      }
+
+      input.addEventListener('focus', openDropdown);
+      input.addEventListener('input', (event) => {
+        renderOptions(event.target.value.trim());
+      });
+
+      control?.addEventListener('click', () => {
+        input.focus();
+      });
+
+      chevron?.addEventListener('click', () => {
+        if (dropdown.classList.contains('multi-select__dropdown--open')) {
+          closeDropdown();
+        } else {
+          input.focus();
+          openDropdown();
+        }
+      });
+
+      document.addEventListener('click', (event) => {
+        if (container.contains(event.target)) return;
+        closeDropdown();
+      });
+
+      renderOptions();
+      updateValidator();
+      updateHiddenInputs();
+
+      return {
+        setValues(values = []) {
+          selected.clear();
+          values
+            .filter(Boolean)
+            .forEach((value) => {
+              if (options.includes(value)) selected.add(value);
+            });
+          renderSelected();
+          updateHiddenInputs();
+          updateValidator();
+          renderOptions('');
+        },
+      };
     }
 
     function setRowList(row, target, values = [], minRows = 1) {
@@ -2677,7 +2913,7 @@
 
       selectReportingPeriod(data.reporting_period);
       form.elements.full_name.value = data.full_name || '';
-      fillMultiInput('job_positions', Array.isArray(data.job_positions) ? data.job_positions : [], 0);
+      jobPositionsSelect?.setValues(Array.isArray(data.job_positions) ? data.job_positions : []);
       form.elements.department.value = data.department || '';
       form.elements.contact_phone_connected_to_telegram.value =
         data.contact_phone_connected_to_telegram || '';
@@ -2747,11 +2983,10 @@
 
     setupTooltips();
 
-    setupMultiInput({
+    jobPositionsSelect = setupSearchableMultiSelect({
       name: 'job_positions',
-      inputName: 'job_position',
-      placeholder: 'Например, преподаватель-практик или тьютор',
-      minRows: 0,
+      options: jobPositionOptions,
+      placeholder: 'Начните вводить должность',
     });
 
     setupMultiInput({
