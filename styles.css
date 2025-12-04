@@ -315,7 +315,7 @@ main {
   display: grid;
   gap: 8px;
   position: relative;
-  z-index: 120;
+  z-index: 5000;
   isolation: isolate;
 }
 
@@ -377,7 +377,7 @@ main {
   border-radius: 10px;
   background: linear-gradient(180deg, rgba(12, 16, 26, 0.96), rgba(12, 16, 26, 0.92));
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
-  z-index: 40;
+  z-index: 5100;
   display: none;
 }
 
@@ -407,7 +407,7 @@ main {
 .datalist {
   position: relative;
   width: 100%;
-  z-index: 120;
+  z-index: 5000;
 }
 
 .datalist__control {
@@ -460,7 +460,7 @@ main {
   background: linear-gradient(180deg, rgba(12, 16, 26, 0.96), rgba(12, 16, 26, 0.92));
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
   display: none;
-  z-index: 45;
+  z-index: 5100;
 }
 
 .datalist__dropdown--open {
