@@ -315,6 +315,7 @@ main {
   display: grid;
   gap: 8px;
   position: relative;
+  z-index: 120;
   isolation: isolate;
 }
 
@@ -406,6 +407,7 @@ main {
 .datalist {
   position: relative;
   width: 100%;
+  z-index: 120;
 }
 
 .datalist__control {
