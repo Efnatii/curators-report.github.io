@@ -1813,6 +1813,15 @@
 
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => renderOptions(event.target.value.trim()));
+      input.addEventListener('blur', () => {
+        const value = input.value.trim();
+        if (value && !options.includes(value)) {
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        closeDropdown();
+      });
       input.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           closeDropdown();
@@ -1835,6 +1844,19 @@
       });
 
       renderOptions();
+    }
+
+    function addSelectBlurValidation(select) {
+      if (!select) return;
+
+      const allowedValues = Array.from(select.options).map((option) => option.value);
+      select.addEventListener('blur', () => {
+        const value = select.value;
+        if (value && !allowedValues.includes(value)) {
+          select.value = '';
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
     }
 
     function setupSearchableMultiSelect({ name, options = [], placeholder = '' }) {
@@ -1958,6 +1980,15 @@
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => {
         renderOptions(event.target.value.trim());
+      });
+      input.addEventListener('blur', () => {
+        const value = input.value.trim();
+        if (value && !options.includes(value)) {
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        closeDropdown();
       });
 
       control?.addEventListener('click', () => {
@@ -3089,6 +3120,7 @@
 
     enhanceDatalistInput(form.elements.department);
     enhanceDatalistInput(form.elements.curator_primary_room);
+    addSelectBlurValidation(form.elements.curator_primary_building);
 
     setupTooltips();
 
