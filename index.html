@@ -20,19 +20,21 @@
           <div class="period-picker__manual" aria-label="Ручной ввод отчетного периода">
             <label class="period-picker__field">
               <span class="period-picker__field-label">Номер периода</span>
-              <select id="reporting-period-label" class="period-picker__input" aria-label="Номер периода">
-                <option value="" disabled selected hidden>Выберите номер периода</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-              </select>
+              <div class="select-shell select-shell--compact">
+                <select id="reporting-period-label" class="period-picker__input" aria-label="Номер периода">
+                  <option value="" disabled selected hidden>Выберите номер периода</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                </select>
+              </div>
             </label>
             <label class="period-picker__field">
               <span class="period-picker__field-label">Дата начала</span>
@@ -195,24 +197,26 @@
             </div>
             <label class="field">
               <span class="field__label">8. Корпус основного пребывания куратора *</span>
-              <select name="curator_primary_building" required>
-                <option value="" disabled selected hidden>Выберите адрес</option>
-                <option value="190000, Россия, г. Санкт-Петербург, ул. Большая Морская, д. 67">
-                  190000, Россия, г. Санкт-Петербург, ул. Большая Морская, д. 67
-                </option>
-                <option value="196066, Россия, г. Санкт-Петербург, ул. Гастелло, д. 15">
-                  196066, Россия, г. Санкт-Петербург, ул. Гастелло, д. 15
-                </option>
-                <option value="196135, Россия, г. Санкт-Петербург, ул. Ленсовета, д. 14">
-                  196135, Россия, г. Санкт-Петербург, ул. Ленсовета, д. 14
-                </option>
-                <option value="195067, Россия, г. Санкт-Петербург, ул. Маршала Тухачевского, д. 22">
-                  195067, Россия, г. Санкт-Петербург, ул. Маршала Тухачевского, д. 22
-                </option>
-                <option value="196128, Россия, г. Санкт-Петербург, Московский проспект, д. 149">
-                  196128, Россия, г. Санкт-Петербург, Московский проспект, д. 149
-                </option>
-              </select>
+              <div class="select-shell">
+                <select name="curator_primary_building" required>
+                  <option value="" disabled selected hidden>Выберите адрес</option>
+                  <option value="190000, Россия, г. Санкт-Петербург, ул. Большая Морская, д. 67">
+                    190000, Россия, г. Санкт-Петербург, ул. Большая Морская, д. 67
+                  </option>
+                  <option value="196066, Россия, г. Санкт-Петербург, ул. Гастелло, д. 15">
+                    196066, Россия, г. Санкт-Петербург, ул. Гастелло, д. 15
+                  </option>
+                  <option value="196135, Россия, г. Санкт-Петербург, ул. Ленсовета, д. 14">
+                    196135, Россия, г. Санкт-Петербург, ул. Ленсовета, д. 14
+                  </option>
+                  <option value="195067, Россия, г. Санкт-Петербург, ул. Маршала Тухачевского, д. 22">
+                    195067, Россия, г. Санкт-Петербург, ул. Маршала Тухачевского, д. 22
+                  </option>
+                  <option value="196128, Россия, г. Санкт-Петербург, Московский проспект, д. 149">
+                    196128, Россия, г. Санкт-Петербург, Московский проспект, д. 149
+                  </option>
+                </select>
+              </div>
             </label>
             <label class="field">
               <span class="field__label">9. Аудитория основного пребывания куратора *</span>
@@ -2231,7 +2235,7 @@
                 <button type="button" class="chip chip--interactive curator-hours__add-direction">+</button>
               </div>
             </div>
-            <div class="curator-hours__direction-select">
+            <div class="curator-hours__direction-select select-shell">
               <select class="curator-hours__direction-input"></select>
             </div>
             <div class="pill-list" data-list="directions"></div>
