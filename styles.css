@@ -323,10 +323,11 @@ main {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 6px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: #0a0f1a;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), #0a0f1a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 28px rgba(0, 0, 0, 0.3);
   cursor: text;
 }
 
@@ -373,7 +374,7 @@ main {
   overflow-y: auto;
   border: 1px solid rgba(242, 177, 56, 0.35);
   border-radius: 10px;
-  background: #0f172a;
+  background: linear-gradient(180deg, rgba(12, 16, 26, 0.96), rgba(12, 16, 26, 0.92));
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
   z-index: 40;
   display: none;
@@ -399,24 +400,112 @@ main {
 }
 
 .input--datalist {
-  position: relative;
   padding-right: 44px;
+}
+
+.datalist {
+  position: relative;
+  width: 100%;
+}
+
+.datalist__control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), #0a0f1a;
-  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23F2B138' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.datalist__control:focus-within {
+  outline: 2px solid rgba(242, 177, 56, 0.4);
+  outline-offset: 2px;
+  border-color: rgba(242, 177, 56, 0.4);
+}
+
+.datalist__input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 0;
+}
+
+.datalist__input:focus {
+  outline: none;
+}
+
+.datalist__chevron {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.datalist__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(242, 177, 56, 0.35);
+  background: linear-gradient(180deg, rgba(12, 16, 26, 0.96), rgba(12, 16, 26, 0.92));
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  display: none;
+  z-index: 45;
+}
+
+.datalist__dropdown--open {
+  display: block;
+}
+
+.datalist__option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.datalist__option:hover,
+.datalist__option:focus {
+  background: rgba(242, 177, 56, 0.08);
 }
 
 @media (max-width: 640px) {
   .multi-select__control {
-    min-height: 52px;
-    padding: 12px 14px;
+    min-height: 54px;
+    padding: 13px 14px;
   }
 
   .multi-select__dropdown {
+    position: fixed;
+    inset: auto 16px 16px 16px;
+    max-height: 45vh;
     border-width: 1.5px;
-    max-height: 320px;
+    border-radius: 14px;
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55);
+  }
+
+  .datalist__control {
+    min-height: 54px;
+  }
+
+  .datalist__dropdown {
+    position: fixed;
+    inset: auto 16px 16px 16px;
+    max-height: 45vh;
+    border-width: 1.5px;
+    border-radius: 14px;
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.55);
   }
 
   .multi-select__option {
