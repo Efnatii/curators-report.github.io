@@ -1747,7 +1747,6 @@
       const options = Array.from(datalist.querySelectorAll('option'))
         .map((option) => option.value)
         .filter(Boolean);
-      const normalizedOptions = new Set(options.map((option) => option.trim().toLowerCase()));
 
       const container = document.createElement('div');
       container.className = 'datalist';
@@ -1814,15 +1813,6 @@
 
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => renderOptions(event.target.value.trim()));
-      input.addEventListener('blur', () => {
-        const value = input.value.trim();
-        if (value && !normalizedOptions.has(value.toLowerCase())) {
-          input.value = '';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        closeDropdown();
-      });
       input.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           closeDropdown();
@@ -1845,20 +1835,6 @@
       });
 
       renderOptions();
-    }
-
-    function addSelectBlurValidation(select) {
-      if (!select) return;
-
-      const allowedValues = Array.from(select.options).map((option) => option.value);
-      const normalizedValues = new Set(allowedValues.map((value) => value.trim().toLowerCase()));
-      select.addEventListener('blur', () => {
-        const value = select.value;
-        if (value && !normalizedValues.has(value.trim().toLowerCase())) {
-          select.value = '';
-          select.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
     }
 
     function setupSearchableMultiSelect({ name, options = [], placeholder = '' }) {
@@ -1973,8 +1949,6 @@
         });
       }
 
-      const normalizedOptions = new Set(options.map((option) => option.trim().toLowerCase()));
-
       function openDropdown() {
         dropdown.classList.add('multi-select__dropdown--open');
         control?.setAttribute('aria-expanded', 'true');
@@ -1984,15 +1958,6 @@
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => {
         renderOptions(event.target.value.trim());
-      });
-      input.addEventListener('blur', () => {
-        const value = input.value.trim();
-        if (value && !normalizedOptions.has(value.toLowerCase())) {
-          input.value = '';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-
-        closeDropdown();
       });
 
       control?.addEventListener('click', () => {
@@ -3124,7 +3089,6 @@
 
     enhanceDatalistInput(form.elements.department);
     enhanceDatalistInput(form.elements.curator_primary_room);
-    addSelectBlurValidation(form.elements.curator_primary_building);
 
     setupTooltips();
 
