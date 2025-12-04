@@ -468,8 +468,11 @@
 
         <div class="actions">
           <button type="button" id="import-json-button" class="button button--secondary">Импорт из JSON</button>
-          <button type="button" id="export-json-button" class="button">Экспорт в JSON</button>
-          <button type="button" id="export-pdf-button" class="button">Экспорт в PDF</button>
+          <button type="button" id="export-json-button" class="button button--emphasis">Экспорт в JSON</button>
+          <button type="button" id="export-pdf-button" class="button button--ghost">
+            <span>Экспорт в PDF</span>
+            <span class="button__note">*только для самопроверки</span>
+          </button>
           <p class="muted">Используйте кнопки, чтобы импортировать ответы или экспортировать их в форматах JSON и PDF.</p>
           <input type="file" id="import-json-input" accept="application/json" hidden />
         </div>
