@@ -907,9 +907,11 @@
         });
       }
 
-      extracurricularRowsContainer.append(row);
+      extracurricularRowsContainer.prepend(row);
       setupTooltips();
       updateExtracurricularRowRemovalState();
+
+      return row;
     }
 
     function createPersonalProgramRow() {
@@ -959,8 +961,10 @@
 
     function addPersonalProgramRow() {
       const row = createPersonalProgramRow();
-      personalProgramRowsContainer.append(row);
+      personalProgramRowsContainer.prepend(row);
       setupTooltips();
+
+      return row;
     }
 
     function createScientificWorkRow() {
@@ -993,7 +997,9 @@
 
     function addScientificWorkRow() {
       const row = createScientificWorkRow();
-      scientificWorkRowsContainer.append(row);
+      scientificWorkRowsContainer.prepend(row);
+
+      return row;
     }
 
     function createInterviewRow() {
@@ -1022,7 +1028,9 @@
 
     function addInterviewRow() {
       const row = createInterviewRow();
-      interviewRowsContainer.append(row);
+      interviewRowsContainer.prepend(row);
+
+      return row;
     }
 
     function createQualificationCourseRow() {
@@ -1072,8 +1080,10 @@
 
     function addQualificationCourseRow() {
       const row = createQualificationCourseRow();
-      qualificationCourseRowsContainer.append(row);
+      qualificationCourseRowsContainer.prepend(row);
       setupTooltips();
+
+      return row;
     }
 
     let tooltipListenersAttached = false;
@@ -1215,7 +1225,7 @@
       addButton.addEventListener('click', () => {
         const newRow = createRow(inputName, placeholder);
         attachRemove(newRow);
-        container.append(newRow);
+        container.prepend(newRow);
         updateRemoveState();
       });
 
@@ -1376,14 +1386,14 @@
       if (!startEmpty) {
         const firstRow = createListRow(placeholder);
         attachRemove(firstRow);
-        listContainer.append(firstRow);
+        listContainer.prepend(firstRow);
         updateRemoveState();
       }
 
       addButton.addEventListener('click', () => {
         const newRow = createListRow(placeholder);
         attachRemove(newRow);
-        listContainer.append(newRow);
+        listContainer.prepend(newRow);
         updateRemoveState();
       });
     }
@@ -1403,7 +1413,7 @@
       removeButton.addEventListener('click', () => chip.remove());
 
       chip.append(removeButton);
-      container.append(chip);
+      container.prepend(chip);
     }
 
     function setupDirections(row) {
@@ -1615,9 +1625,11 @@
         }
       }
 
-      curatorHoursRows.append(row);
+      curatorHoursRows.prepend(row);
       setupTooltips();
       updateRowRemovalState();
+
+      return row;
     }
 
     function collectCuratorHoursRows() {
@@ -1642,20 +1654,22 @@
     function fillCuratorHoursRows(rows = []) {
       curatorHoursRows.innerHTML = '';
 
-      rows.forEach((item) => {
-        addCuratorHourRow();
-        const row = curatorHoursRows.lastElementChild;
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = addCuratorHourRow();
 
-        if (!row) return;
+          if (!row) return;
 
-        setRowList(row, 'groups', item.groups || []);
-        setRowList(row, 'specialists', item.specialists || []);
-        row.querySelector('.date-range__start').value = item.date_start || '';
-        row.querySelector('.date-range__end').value = item.date_end || '';
-        const topicField = row.querySelector('.curator-hours__topic');
-        if (topicField) topicField.value = item.topic || '';
-        setDirections(row, item.directions || []);
-      });
+          setRowList(row, 'groups', item.groups || []);
+          setRowList(row, 'specialists', item.specialists || []);
+          row.querySelector('.date-range__start').value = item.date_start || '';
+          row.querySelector('.date-range__end').value = item.date_end || '';
+          const topicField = row.querySelector('.curator-hours__topic');
+          if (topicField) topicField.value = item.topic || '';
+          setDirections(row, item.directions || []);
+        });
 
       updateRowRemovalState();
       setupTooltips();
@@ -1683,16 +1697,19 @@
     function fillAchievementRows(rows = []) {
       achievementRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        const row = createAchievementRow();
-        row.querySelector('.achievement-date__start').value = item.date_start || '';
-        row.querySelector('.achievement-date__end').value = item.date_end || '';
-        row.querySelector('textarea[name="achievement_event"]').value = item.event || '';
-        row.querySelector('input[name="achievement_group"]').value = item.group || '';
-        row.querySelector('input[name="achievement_student"]').value = item.student || '';
-        row.querySelector('textarea[name="achievement_result"]').value = item.result || '';
-        achievementRowsContainer.append(row);
-      });
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = createAchievementRow();
+          row.querySelector('.achievement-date__start').value = item.date_start || '';
+          row.querySelector('.achievement-date__end').value = item.date_end || '';
+          row.querySelector('textarea[name="achievement_event"]').value = item.event || '';
+          row.querySelector('input[name="achievement_group"]').value = item.group || '';
+          row.querySelector('input[name="achievement_student"]').value = item.student || '';
+          row.querySelector('textarea[name="achievement_result"]').value = item.result || '';
+          achievementRowsContainer.prepend(row);
+        });
 
       setupTooltips();
     }
@@ -1723,16 +1740,19 @@
 
       mentorSupportRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        const row = createMentorSupportRow();
-        row.querySelector('.mentor-support-date__start').value = item.date_start || '';
-        row.querySelector('.mentor-support-date__end').value = item.date_end || '';
-        row.querySelector('textarea[name="mentor_support_event"]').value = item.event || '';
-        row.querySelector('input[name="mentor_support_group"]').value = item.group || '';
-        row.querySelector('input[name="mentor_support_student"]').value = item.student || '';
-        row.querySelector('textarea[name="mentor_support_result"]').value = item.result || '';
-        mentorSupportRowsContainer.append(row);
-      });
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = createMentorSupportRow();
+          row.querySelector('.mentor-support-date__start').value = item.date_start || '';
+          row.querySelector('.mentor-support-date__end').value = item.date_end || '';
+          row.querySelector('textarea[name="mentor_support_event"]').value = item.event || '';
+          row.querySelector('input[name="mentor_support_group"]').value = item.group || '';
+          row.querySelector('input[name="mentor_support_student"]').value = item.student || '';
+          row.querySelector('textarea[name="mentor_support_result"]').value = item.result || '';
+          mentorSupportRowsContainer.prepend(row);
+        });
 
       setupTooltips();
     }
@@ -1759,15 +1779,18 @@
     function fillJointEventsRows(rows = []) {
       jointEventRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        const row = createJointEventRow();
-        setRowList(row, 'groups', item.groups || []);
-        row.querySelector('.joint-events-date__start').value = item.date_start || '';
-        row.querySelector('.joint-events-date__end').value = item.date_end || '';
-        const description = row.querySelector('textarea[name="joint_event_description"]');
-        if (description) description.value = item.event || '';
-        jointEventRowsContainer.append(row);
-      });
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = createJointEventRow();
+          setRowList(row, 'groups', item.groups || []);
+          row.querySelector('.joint-events-date__start').value = item.date_start || '';
+          row.querySelector('.joint-events-date__end').value = item.date_end || '';
+          const description = row.querySelector('textarea[name="joint_event_description"]');
+          if (description) description.value = item.event || '';
+          jointEventRowsContainer.prepend(row);
+        });
 
       setupTooltips();
     }
@@ -1793,17 +1816,19 @@
     function fillExtracurricularRows(rows = []) {
       extracurricularRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        addExtracurricularRow();
-        const row = extracurricularRowsContainer.lastElementChild;
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = addExtracurricularRow();
 
-        if (!row) return;
+          if (!row) return;
 
-        row.querySelector('.extracurricular-date__start').value = item.date_start || '';
-        row.querySelector('.extracurricular-date__end').value = item.date_end || '';
-        const description = row.querySelector('.extracurricular-event__description');
-        if (description) description.value = item.event || '';
-      });
+          row.querySelector('.extracurricular-date__start').value = item.date_start || '';
+          row.querySelector('.extracurricular-date__end').value = item.date_end || '';
+          const description = row.querySelector('.extracurricular-event__description');
+          if (description) description.value = item.event || '';
+        });
 
       updateExtracurricularRowRemovalState();
       setupTooltips();
@@ -1832,17 +1857,19 @@
 
       personalProgramRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        addPersonalProgramRow();
-        const row = personalProgramRowsContainer.lastElementChild;
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = addPersonalProgramRow();
 
-        if (!row) return;
+          if (!row) return;
 
-        row.querySelector('.personal-program-date__start').value = item.date_start || '';
-        row.querySelector('.personal-program-date__end').value = item.date_end || '';
-        const description = row.querySelector('.personal-program-event__description');
-        if (description) description.value = item.event || '';
-      });
+          row.querySelector('.personal-program-date__start').value = item.date_start || '';
+          row.querySelector('.personal-program-date__end').value = item.date_end || '';
+          const description = row.querySelector('.personal-program-event__description');
+          if (description) description.value = item.event || '';
+        });
 
       setupTooltips();
     }
@@ -1869,17 +1896,19 @@
 
       scientificWorkRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        addScientificWorkRow();
-        const row = scientificWorkRowsContainer.lastElementChild;
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = addScientificWorkRow();
 
-        if (!row) return;
+          if (!row) return;
 
-        const description = row.querySelector('.scientific-work__description');
-        const link = row.querySelector('.scientific-work__link');
-        if (description) description.value = item.description || '';
-        if (link) link.value = item.link || '';
-      });
+          const description = row.querySelector('.scientific-work__description');
+          const link = row.querySelector('.scientific-work__link');
+          if (description) description.value = item.description || '';
+          if (link) link.value = item.link || '';
+        });
     }
 
     function collectInterviews() {
@@ -1903,15 +1932,17 @@
 
       interviewRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        addInterviewRow();
-        const row = interviewRowsContainer.lastElementChild;
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = addInterviewRow();
 
-        if (!row) return;
+          if (!row) return;
 
-        const link = row.querySelector('.interview__link');
-        if (link) link.value = item.link || '';
-      });
+          const link = row.querySelector('.interview__link');
+          if (link) link.value = item.link || '';
+        });
     }
 
     function collectQualificationCourses() {
@@ -1937,17 +1968,19 @@
 
       qualificationCourseRowsContainer.innerHTML = '';
 
-      rows.forEach((item) => {
-        addQualificationCourseRow();
-        const row = qualificationCourseRowsContainer.lastElementChild;
+      rows
+        .slice()
+        .reverse()
+        .forEach((item) => {
+          const row = addQualificationCourseRow();
 
-        if (!row) return;
+          if (!row) return;
 
-        row.querySelector('.qualification-course-date__start').value = item.date_start || '';
-        row.querySelector('.qualification-course-date__end').value = item.date_end || '';
-        const description = row.querySelector('.qualification-course__description');
-        if (description) description.value = item.event || '';
-      });
+          row.querySelector('.qualification-course-date__start').value = item.date_start || '';
+          row.querySelector('.qualification-course-date__end').value = item.date_end || '';
+          const description = row.querySelector('.qualification-course__description');
+          if (description) description.value = item.event || '';
+        });
 
       setupTooltips();
     }
@@ -1990,7 +2023,7 @@
 
       if (!jointEventRowsContainer.children.length) {
         Array.from({ length: 2 }).forEach(() => {
-          jointEventRowsContainer.append(createJointEventRow({ isRemovable: false }));
+          jointEventRowsContainer.prepend(createJointEventRow({ isRemovable: false }));
         });
       }
     }
@@ -2375,13 +2408,13 @@
 
     if (addAchievementRowButton) {
       addAchievementRowButton.addEventListener('click', () => {
-        achievementRowsContainer.append(createAchievementRow());
+        achievementRowsContainer.prepend(createAchievementRow());
       });
     }
 
     if (addJointEventRowButton) {
       addJointEventRowButton.addEventListener('click', () => {
-        jointEventRowsContainer.append(createJointEventRow());
+        jointEventRowsContainer.prepend(createJointEventRow());
       });
     }
 
@@ -2395,7 +2428,7 @@
 
     if (addMentorSupportRowButton) {
       addMentorSupportRowButton.addEventListener('click', () => {
-        mentorSupportRowsContainer.append(createMentorSupportRow());
+        mentorSupportRowsContainer.prepend(createMentorSupportRow());
         setupTooltips();
       });
     }
