@@ -936,6 +936,25 @@
       'д.э.н.',
     ];
 
+    function buildNormalizedSet(values = []) {
+      return new Set(values.map((value) => value.trim().toLowerCase()).filter(Boolean));
+    }
+
+    const jobPositionOptionsNormalized = buildNormalizedSet(jobPositionOptions);
+    const departmentOptionsNormalized = buildNormalizedSet(
+      Array.from(document.getElementById('department-options')?.querySelectorAll('option') || []).map(
+        (option) => option.value
+      )
+    );
+    const primaryRoomOptionsNormalized = buildNormalizedSet(
+      Array.from(document.getElementById('curator-primary-room-options')?.querySelectorAll('option') || []).map(
+        (option) => option.value
+      )
+    );
+    const primaryBuildingOptionsNormalized = buildNormalizedSet(
+      Array.from(form.elements.curator_primary_building?.options || []).map((option) => option.value)
+    );
+
     let jobPositionsSelect;
 
     function selectReportingPeriod(period) {
@@ -1747,6 +1766,7 @@
       const options = Array.from(datalist.querySelectorAll('option'))
         .map((option) => option.value)
         .filter(Boolean);
+      const normalizedOptions = new Set(options.map((option) => option.trim().toLowerCase()));
 
       const container = document.createElement('div');
       container.className = 'datalist';
@@ -1813,6 +1833,19 @@
 
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => renderOptions(event.target.value.trim()));
+      input.addEventListener('blur', (event) => {
+        if (event.relatedTarget && dropdown.contains(event.relatedTarget)) {
+          return;
+        }
+
+        const value = input.value.trim();
+        if (value && !normalizedOptions.has(value.toLowerCase())) {
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        closeDropdown();
+      });
       input.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           closeDropdown();
@@ -1835,6 +1868,20 @@
       });
 
       renderOptions();
+    }
+
+    function addSelectBlurValidation(select) {
+      if (!select) return;
+
+      const allowedValues = Array.from(select.options).map((option) => option.value);
+      const normalizedValues = new Set(allowedValues.map((value) => value.trim().toLowerCase()));
+      select.addEventListener('blur', () => {
+        const value = select.value;
+        if (value && !normalizedValues.has(value.trim().toLowerCase())) {
+          select.value = '';
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
     }
 
     function setupSearchableMultiSelect({ name, options = [], placeholder = '' }) {
@@ -1949,6 +1996,8 @@
         });
       }
 
+      const normalizedOptions = new Set(options.map((option) => option.trim().toLowerCase()));
+
       function openDropdown() {
         dropdown.classList.add('multi-select__dropdown--open');
         control?.setAttribute('aria-expanded', 'true');
@@ -1958,6 +2007,19 @@
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => {
         renderOptions(event.target.value.trim());
+      });
+      input.addEventListener('blur', (event) => {
+        if (event.relatedTarget && dropdown.contains(event.relatedTarget)) {
+          return;
+        }
+
+        const value = input.value.trim();
+        if (value && !normalizedOptions.has(value.toLowerCase())) {
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        closeDropdown();
       });
 
       control?.addEventListener('click', () => {
@@ -3019,8 +3081,17 @@
 
       selectReportingPeriod(data.reporting_period);
       form.elements.full_name.value = data.full_name || '';
-      jobPositionsSelect?.setValues(Array.isArray(data.job_positions) ? data.job_positions : []);
-      form.elements.department.value = data.department || '';
+
+      const importedJobPositions = Array.isArray(data.job_positions) ? data.job_positions : [];
+      const validJobPositions = importedJobPositions.filter((value) =>
+        jobPositionOptionsNormalized.has((value || '').trim().toLowerCase())
+      );
+      jobPositionsSelect?.setValues(validJobPositions);
+
+      const departmentValue = (data.department || '').trim();
+      form.elements.department.value = departmentOptionsNormalized.has(departmentValue.toLowerCase())
+        ? departmentValue
+        : '';
       form.elements.contact_phone_connected_to_telegram.value =
         data.contact_phone_connected_to_telegram || '';
       form.elements.telegram_username.value = data.telegram_username || '';
@@ -3030,8 +3101,17 @@
         Array.isArray(data.curated_group_numbers) ? data.curated_group_numbers : [],
         0
       );
-      form.elements.curator_primary_building.value = data.curator_primary_building || '';
-      form.elements.curator_primary_room.value = data.curator_primary_room || '';
+      const buildingValue = (data.curator_primary_building || '').trim();
+      form.elements.curator_primary_building.value = primaryBuildingOptionsNormalized.has(
+        buildingValue.toLowerCase()
+      )
+        ? buildingValue
+        : '';
+
+      const roomValue = (data.curator_primary_room || '').trim();
+      form.elements.curator_primary_room.value = primaryRoomOptionsNormalized.has(roomValue.toLowerCase())
+        ? roomValue
+        : '';
 
       const faculties = Array.isArray(data.institute_or_faculty) ? data.institute_or_faculty : [];
       form.querySelectorAll('input[name="institute_or_faculty"]').forEach((input) => {
@@ -3089,6 +3169,7 @@
 
     enhanceDatalistInput(form.elements.department);
     enhanceDatalistInput(form.elements.curator_primary_room);
+    addSelectBlurValidation(form.elements.curator_primary_building);
 
     setupTooltips();
 
