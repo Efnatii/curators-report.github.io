@@ -770,6 +770,22 @@ select:focus {
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
 }
 
+.button--emphasis {
+  background: linear-gradient(120deg, #ffe09e, #f2b138 55%, #ffb347);
+  box-shadow: 0 16px 44px rgba(242, 177, 56, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 212, 121, 0.5);
+}
+
+.button--ghost {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 16px;
+}
+
 .button--secondary {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
@@ -779,6 +795,15 @@ select:focus {
 
 .button--secondary:hover {
   box-shadow: 0 10px 28px rgba(242, 177, 56, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.button--ghost:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+.button--ghost:active {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: none;
 }
 
 .button--secondary:active {
@@ -800,6 +825,13 @@ select:focus {
 .button:focus-visible {
   outline: 2px solid rgba(242, 177, 56, 0.7);
   outline-offset: 3px;
+}
+
+.button__note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .footer {
