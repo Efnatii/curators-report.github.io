@@ -87,12 +87,7 @@
                   <button type="button" class="chip chip--interactive" data-add="job_positions">Добавить</button>
                 </div>
               </div>
-              <div class="multi-input" data-name="job_positions">
-                <div class="multi-input__row">
-                  <input type="text" name="job_position" placeholder="Например, старший преподаватель" required />
-                  <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
-                </div>
-              </div>
+              <div class="multi-input" data-name="job_positions"></div>
             </div>
             <label class="field">
               <span class="field__label">3. Кафедра *</span>
@@ -128,12 +123,7 @@
                   <button type="button" class="chip chip--interactive" data-add="curated_group_numbers">Добавить</button>
                 </div>
               </div>
-              <div class="multi-input" data-name="curated_group_numbers">
-                <div class="multi-input__row">
-                  <input type="text" name="curated_group_number" placeholder="Например, 1234 или 4102" required />
-                  <button type="button" class="multi-input__remove" aria-label="Удалить запись">&times;</button>
-                </div>
-              </div>
+              <div class="multi-input" data-name="curated_group_numbers"></div>
             </div>
             <label class="field">
               <span class="field__label">8. Корпус основного пребывания куратора *</span>
@@ -813,7 +803,7 @@
       const addButton = row.querySelector('.joint-events__add-item[data-target="groups"]');
 
       if (listContainer && addButton) {
-        setupRowList({ row, target: 'groups', placeholder: 'Например, 4102', startEmpty: false });
+        setupRowList({ row, target: 'groups', placeholder: 'Например, 4102', startEmpty: true, minRows: 0 });
       }
 
       const removeButton = row.querySelector('.joint-events__row-remove');
@@ -1194,7 +1184,7 @@
       return row;
     }
 
-    function setupMultiInput({ name, inputName, placeholder = '' }) {
+    function setupMultiInput({ name, inputName, placeholder = '', minRows = 1 }) {
       const container = form.querySelector(`[data-name="${name}"]`);
       const addButton = form.querySelector(`[data-add="${name}"]`);
 
@@ -1205,7 +1195,7 @@
         rows.forEach((row) => {
           const removeButton = row.querySelector('.multi-input__remove');
           if (!removeButton) return;
-          const isDisabled = rows.length === 1;
+          const isDisabled = rows.length <= minRows;
           removeButton.disabled = isDisabled;
         });
       }
@@ -1214,13 +1204,23 @@
         const removeButton = row.querySelector('.multi-input__remove');
         if (!removeButton) return;
         removeButton.addEventListener('click', () => {
-          if (container.querySelectorAll('.multi-input__row').length === 1) return;
+          if (container.querySelectorAll('.multi-input__row').length <= minRows) return;
           row.remove();
           updateRemoveState();
         });
       }
 
+      function ensureMinimumRows() {
+        while (container.querySelectorAll('.multi-input__row').length < minRows) {
+          const newRow = createRow(inputName, placeholder);
+          attachRemove(newRow);
+          container.prepend(newRow);
+        }
+      }
+
       container.querySelectorAll('.multi-input__row').forEach((row) => attachRemove(row));
+
+      ensureMinimumRows();
 
       addButton.addEventListener('click', () => {
         const newRow = createRow(inputName, placeholder);
@@ -1304,13 +1304,13 @@
       }
     }
 
-    function fillMultiInput(name, values = []) {
+    function fillMultiInput(name, values = [], minRows = 1) {
       const container = form.querySelector(`[data-name="${name}"]`);
       const addButton = form.querySelector(`[data-add="${name}"]`);
 
       if (!container) return;
 
-      const desiredLength = Math.max(values.length, 1);
+      const desiredLength = Math.max(values.length, minRows);
       while (container.querySelectorAll('.multi-input__row').length < desiredLength) {
         addButton?.click();
       }
@@ -1321,7 +1321,7 @@
       });
 
       const removeButtons = container.querySelectorAll('.multi-input__remove');
-      const cutoff = values.length ? values.length : 1;
+      const cutoff = values.length ? values.length : minRows;
 
       for (let i = removeButtons.length - 1; i >= cutoff; i -= 1) {
         const removeButton = removeButtons[i];
@@ -1331,13 +1331,13 @@
       }
     }
 
-    function setRowList(row, target, values = []) {
+    function setRowList(row, target, values = [], minRows = 1) {
       const listContainer = row.querySelector(`[data-list="${target}"]`);
       const addButton = row.querySelector(`[data-target="${target}"]`);
 
       if (!listContainer || !addButton) return;
 
-      const desiredLength = Math.max(values.length, 1);
+      const desiredLength = Math.max(values.length, minRows);
       while (listContainer.querySelectorAll('.multi-input__row').length < desiredLength) {
         addButton.click();
       }
@@ -1348,7 +1348,7 @@
       });
 
       const removeButtons = listContainer.querySelectorAll('.multi-input__remove');
-      const cutoff = values.length ? values.length : 1;
+      const cutoff = values.length ? values.length : minRows;
 
       for (let i = removeButtons.length - 1; i >= cutoff; i -= 1) {
         const removeButton = removeButtons[i];
@@ -1358,7 +1358,7 @@
       }
     }
 
-    function setupRowList({ row, target, placeholder = '', startEmpty = false }) {
+    function setupRowList({ row, target, placeholder = '', startEmpty = false, minRows = 1 }) {
       const listContainer = row.querySelector(`[data-list="${target}"]`);
       const addButton = row.querySelector(`.curator-hours__add-item[data-target="${target}"]`);
 
@@ -1369,7 +1369,7 @@
         rows.forEach((currentRow) => {
           const removeButton = currentRow.querySelector('.multi-input__remove');
           if (!removeButton) return;
-          removeButton.disabled = rows.length === 1;
+          removeButton.disabled = rows.length <= minRows;
         });
       }
 
@@ -1377,10 +1377,18 @@
         const removeButton = listRow.querySelector('.multi-input__remove');
         if (!removeButton) return;
         removeButton.addEventListener('click', () => {
-          if (listContainer.querySelectorAll('.multi-input__row').length === 1) return;
+          if (listContainer.querySelectorAll('.multi-input__row').length <= minRows) return;
           listRow.remove();
           updateRemoveState();
         });
+      }
+
+      function ensureMinimumRows() {
+        while (listContainer.querySelectorAll('.multi-input__row').length < minRows) {
+          const newRow = createListRow(placeholder);
+          attachRemove(newRow);
+          listContainer.prepend(newRow);
+        }
       }
 
       if (!startEmpty) {
@@ -1389,6 +1397,8 @@
         listContainer.prepend(firstRow);
         updateRemoveState();
       }
+
+      ensureMinimumRows();
 
       addButton.addEventListener('click', () => {
         const newRow = createListRow(placeholder);
@@ -1576,12 +1586,13 @@
         </div>
       `;
 
-      setupRowList({ row, target: 'groups', placeholder: 'Например, 1234' });
+      setupRowList({ row, target: 'groups', placeholder: 'Например, 1234', startEmpty: true, minRows: 0 });
       setupRowList({
         row,
         target: 'specialists',
         placeholder: 'Например, приглашённый специалист',
         startEmpty: true,
+        minRows: 0,
       });
       setupDirections(row);
 
@@ -1662,8 +1673,8 @@
 
           if (!row) return;
 
-          setRowList(row, 'groups', item.groups || []);
-          setRowList(row, 'specialists', item.specialists || []);
+          setRowList(row, 'groups', item.groups || [], 0);
+          setRowList(row, 'specialists', item.specialists || [], 0);
           row.querySelector('.date-range__start').value = item.date_start || '';
           row.querySelector('.date-range__end').value = item.date_end || '';
           const topicField = row.querySelector('.curator-hours__topic');
@@ -1784,7 +1795,7 @@
         .reverse()
         .forEach((item) => {
           const row = createJointEventRow();
-          setRowList(row, 'groups', item.groups || []);
+          setRowList(row, 'groups', item.groups || [], 0);
           row.querySelector('.joint-events-date__start').value = item.date_start || '';
           row.querySelector('.joint-events-date__end').value = item.date_end || '';
           const description = row.querySelector('textarea[name="joint_event_description"]');
@@ -2323,7 +2334,7 @@
 
       selectReportingPeriod(data.reporting_period);
       form.elements.full_name.value = data.full_name || '';
-      fillMultiInput('job_positions', Array.isArray(data.job_positions) ? data.job_positions : []);
+      fillMultiInput('job_positions', Array.isArray(data.job_positions) ? data.job_positions : [], 0);
       form.elements.department.value = data.department || '';
       form.elements.contact_phone_connected_to_telegram.value =
         data.contact_phone_connected_to_telegram || '';
@@ -2331,7 +2342,8 @@
       form.elements.email.value = data.email || '';
       fillMultiInput(
         'curated_group_numbers',
-        Array.isArray(data.curated_group_numbers) ? data.curated_group_numbers : []
+        Array.isArray(data.curated_group_numbers) ? data.curated_group_numbers : [],
+        0
       );
       form.elements.curator_primary_building.value = data.curator_primary_building || '';
       form.elements.curator_primary_room.value = data.curator_primary_room || '';
@@ -2396,12 +2408,14 @@
       name: 'job_positions',
       inputName: 'job_position',
       placeholder: 'Например, преподаватель-практик или тьютор',
+      minRows: 0,
     });
 
     setupMultiInput({
       name: 'curated_group_numbers',
       inputName: 'curated_group_number',
       placeholder: 'Например, 1234 или 4102',
+      minRows: 0,
     });
 
     addCuratorHourRowButton.addEventListener('click', () => addCuratorHourRow());
