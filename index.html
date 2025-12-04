@@ -213,7 +213,7 @@
             <div class="section-header section-header--sub">
               <div>
                 <p class="section-counter">Дополнительный вопрос</p>
-                <h3>12. Даты проведения трех и более кураторских часов в течение отчетного периода</h3>
+                <h3 id="question-12">12. Даты проведения трех и более кураторских часов в течение отчетного периода</h3>
                 <p class="muted">Заполните данные по каждому проведенному кураторскому часу.</p>
               </div>
               <div class="tooltip tooltip--standalone">
@@ -2055,6 +2055,24 @@
       }
     }
 
+    function ensureCuratorDirectionsFilled() {
+      const isHeld = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
+      if (!isHeld) return true;
+
+      const rows = Array.from(curatorHoursRows.querySelectorAll('.curator-hours__row'));
+      const rowsWithoutDirections = rows.filter((row) => {
+        const directions = collectDirections(row.querySelector('[data-list="directions"]'));
+        return directions.length === 0;
+      });
+
+      if (!rowsWithoutDirections.length) return true;
+
+      alert('Добавьте хотя бы одну направленность в каждую строку вопроса 12 перед скачиванием отчёта.');
+      document.getElementById('question-12')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      return false;
+    }
+
     function buildReportData() {
       const heldMinimumThreeCuratorSessions = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       const participatedInCuratorEvents = getBooleanRadio('participated_in_two_curator_events');
@@ -2516,6 +2534,7 @@
 
     if (exportJsonButton) {
       exportJsonButton.addEventListener('click', () => {
+        if (!ensureCuratorDirectionsFilled()) return;
         const reportData = buildReportData();
         const report = JSON.stringify(reportData, null, 2);
         const blob = new Blob([report], { type: 'application/json' });
@@ -2532,6 +2551,7 @@
 
     if (exportPdfButton) {
       exportPdfButton.addEventListener('click', () => {
+        if (!ensureCuratorDirectionsFilled()) return;
         const reportData = buildReportData();
         const pdfDefinition = buildPdfDefinition(reportData);
         pdfMake.createPdf(pdfDefinition).download(generateFileName('pdf'));
