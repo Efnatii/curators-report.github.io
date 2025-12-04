@@ -367,10 +367,8 @@ main {
 }
 
 .multi-select__dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  position: static;
+  margin-top: 6px;
   max-height: 240px;
   overflow-y: auto;
   border: 1px solid rgba(242, 177, 56, 0.35);
