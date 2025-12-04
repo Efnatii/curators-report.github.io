@@ -311,6 +311,125 @@ main {
   cursor: not-allowed;
 }
 
+.multi-select {
+  display: grid;
+  gap: 8px;
+  position: relative;
+}
+
+.multi-select__control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0a0f1a;
+  cursor: text;
+}
+
+.multi-select__control:focus-within {
+  outline: 2px solid rgba(242, 177, 56, 0.4);
+  outline-offset: 2px;
+  border-color: rgba(242, 177, 56, 0.4);
+}
+
+.multi-select__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 26px;
+}
+
+.multi-select__input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--text);
+}
+
+.multi-select__input:focus {
+  outline: none;
+}
+
+.multi-select__chevron {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.multi-select__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0d1422;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  z-index: 10;
+  display: none;
+}
+
+.multi-select__dropdown--open {
+  display: block;
+}
+
+.multi-select__option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.multi-select__option:hover,
+.multi-select__option:focus {
+  background: rgba(242, 177, 56, 0.08);
+}
+
+.multi-select__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(242, 177, 56, 0.1);
+  color: var(--text);
+  border: 1px solid rgba(242, 177, 56, 0.3);
+}
+
+.multi-select__chip-remove {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+}
+
+.multi-select__validator {
+  position: absolute;
+  inset: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  margin: -1px;
+  overflow: hidden;
+}
+
 input,
 textarea,
 select {
