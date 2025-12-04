@@ -1733,6 +1733,106 @@
       }
     }
 
+    function enhanceDatalistInput(input) {
+      const listId = input?.getAttribute('list');
+      if (!input || !listId) return;
+
+      const datalist = document.getElementById(listId);
+      if (!datalist) return;
+
+      const options = Array.from(datalist.querySelectorAll('option'))
+        .map((option) => option.value)
+        .filter(Boolean);
+
+      const container = document.createElement('div');
+      container.className = 'datalist';
+
+      const control = document.createElement('div');
+      control.className = 'datalist__control';
+
+      const chevron = document.createElement('button');
+      chevron.type = 'button';
+      chevron.className = 'datalist__chevron';
+      chevron.setAttribute('aria-label', 'Показать варианты');
+      chevron.textContent = '▾';
+
+      const dropdown = document.createElement('div');
+      dropdown.className = 'datalist__dropdown';
+
+      input.classList.add('datalist__input');
+      input.removeAttribute('list');
+      input.autocomplete = 'off';
+
+      function closeDropdown() {
+        dropdown.classList.remove('datalist__dropdown--open');
+      }
+
+      function renderOptions(term = '') {
+        dropdown.innerHTML = '';
+        const normalized = term.toLowerCase();
+        const filtered = options.filter((option) => option.toLowerCase().includes(normalized));
+
+        if (!filtered.length) {
+          const empty = document.createElement('div');
+          empty.className = 'datalist__option';
+          empty.textContent = 'Совпадений не найдено';
+          dropdown.append(empty);
+          return;
+        }
+
+        filtered.forEach((option) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'datalist__option';
+          button.textContent = option;
+          button.addEventListener('click', () => {
+            input.value = option;
+            closeDropdown();
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+          dropdown.append(button);
+        });
+      }
+
+      function openDropdown() {
+        dropdown.classList.add('datalist__dropdown--open');
+        renderOptions(input.value.trim());
+      }
+
+      const parent = input.parentElement;
+      parent.insertBefore(container, input);
+      container.append(control);
+      control.append(input, chevron);
+      container.append(dropdown);
+      datalist.hidden = true;
+      container.append(datalist);
+
+      input.addEventListener('focus', openDropdown);
+      input.addEventListener('input', (event) => renderOptions(event.target.value.trim()));
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeDropdown();
+        }
+      });
+
+      chevron.addEventListener('click', () => {
+        if (dropdown.classList.contains('datalist__dropdown--open')) {
+          closeDropdown();
+        } else {
+          input.focus();
+          openDropdown();
+        }
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!container.contains(event.target)) {
+          closeDropdown();
+        }
+      });
+
+      renderOptions();
+    }
+
     function setupSearchableMultiSelect({ name, options = [], placeholder = '' }) {
       const container = form.querySelector(`[data-name="${name}"]`);
       if (!container) return null;
@@ -2982,6 +3082,9 @@
       toggleJointParticipationDetails();
       toggleExtracurricularDetails();
     }
+
+    enhanceDatalistInput(form.elements.department);
+    enhanceDatalistInput(form.elements.curator_primary_room);
 
     setupTooltips();
 
