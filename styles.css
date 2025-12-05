@@ -340,12 +340,6 @@ main {
   cursor: text;
 }
 
-.multi-select__control--input {
-  background: #0a0f1a;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-  border-color: var(--border);
-}
-
 .multi-select__control:focus-within {
   outline: 2px solid rgba(242, 177, 56, 0.4);
   outline-offset: 2px;
@@ -357,13 +351,6 @@ main {
   flex-wrap: wrap;
   gap: 6px;
   min-height: 26px;
-}
-
-.multi-select__selection {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
 }
 
 .multi-select__input {
@@ -388,10 +375,8 @@ main {
 }
 
 .multi-select__dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
+  position: static;
+  margin-top: 6px;
   max-height: 240px;
   overflow-y: auto;
   border: 1px solid rgba(242, 177, 56, 0.35);
@@ -551,7 +536,7 @@ main {
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: 12px;
+  border-radius: 999px;
   background: rgba(242, 177, 56, 0.1);
   color: var(--text);
   border: 1px solid rgba(242, 177, 56, 0.3);
@@ -1082,7 +1067,7 @@ select:focus {
   background: rgba(242, 177, 56, 0.12);
   border: 1px solid rgba(242, 177, 56, 0.35);
   color: var(--text);
-  border-radius: 12px;
+  border-radius: 999px;
   font-weight: 700;
 }
 
@@ -1097,7 +1082,7 @@ select:focus {
   height: 22px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 999px;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
 
