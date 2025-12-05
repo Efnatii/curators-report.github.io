@@ -179,7 +179,7 @@ h2 {
   border: 1px solid rgba(242, 177, 56, 0.4);
   color: var(--accent);
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-weight: 700;
 }
 
@@ -453,6 +453,7 @@ main {
   align-items: center;
   gap: 8px;
   padding: 12px 14px;
+  min-height: 52px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), #0a0f1a;
@@ -561,7 +562,7 @@ main {
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: rgba(242, 177, 56, 0.1);
   color: var(--text);
   border: 1px solid rgba(242, 177, 56, 0.3);
@@ -931,8 +932,8 @@ select:focus {
   border-radius: 3px 0 0 0;
 }
 
-.tooltip:hover .tooltip__bubble,
-.tooltip:focus-within .tooltip__bubble,
+.tooltip__trigger:hover + .tooltip__bubble,
+.tooltip__trigger:focus-visible + .tooltip__bubble,
 .tooltip--active .tooltip__bubble {
   opacity: 1;
   pointer-events: auto;
@@ -1092,7 +1093,7 @@ select:focus {
   background: rgba(242, 177, 56, 0.12);
   border: 1px solid rgba(242, 177, 56, 0.35);
   color: var(--text);
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 700;
 }
 
@@ -1107,7 +1108,7 @@ select:focus {
   height: 22px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
 
