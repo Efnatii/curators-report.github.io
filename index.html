@@ -875,8 +875,6 @@
     const addInterviewRowButton = document.getElementById('add-interview-row');
     const qualificationCourseRowsContainer = document.getElementById('qualification-course-rows');
     const addQualificationCourseRowButton = document.getElementById('add-qualification-course-row');
-    const qualificationCourseDirectionSelects = new WeakMap();
-    let qualificationCourseDirectionDropdownId = 0;
 
     const directionsOptions = [
       'Гражданская',
@@ -936,109 +934,6 @@
       'К.фил.н.',
       'Д.т.н.',
       'Д.э.н.',
-    ];
-
-    const qualificationCourseDirectionOptions = [
-      'Основы государственной молодежной политики',
-      'Нормативно-правовое регулирование молодежной политики',
-      'Организация воспитательной работы в вузе',
-      'Методика кураторской деятельности в студенческой группе',
-      'Профилактика девиантного поведения обучающихся',
-      'Профилактика экстремизма и терроризма в молодежной среде',
-      'Формирование гражданской идентичности и патриотическое воспитание',
-      'Духовно-нравственное воспитание молодежи',
-      'Развитие студенческого самоуправления',
-      'Проектирование и сопровождение молодежных инициатив',
-      'Технологии социального проектирования для молодежи',
-      'Организация волонтерской (добровольческой) деятельности',
-      'Инклюзивные практики в молодежной политике',
-      'Профилактика буллинга и кибербуллинга',
-      'Профилактика суицидального поведения у молодежи',
-      'Профилактика употребления психоактивных веществ',
-      'Психолого-педагогическая поддержка студентов группы риска',
-      'Медиация и урегулирование конфликтов в студенческой среде',
-      'Развитие коммуникативных навыков куратора',
-      'Психологическая компетентность куратора студенческой группы',
-      'Тьюторское сопровождение обучающихся',
-      'Куратор как наставник: наставнические практики',
-      'Организация работы со студенческими объединениями',
-      'Сопровождение студенческих научных и творческих сообществ',
-      'Организация культурно-досуговой деятельности студентов',
-      'Развитие добровольчества и социального служения',
-      'Вовлечение студентов в общественно-полезную деятельность',
-      'Работа с первокурсниками и адаптация к обучению в вузе',
-      'Работа с выпускными курсами и планирование карьерной траектории',
-      'Развитие лидерского потенциала студентов',
-      'Формирование мягких навыков (soft skills) у молодежи',
-      'Профилактика эмоционального выгорания студентов и кураторов',
-      'Организация воспитательной работы в общежитиях',
-      'Работа с родителями (законными представителями) студентов',
-      'Межкультурная коммуникация и работа с иностранными студентами',
-      'Организация патриотических и памятных мероприятий',
-      'Гражданско-правовое просвещение молодежи',
-      'Финансовая грамотность и экономическое просвещение студентов',
-      'Медиа-грамотность и информационная безопасность молодежи',
-      'Формирование безопасного образовательного пространства',
-      'Цифровые технологии в воспитательной работе',
-      'Использование социальных сетей в работе со студентами',
-      'Проектирование воспитательной программы академической группы',
-      'Мониторинг и оценка воспитательных результатов',
-      'Документационное сопровождение воспитательной работы',
-      'Интерактивные формы и методы воспитательной деятельности',
-      'Игровые технологии и тимбилдинг в студенческом коллективе',
-      'Организация спортивно-оздоровительных мероприятий',
-      'Профилактика профессионального и учебного стресса у студентов',
-      'Работа с одаренной молодежью',
-      'Работа с обучающимися с ограниченными возможностями здоровья',
-      'Гендерные аспекты в молодежной политике и воспитании',
-      'Формирование культуры здорового образа жизни',
-      'Профилактика правонарушений среди молодежи',
-      'Взаимодействие вуза с органами молодежной политики',
-      'Молодежное предпринимательство и поддержка стартапов',
-      'Развитие проектной культуры у студентов',
-      'Экологическое воспитание и эковолонтерство',
-      'Патриотические проекты и работа с молодежными общественными организациями',
-      'Формирование толерантности и профилактика дискриминации',
-      'Организация дискуссионных клубов и дебатов',
-      'Развитие студенческих медиа и пресс-центров',
-      'Использование арт-терапевтических методов в работе со студентами',
-      'Социально-психологическая диагностика в студенческой группе',
-      'Анкетирование и социологические исследования в молодежной среде',
-      'Работа куратора в условиях смешанного и дистанционного обучения',
-      'Кризисное консультирование молодежи',
-      'Профилактика интернет-зависимости у студентов',
-      'Формирование культуры академической честности',
-      'Развитие волонтерских практик в сфере инклюзии',
-      'Организация профориентационных мероприятий для старшекурсников',
-      'Практики студенческого наставничества «равный–равному»',
-      'Организация правового просвещения и правовой помощи студентам',
-      'Формирование экологической культуры и ответственного потребления',
-      'Развитие креативности и творческого потенциала молодежи',
-      'Работа куратора с неуспевающими студентами',
-      'Организация и сопровождение студенческих форумов и слетов',
-      'Межведомственное взаимодействие в сфере молодежной политики',
-      'Работа с молодежью в условиях мегаполиса',
-      'Профилактика радикализации молодежи',
-      'Формирование культуры межнационального общения',
-      'Поддержка студенческих инициатив в научно-технической сфере',
-      'Развитие цифровых компетенций у молодежи',
-      'Организация инклюзивных культурно-массовых мероприятий',
-      'Формирование культуры безопасного поведения в сети Интернет',
-      'Сопровождение студентов в период практик и стажировок',
-      'Воспитательный потенциал учебной дисциплины',
-      'Межпоколенческое взаимодействие и волонтерские практики',
-      'Организация школьно-студенческих проектов по профориентации',
-      'Формирование навыков самоуправления и самоорганизации у студентов',
-      'Партнерство с некоммерческими организациями в воспитательной работе',
-      'Формирование ценностей устойчивого развития у молодежи',
-      'Организация мероприятий по сохранению исторической памяти',
-      'Социальная поддержка и сопровождение студентов в трудной жизненной ситуации',
-      'Развитие клубной работы и интерес-сообществ',
-      'Мониторинг социально-психологического климата в студенческой группе',
-      'Профилактика и разрешение конфликтов в общежитиях',
-      'Организация наставничества выпускников для студентов',
-      'Формирование культуры безопасного поведения в городской среде',
-      'Методическое обеспечение кураторской и воспитательной деятельности',
     ];
 
     function buildNormalizedSet(values = []) {
@@ -1158,7 +1053,6 @@
         date_start: 'Дата начала или единственная дата обучения.',
         date_end: 'Дата окончания курса, если обучение шло периодом.',
         event: 'Название или описание курса.',
-        directions: 'Направленности курса из списка по вопросу 24.',
       },
     };
 
@@ -1554,7 +1448,6 @@
     function createQualificationCourseRow() {
       const row = document.createElement('div');
       row.className = 'curator-hours__row qualification-course-row';
-      const directionDropdownId = `qualification-course-directions-list-${++qualificationCourseDirectionDropdownId}`;
 
       row.innerHTML = `
         <div class="curator-hours__grid">
@@ -1580,33 +1473,6 @@
             </div>
           </div>
           <label class="field field--compact">
-            <span class="field__label">Направленность</span>
-            <div class="multi-select" data-name="qualification_course_directions">
-              <div
-                class="multi-select__control multi-select__control--input"
-                role="combobox"
-                aria-haspopup="listbox"
-                aria-expanded="false"
-                aria-owns="${directionDropdownId}"
-              >
-                <div class="multi-select__values multi-select__values--hidden" aria-live="polite"></div>
-                <input type="text" class="multi-select__input" placeholder="Начните вводить направленность" />
-                <button type="button" class="multi-select__chevron" aria-hidden="true">▾</button>
-              </div>
-              <div class="multi-select__dropdown" id="${directionDropdownId}" role="listbox"></div>
-              <div class="multi-select__hidden" aria-hidden="true"></div>
-              <input
-                type="text"
-                class="multi-select__validator"
-                name="qualification_course_directions_validator"
-                aria-hidden="true"
-                tabindex="-1"
-                required
-              />
-              <div class="multi-select__selection" aria-live="polite"></div>
-            </div>
-          </label>
-          <label class="field field--compact">
             <span class="field__label">Мероприятие</span>
             <textarea class="qualification-course__description" placeholder="Например, курс повышения квалификации по молодежной политике" rows="3"></textarea>
           </label>
@@ -1627,17 +1493,6 @@
     function addQualificationCourseRow() {
       const row = createQualificationCourseRow();
       qualificationCourseRowsContainer.prepend(row);
-      const directionSelect = setupSearchableMultiSelect({
-        name: 'qualification_course_directions',
-        options: qualificationCourseDirectionOptions,
-        placeholder: 'Начните вводить направленность',
-        container: row.querySelector('[data-name="qualification_course_directions"]'),
-        selectedContainer: row.querySelector('.multi-select__selection'),
-      });
-
-      if (directionSelect) {
-        qualificationCourseDirectionSelects.set(row, directionSelect);
-      }
       setupTooltips();
 
       return row;
@@ -2141,20 +1996,14 @@
       syncTriggerLabel();
     }
 
-    function setupSearchableMultiSelect({
-      name,
-      options = [],
-      placeholder = '',
-      container: providedContainer = null,
-      selectedContainer: providedSelectedContainer = null,
-    }) {
-      const container = providedContainer || form.querySelector(`[data-name="${name}"]`);
+    function setupSearchableMultiSelect({ name, options = [], placeholder = '' }) {
+      const container = form.querySelector(`[data-name="${name}"]`);
       if (!container) return null;
 
       const control = container.querySelector('.multi-select__control');
       const input = container.querySelector('.multi-select__input');
       const dropdown = container.querySelector('.multi-select__dropdown');
-      const valuesContainer = providedSelectedContainer || container.querySelector('.multi-select__values');
+      const valuesContainer = container.querySelector('.multi-select__values');
       const hiddenContainer = container.querySelector('.multi-select__hidden');
       const validator = container.querySelector('.multi-select__validator');
       const chevron = container.querySelector('.multi-select__chevron');
@@ -2201,7 +2050,7 @@
           const removeButton = document.createElement('button');
           removeButton.type = 'button';
           removeButton.className = 'multi-select__chip-remove';
-          removeButton.setAttribute('aria-label', `Удалить «${value}»`);
+          removeButton.setAttribute('aria-label', `Удалить должность «${value}»`);
           removeButton.textContent = '×';
           removeButton.addEventListener('click', () => {
             selected.delete(value);
@@ -2287,9 +2136,7 @@
         closeDropdown();
       });
 
-      control?.addEventListener('mousedown', (event) => {
-        if (event.target.closest('.multi-select__chip')) return;
-        event.preventDefault();
+      control?.addEventListener('click', () => {
         input.focus();
       });
 
@@ -2324,18 +2171,7 @@
           updateValidator();
           renderOptions('');
         },
-        getValues() {
-          return Array.from(selected);
-        },
       };
-    }
-
-    function collectMultiSelectValues(container) {
-      if (!container) return [];
-
-      return Array.from(container.querySelectorAll('.multi-select__hidden input[name]'))
-        .map((input) => input.value)
-        .filter(Boolean);
     }
 
     function setRowList(row, target, values = [], minRows = 1) {
@@ -2973,15 +2809,12 @@
           const dateStart = row.querySelector('.qualification-course-date__start')?.value || '';
           const dateEnd = row.querySelector('.qualification-course-date__end')?.value || '';
           const event = sanitizeText(row.querySelector('.qualification-course__description')?.value || '');
-          const directions = collectMultiSelectValues(
-            row.querySelector('[data-name="qualification_course_directions"]')
-          );
 
-          if (!dateStart && !dateEnd && !event && directions.length === 0) {
+          if (!dateStart && !dateEnd && !event) {
             return null;
           }
 
-          return { date_start: dateStart, date_end: dateEnd, event, directions };
+          return { date_start: dateStart, date_end: dateEnd, event };
         })
         .filter(Boolean);
     }
@@ -3003,9 +2836,6 @@
           row.querySelector('.qualification-course-date__end').value = item.date_end || '';
           const description = row.querySelector('.qualification-course__description');
           if (description) description.value = item.event || '';
-          const directionSelect = qualificationCourseDirectionSelects.get(row);
-          const directions = Array.isArray(item.directions) ? item.directions : [];
-          directionSelect?.setValues(directions);
         });
 
       setupTooltips();
@@ -3304,7 +3134,7 @@
         (course, index) =>
           `${index + 1}. Период: ${formatDateRange(course.date_start, course.date_end)}, Курс: ${
             course.event || '—'
-          }, Направленность: ${formatList(course.directions)}`
+          }`
       );
 
       return lines;
