@@ -1580,7 +1580,22 @@
             </div>
           </div>
           <label class="field field--compact">
-            <span class="field__label">Направленность</span>
+            <div class="field__label-row">
+              <span class="field__label">Направленность</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: выберите одну или несколько направленностей курса"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">
+                  Выберите направленность курса из списка или добавьте несколько вариантов. Чтобы удалить выбранное, нажмите на крестик на метке.
+                </div>
+              </div>
+            </div>
             <div class="multi-select" data-name="qualification_course_directions">
               <div
                 class="multi-select__control multi-select__control--input"
@@ -2204,7 +2219,12 @@
           removeButton.className = 'multi-select__chip-remove';
           removeButton.setAttribute('aria-label', `Удалить «${value}»`);
           removeButton.textContent = '×';
-          removeButton.addEventListener('click', () => {
+          removeButton.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          });
+          removeButton.addEventListener('click', (event) => {
+            event.stopPropagation();
             selected.delete(value);
             renderSelected();
             updateHiddenInputs();
