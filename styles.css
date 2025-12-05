@@ -881,7 +881,8 @@ select:focus {
 }
 
 .tooltip__trigger:hover,
-.tooltip--active .tooltip__trigger {
+.tooltip--active .tooltip__trigger,
+.tooltip__trigger--highlight {
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
   border-color: rgba(242, 177, 56, 0.6);
