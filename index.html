@@ -1686,8 +1686,43 @@
       }
     }
 
+    function setupTooltipHighlight(tooltip) {
+      if (tooltip.dataset.highlightReady) return;
+
+      const trigger = tooltip.querySelector('.tooltip__trigger');
+      if (!trigger) return;
+
+      const highlightArea = tooltip.closest(
+        '.field, .legend-with-tooltip, .section-header, .choice-group, fieldset, .tooltip'
+      );
+
+      if (!highlightArea) return;
+
+      tooltip.dataset.highlightReady = 'true';
+
+      const addHighlight = () => trigger.classList.add('tooltip__trigger--highlight');
+      const removeHighlight = () => trigger.classList.remove('tooltip__trigger--highlight');
+
+      highlightArea.addEventListener('mouseenter', addHighlight);
+      highlightArea.addEventListener('mouseleave', removeHighlight);
+      highlightArea.addEventListener('focusin', addHighlight);
+      highlightArea.addEventListener('focusout', () => {
+        setTimeout(() => {
+          if (!highlightArea.contains(document.activeElement)) {
+            removeHighlight();
+          }
+        });
+      });
+    }
+
+    function setupTooltipHighlights() {
+      document.querySelectorAll('.tooltip').forEach(setupTooltipHighlight);
+    }
+
     function setupTooltips() {
       const triggers = document.querySelectorAll('.tooltip__trigger');
+
+      setupTooltipHighlights();
 
       triggers.forEach((trigger) => {
         if (trigger.dataset.tooltipReady) return;
