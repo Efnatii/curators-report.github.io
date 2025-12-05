@@ -2030,18 +2030,22 @@
 
       input.addEventListener('focus', openDropdown);
       input.addEventListener('input', (event) => renderOptions(event.target.value.trim()));
-      input.addEventListener('blur', (event) => {
-        if (event.relatedTarget && dropdown.contains(event.relatedTarget)) {
-          return;
-        }
+      input.addEventListener('blur', () => {
+        const pendingValue = input.value.trim();
+        setTimeout(() => {
+          const nextFocus = document.activeElement;
 
-        const value = input.value.trim();
-        if (value && !normalizedOptions.has(value.toLowerCase())) {
-          input.value = '';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+          if (nextFocus && container.contains(nextFocus)) {
+            return;
+          }
 
-        closeDropdown();
+          if (pendingValue && !normalizedOptions.has(pendingValue.toLowerCase())) {
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+
+          closeDropdown();
+        }, 0);
       });
       input.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
@@ -2345,18 +2349,22 @@
       input.addEventListener('input', (event) => {
         renderOptions(event.target.value.trim());
       });
-      input.addEventListener('blur', (event) => {
-        if (event.relatedTarget && dropdown.contains(event.relatedTarget)) {
-          return;
-        }
+      input.addEventListener('blur', () => {
+        const pendingValue = input.value.trim();
+        setTimeout(() => {
+          const nextFocus = document.activeElement;
 
-        const value = input.value.trim();
-        if (value && !normalizedOptions.has(value.toLowerCase())) {
-          input.value = '';
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+          if (nextFocus && container.contains(nextFocus)) {
+            return;
+          }
 
-        closeDropdown();
+          if (pendingValue && !normalizedOptions.has(pendingValue.toLowerCase())) {
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+
+          closeDropdown();
+        }, 0);
       });
 
       control?.addEventListener('mousedown', (event) => {
