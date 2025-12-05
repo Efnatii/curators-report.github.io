@@ -353,13 +353,6 @@ main {
   min-height: 26px;
 }
 
-.multi-select__selection {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
 .multi-select__input {
   width: 100%;
   border: none;
