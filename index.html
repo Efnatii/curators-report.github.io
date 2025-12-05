@@ -1555,6 +1555,7 @@
       const row = document.createElement('div');
       row.className = 'curator-hours__row qualification-course-row';
       const directionDropdownId = `qualification-course-directions-list-${++qualificationCourseDirectionDropdownId}`;
+      const directionLabelId = `qualification-course-direction-label-${qualificationCourseDirectionDropdownId}`;
 
       row.innerHTML = `
         <div class="curator-hours__grid">
@@ -1579,9 +1580,9 @@
               <input type="date" class="qualification-course-date__end" aria-label="Дата окончания" />
             </div>
           </div>
-          <label class="field field--compact">
+          <div class="field field--compact" role="group" aria-labelledby="${directionLabelId}">
             <div class="field__label-row">
-              <span class="field__label">Направленность</span>
+              <span class="field__label" id="${directionLabelId}">Направленность</span>
               <div class="tooltip">
                 <button
                   type="button"
@@ -1605,7 +1606,12 @@
                 aria-owns="${directionDropdownId}"
               >
                 <div class="multi-select__values multi-select__values--hidden" aria-live="polite"></div>
-                <input type="text" class="multi-select__input" placeholder="Начните вводить направленность" />
+                <input
+                  type="text"
+                  class="multi-select__input"
+                  placeholder="Начните вводить направленность"
+                  aria-labelledby="${directionLabelId}"
+                />
                 <button type="button" class="multi-select__chevron" aria-hidden="true">▾</button>
               </div>
               <div class="multi-select__dropdown" id="${directionDropdownId}" role="listbox"></div>
@@ -1620,7 +1626,7 @@
               />
               <div class="multi-select__selection" aria-live="polite"></div>
             </div>
-          </label>
+          </div>
           <label class="field field--compact">
             <span class="field__label">Мероприятие</span>
             <textarea class="qualification-course__description" placeholder="Например, курс повышения квалификации по молодежной политике" rows="3"></textarea>
