@@ -876,6 +876,7 @@
     const qualificationCourseRowsContainer = document.getElementById('qualification-course-rows');
     const addQualificationCourseRowButton = document.getElementById('add-qualification-course-row');
     const achievementDirectionSelects = new WeakMap();
+    const curatorHoursDirectionSelects = new WeakMap();
     const interviewDirectionSelects = new WeakMap();
     const scientificWorkDirectionSelects = new WeakMap();
     const qualificationCourseDirectionSelects = new WeakMap();
@@ -884,6 +885,7 @@
     const curatorPersonalEventDirectionSelects = new WeakMap();
     const jointEventDirectionSelects = new WeakMap();
     let achievementDirectionDropdownId = 0;
+    let curatorHoursDirectionDropdownId = 0;
     let interviewDirectionDropdownId = 0;
     let scientificWorkDirectionDropdownId = 0;
     let qualificationCourseDirectionDropdownId = 0;
@@ -3312,60 +3314,6 @@
       });
     }
 
-    function createDirectionChip(value, container) {
-      if (!value || container.querySelector(`[data-direction-value="${value}"]`)) return;
-      const chip = document.createElement('span');
-      chip.className = 'pill pill--compact';
-      chip.dataset.directionValue = value;
-      chip.textContent = value;
-
-      const removeButton = document.createElement('button');
-      removeButton.type = 'button';
-      removeButton.className = 'pill__remove';
-      removeButton.setAttribute('aria-label', 'Удалить направление');
-      removeButton.textContent = '×';
-      removeButton.addEventListener('click', () => chip.remove());
-
-      chip.append(removeButton);
-      container.prepend(chip);
-    }
-
-    function setupDirections(row) {
-      const select = row.querySelector('.curator-hours__direction-input');
-      const addButton = row.querySelector('.curator-hours__add-direction');
-      const listContainer = row.querySelector('[data-list="directions"]');
-
-      if (!select || !addButton || !listContainer) return;
-
-      directionsOptions.forEach((option) => {
-        const opt = document.createElement('option');
-        opt.value = option;
-        opt.textContent = option;
-        select.append(opt);
-      });
-
-      enhanceSelectDropdown(select);
-
-      addButton.addEventListener('click', () => {
-        createDirectionChip(select.value, listContainer);
-      });
-    }
-
-    function collectDirections(container) {
-      if (!container) return [];
-      return Array.from(container.querySelectorAll('[data-direction-value]')).map((chip) => chip.dataset.directionValue);
-    }
-
-    function setDirections(row, directions = []) {
-      const listContainer = row.querySelector('[data-list="directions"]');
-      if (!listContainer) return;
-
-      listContainer.innerHTML = '';
-      directions.forEach((direction) => {
-        createDirectionChip(direction, listContainer);
-      });
-    }
-
     function collectDynamicList(container) {
       if (!container) return [];
       return Array.from(container.querySelectorAll('input'))
@@ -3422,6 +3370,8 @@
     function createCuratorHoursRow({ isRemovable = true } = {}) {
       const row = document.createElement('div');
       row.className = 'curator-hours__row';
+      const directionDropdownId = `curator-hours-directions-list-${++curatorHoursDirectionDropdownId}`;
+      const directionLabelId = `curator-hours-direction-label-${curatorHoursDirectionDropdownId}`;
       row.innerHTML = `
         <div class="curator-hours__grid">
           <div class="field field--compact">
@@ -3456,28 +3406,52 @@
             <span class="field__label">Тема</span>
             <textarea class="curator-hours__topic" placeholder="Например, профилактическая беседа" rows="3"></textarea>
           </label>
-          <div class="field field--compact">
+          <div class="field field--compact" role="group" aria-labelledby="${directionLabelId}">
             <div class="field__label-row">
-              <span class="field__label">Направленность</span>
-              <div class="field__meta">
-                <div class="tooltip">
-                  <button
-                    type="button"
-                    class="tooltip__trigger"
-                    aria-label="Подсказка: выберите направление и нажмите плюс, чтобы добавить его"
-                    aria-expanded="false"
-                  >
-                    ?
-                  </button>
-                  <div class="tooltip__bubble" role="tooltip">Выберите направление в списке ниже и нажмите «+», чтобы добавить его. Можно указать несколько направлений; для удаления используйте крестик на метке.</div>
+              <span class="field__label" id="${directionLabelId}">Направленность</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: выберите одну или несколько направленностей"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">
+                  Выберите одну или несколько направленностей из списка. Чтобы удалить выбранное, нажмите на крестик на метке.
                 </div>
-                <button type="button" class="chip chip--interactive curator-hours__add-direction">+</button>
               </div>
             </div>
-            <div class="curator-hours__direction-select select-shell">
-              <select class="curator-hours__direction-input"></select>
+            <div class="multi-select" data-name="curator_hour_directions">
+              <div
+                class="multi-select__control multi-select__control--input"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-owns="${directionDropdownId}"
+              >
+                <div class="multi-select__values multi-select__values--hidden" aria-live="polite"></div>
+                <input
+                  type="text"
+                  class="multi-select__input"
+                  placeholder="Начните вводить направленность"
+                  aria-labelledby="${directionLabelId}"
+                />
+                <button type="button" class="multi-select__chevron" aria-hidden="true">▾</button>
+              </div>
+              <div class="multi-select__dropdown" id="${directionDropdownId}" role="listbox"></div>
+              <div class="multi-select__hidden" aria-hidden="true"></div>
+              <input
+                type="text"
+                class="multi-select__validator"
+                name="curator_hour_directions_validator"
+                aria-hidden="true"
+                tabindex="-1"
+                required
+              />
+              <div class="multi-select__selection" aria-live="polite"></div>
             </div>
-            <div class="pill-list" data-list="directions"></div>
           </div>
           <div class="field field--compact">
             <div class="field__label-row">
@@ -3500,7 +3474,18 @@
         startEmpty: true,
         minRows: 0,
       });
-      setupDirections(row);
+
+      const directionSelect = setupSearchableMultiSelect({
+        name: 'curator_hour_directions',
+        options: directionsOptions,
+        placeholder: 'Начните вводить направленность',
+        container: row.querySelector('[data-name="curator_hour_directions"]'),
+        selectedContainer: row.querySelector('.multi-select__selection'),
+      });
+
+      if (directionSelect) {
+        curatorHoursDirectionSelects.set(row, directionSelect);
+      }
 
       const removeButton = row.querySelector('.curator-hours__remove-row');
 
@@ -3536,6 +3521,7 @@
         } else {
           removeButton.addEventListener('click', () => {
             if (curatorHoursRows.querySelectorAll('.curator-hours__row').length === 1) return;
+            curatorHoursDirectionSelects.delete(row);
             row.remove();
             updateRowRemovalState();
           });
@@ -3557,7 +3543,7 @@
           const dateStart = row.querySelector('.date-range__start')?.value || '';
           const dateEnd = row.querySelector('.date-range__end')?.value || '';
           const topic = sanitizeText(row.querySelector('.curator-hours__topic')?.value || '');
-          const directions = collectDirections(row.querySelector('[data-list="directions"]'));
+          const directions = collectMultiSelectValues(row.querySelector('[data-name="curator_hour_directions"]'));
 
           if (!groups.length && !specialists.length && !dateStart && !dateEnd && !topic && !directions.length) {
             return null;
@@ -3585,7 +3571,8 @@
           row.querySelector('.date-range__end').value = item.date_end || '';
           const topicField = row.querySelector('.curator-hours__topic');
           if (topicField) topicField.value = item.topic || '';
-          setDirections(row, item.directions || []);
+          const directionSelect = curatorHoursDirectionSelects.get(row);
+          directionSelect?.setValues(item.directions || []);
         });
 
       updateRowRemovalState();
@@ -4003,7 +3990,7 @@
 
       const rows = Array.from(curatorHoursRows.querySelectorAll('.curator-hours__row'));
       const rowsWithoutDirections = rows.filter((row) => {
-        const directions = collectDirections(row.querySelector('[data-list="directions"]'));
+        const directions = collectMultiSelectValues(row.querySelector('[data-name="curator_hour_directions"]'));
         return directions.length === 0;
       });
 
