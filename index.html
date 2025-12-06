@@ -876,8 +876,10 @@
     const qualificationCourseRowsContainer = document.getElementById('qualification-course-rows');
     const addQualificationCourseRowButton = document.getElementById('add-qualification-course-row');
     const interviewDirectionSelects = new WeakMap();
+    const scientificWorkDirectionSelects = new WeakMap();
     const qualificationCourseDirectionSelects = new WeakMap();
     let interviewDirectionDropdownId = 0;
+    let scientificWorkDirectionDropdownId = 0;
     let qualificationCourseDirectionDropdownId = 0;
 
     const directionsOptions = [
@@ -938,6 +940,72 @@
       'К.фил.н.',
       'Д.т.н.',
       'Д.э.н.',
+    ];
+
+    const scientificWorkDirectionOptions = [
+      'Государственная молодежная политика в РФ и её реализация в вузах',
+      'Общетеоретические вопросы молодежной политики',
+      'Нормативно-правовое обеспечение молодежной политики и воспитательной работы',
+      'Стратегия развития воспитательной работы в вузе',
+      'Модели и концепции воспитательной системы вуза',
+      'Воспитательная деятельность куратора академической группы',
+      'Организация воспитательной работы со студенческой молодежью',
+      'Психолого-педагогические основы воспитательной деятельности',
+      'Социально-педагогическая поддержка студенческой молодежи',
+      'Ценностные ориентиры современной молодежи',
+      'Формирование гражданской идентичности студентов',
+      'Гражданско-патриотическое воспитание студенческой молодежи',
+      'Историко-культурное воспитание студентов',
+      'Духовно-нравственное воспитание молодежи',
+      'Нравственные ориентиры и этика студенческой среды',
+      'Права человека и правовая культура молодежи',
+      'Правовое просвещение студентов',
+      'Профилактика правонарушений в молодежной среде',
+      'Профилактика экстремизма, радикализации и терроризма среди молодежи',
+      'Профилактика асоциального и девиантного поведения студентов',
+      'Профилактика буллинга и кибербуллинга в студенческой среде',
+      'Формирование культуры безопасного поведения в сети',
+      'Медиаобразование и медиаграмотность студенческой молодежи',
+      'Цифровая среда и ее влияние на воспитание студентов',
+      'Воспитательный потенциал цифровых и онлайн-платформ',
+      'Социальные сети как ресурс воспитательной работы',
+      'Формирование культуры здорового образа жизни у студентов',
+      'Профилактика зависимостей в молодежной среде',
+      'Психологическое благополучие и ментальное здоровье студентов',
+      'Психологическое сопровождение и поддержка студенческой молодежи',
+      'Профилактика эмоционального выгорания студентов',
+      'Развитие стрессоустойчивости и навыков саморегуляции у молодежи',
+      'Развитие коммуникативной культуры и культуры общения студентов',
+      'Развитие soft skills и универсальных компетенций',
+      'Лидерство и развитие лидерского потенциала студенческой молодежи',
+      'Студенческое самоуправление и его роль в воспитательной работе',
+      'Наставничество, тьюторство и кураторство в вузе',
+      'Организация деятельности студенческих клубов и объединений',
+      'Волонтерство и добровольческая деятельность студентов',
+      'Социальное проектирование и молодежные социальные проекты',
+      'Грантовая поддержка молодежных инициатив',
+      'Инклюзивная образовательная среда и воспитательная работа',
+      'Сопровождение студентов с ОВЗ и особыми образовательными потребностями',
+      'Межкультурная коммуникация и работа с иностранными студентами',
+      'Формирование толерантности и культуры межэтнического взаимодействия',
+      'Профориентация и сопровождение профессионального самоопределения студентов',
+      'Карьерное развитие и поддержка трудоустройства молодежи',
+      'Предпринимательская активность и бизнес-инициативы студенческой молодежи',
+      'Организация досуговой деятельности и свободного времени студентов',
+      'Культурно-досуговая деятельность и творческое развитие студентов',
+      'Спортивно-оздоровительная работа со студенческой молодежью',
+      'Экологическое воспитание и формирование экологической культуры',
+      'Финансовая грамотность и экономическая культура студентов',
+      'Формирование корпоративной культуры и идентичности ГУАП',
+      'Взаимодействие вуза с семьями студентов в контексте воспитательной работы',
+      'Взаимодействие вуза с органами власти и общественными организациями в сфере молодежной политики',
+      'Оценка эффективности программ воспитательной деятельности',
+      'Мониторинг воспитательной работы и аналитика в молодежной среде',
+      'Локальные практики и кейсы воспитательной деятельности в ГУАП',
+      'Сравнительный анализ моделей воспитательной работы в разных вузах',
+      'Инновационные технологии и формы воспитательной работы со студентами',
+      'Проектирование программ воспитательной деятельности и молодежной политики в вузе',
+      'Информационное сопровождение воспитательной деятельности и популяризация студенческих инициатив',
     ];
 
     const qualificationCourseDirectionOptions = [
@@ -1166,6 +1234,7 @@
           'Сведения об опубликованных научных работах по молодежной политике и воспитательной деятельности с указанием принадлежности к ГУАП.',
         description: 'Вводные данные о публикации: название, тип, соавторы, выходные данные.',
         link: 'Ссылка на интернет-ресурс с опубликованной работой или электронным изданием.',
+        directions: 'Направленность публикации из списка по вопросу 22.',
       },
       media_materials: {
         _comment: 'Интервью и статьи, подготовленные для «Дзен.ГУАП», соцсетей и сайта ГУАП.',
@@ -1507,6 +1576,8 @@
     function createScientificWorkRow() {
       const row = document.createElement('div');
       row.className = 'curator-hours__row scientific-work-row';
+      const directionDropdownId = `scientific-work-directions-list-${++scientificWorkDirectionDropdownId}`;
+      const directionLabelId = `scientific-work-direction-label-${scientificWorkDirectionDropdownId}`;
 
       row.innerHTML = `
         <div class="curator-hours__grid">
@@ -1514,6 +1585,54 @@
             <span class="field__label">Вводные данные</span>
             <textarea class="scientific-work__description" placeholder="Например, монография или статья с указанием издания и соавторов" rows="3"></textarea>
           </label>
+          <div class="field field--compact" role="group" aria-labelledby="${directionLabelId}">
+            <div class="field__label-row">
+              <span class="field__label" id="${directionLabelId}">Направленность</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: выберите одну или несколько направленностей публикации"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">
+                  Выберите направленность публикации из списка или добавьте несколько вариантов. Чтобы удалить выбранное,
+                  нажмите на крестик на метке.
+                </div>
+              </div>
+            </div>
+            <div class="multi-select" data-name="scientific_work_directions">
+              <div
+                class="multi-select__control multi-select__control--input"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-owns="${directionDropdownId}"
+              >
+                <div class="multi-select__values multi-select__values--hidden" aria-live="polite"></div>
+                <input
+                  type="text"
+                  class="multi-select__input"
+                  placeholder="Начните вводить направленность"
+                  aria-labelledby="${directionLabelId}"
+                />
+                <button type="button" class="multi-select__chevron" aria-hidden="true">▾</button>
+              </div>
+              <div class="multi-select__dropdown" id="${directionDropdownId}" role="listbox"></div>
+              <div class="multi-select__hidden" aria-hidden="true"></div>
+              <input
+                type="text"
+                class="multi-select__validator"
+                name="scientific_work_directions_validator"
+                aria-hidden="true"
+                tabindex="-1"
+                required
+              />
+              <div class="multi-select__selection" aria-live="polite"></div>
+            </div>
+          </div>
           <label class="field field--compact">
             <span class="field__label">Ссылка на интернет-ресурс</span>
             <input type="url" class="scientific-work__link" placeholder="https://example.com" />
@@ -1535,6 +1654,20 @@
     function addScientificWorkRow() {
       const row = createScientificWorkRow();
       scientificWorkRowsContainer.prepend(row);
+
+      const directionSelect = setupSearchableMultiSelect({
+        name: 'scientific_work_directions',
+        options: scientificWorkDirectionOptions,
+        placeholder: 'Начните вводить направленность',
+        container: row.querySelector('[data-name="scientific_work_directions"]'),
+        selectedContainer: row.querySelector('.multi-select__selection'),
+      });
+
+      if (directionSelect) {
+        scientificWorkDirectionSelects.set(row, directionSelect);
+      }
+
+      setupTooltips();
 
       return row;
     }
@@ -3038,12 +3171,13 @@
         .map((row) => {
           const description = sanitizeText(row.querySelector('.scientific-work__description')?.value || '');
           const link = sanitizeText(row.querySelector('.scientific-work__link')?.value || '');
+          const directions = collectMultiSelectValues(row.querySelector('[data-name="scientific_work_directions"]'));
 
-          if (!description && !link) {
+          if (!description && !link && directions.length === 0) {
             return null;
           }
 
-          return { description, link };
+          return { description, link, directions };
         })
         .filter(Boolean);
     }
@@ -3065,6 +3199,9 @@
           const link = row.querySelector('.scientific-work__link');
           if (description) description.value = item.description || '';
           if (link) link.value = item.link || '';
+          const directionSelect = scientificWorkDirectionSelects.get(row);
+          const directions = Array.isArray(item.directions) ? item.directions : [];
+          directionSelect?.setValues(directions);
         });
     }
 
