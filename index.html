@@ -880,11 +880,13 @@
     const qualificationCourseDirectionSelects = new WeakMap();
     const mentorSupportDirectionSelects = new WeakMap();
     const personalProgramDirectionSelects = new WeakMap();
+    const curatorPersonalEventDirectionSelects = new WeakMap();
     let interviewDirectionDropdownId = 0;
     let scientificWorkDirectionDropdownId = 0;
     let qualificationCourseDirectionDropdownId = 0;
     let mentorSupportDirectionDropdownId = 0;
     let personalProgramDirectionDropdownId = 0;
+    let curatorPersonalEventDirectionDropdownId = 0;
 
     const directionsOptions = [
       'Гражданская',
@@ -1067,6 +1069,56 @@
       'Муниципальные и региональные молодежные программы и их использование в работе куратора',
       'Интеграция воспитательной работы с образовательным процессом',
       'Индивидуальное сопровождение студента и ведение «карты развития» обучающегося',
+    ];
+
+    const curatorPersonalEventDirectionOptions = [
+      'Организационно-методическое собрание кураторов',
+      'Совещание по вопросам воспитательной работы',
+      'Совещание по вопросам успеваемости и дисциплины студентов',
+      'Инструктивное совещание по подготовке отчётности кураторов',
+      'Совещание по работе с первокурсниками и адаптации обучающихся',
+      'Совещание по профилактике правонарушений и асоциального поведения',
+      'Совещание по профилактике экстремизма и терроризма',
+      'Совещание по организации патриотических и памятных мероприятий',
+      'Совещание по организации культурно-досуговой деятельности',
+      'Совещание по организации спортивно-оздоровительной работы',
+      'Совещание по работе со студентами, проживающими в общежитии',
+      'Совещание по работе со студенческим самоуправлением',
+      'Совещание по взаимодействию с родителями (законными представителями) студентов',
+      'Методическое собрание по планированию воспитательной работы',
+      'Методическое объединение кураторов',
+      'Методический семинар по обмену опытом кураторской деятельности',
+      'Семинар по организации индивидуальной работы со студентами',
+      'Семинар по сопровождению студентов группы риска',
+      'Семинар по работе со студентами с ОВЗ и особыми образовательными потребностями',
+      'Семинар по работе с иностранными студентами',
+      'Семинар по формированию благоприятного психологического климата в группе',
+      'Семинар по формированию корпоративной культуры вуза',
+      'Тренинг по развитию коммуникативных навыков куратора',
+      'Тренинг по конфликтологии и медиации',
+      'Тренинг по профилактике эмоционального выгорания куратора',
+      'Тренинг по работе с тревожными и депрессивными студентами',
+      'Тренинг по навыкам публичного выступления и ведения собраний',
+      'Тренинг по использованию цифровых сервисов в работе куратора',
+      'Тренинг по работе с документацией и отчётностью куратора',
+      'Мастер-класс по проведению кураторского часа',
+      'Мастер-класс по организации командообразующих мероприятий',
+      'Мастер-класс по использованию интерактивных форм работы со студентами',
+      'Мастер-класс по проектной деятельности со студенческой группой',
+      'Мастер-класс по сопровождению участия студентов в конкурсах и форумах',
+      'Мастер-класс по ведению официальных групп и чатов академической группы',
+      'Участие в конкурсе профессионального мастерства кураторов',
+      'Участие в конкурсе кураторских практик и воспитательных проектов',
+      'Участие в городском/региональном конкурсе кураторов',
+      'Участие в вузовском конкурсе «Лучший куратор»',
+      'Участие в форуме/конференции по молодежной политике и воспитательной работе',
+      'Участие в школе кураторов/школе классных руководителей',
+      'Участие в стратегической сессии по развитию воспитательной работы в вузе',
+      'Участие в круглом столе по вопросам молодежной политики',
+      'Участие в круглых столах и дискуссионных площадках для кураторов',
+      'Консультационное совещание с администрацией факультета/института',
+      'Консультационное совещание с психологической службой вуза',
+      'Мероприятие общего характера для кураторов (тематика не уточнена)',
     ];
 
     const personalProgramDirectionOptions = [
@@ -1323,6 +1375,7 @@
         date_start: 'Дата начала или единственная дата участия.',
         date_end: 'Дата окончания периода участия, если применимо.',
         event: 'Название или описание мероприятия.',
+        directions: 'Направленность мероприятия из списка по вопросу 19.',
       },
       personal_program_participation: {
         _comment:
@@ -1624,6 +1677,8 @@
     function createExtracurricularRow({ isRemovable = true } = {}) {
       const row = document.createElement('div');
       row.className = 'curator-hours__row extracurricular-row';
+      const directionDropdownId = `curator-personal-directions-list-${++curatorPersonalEventDirectionDropdownId}`;
+      const directionLabelId = `curator-personal-direction-label-${curatorPersonalEventDirectionDropdownId}`;
 
       row.innerHTML = `
         <div class="curator-hours__grid">
@@ -1646,6 +1701,54 @@
               <input type="date" class="extracurricular-date__start" aria-label="Дата начала" />
               <span class="date-range__dash">—</span>
               <input type="date" class="extracurricular-date__end" aria-label="Дата окончания" />
+            </div>
+          </div>
+          <div class="field field--compact" role="group" aria-labelledby="${directionLabelId}">
+            <div class="field__label-row">
+              <span class="field__label" id="${directionLabelId}">Направленность</span>
+              <div class="tooltip">
+                <button
+                  type="button"
+                  class="tooltip__trigger"
+                  aria-label="Подсказка: выберите одну или несколько направленностей мероприятия"
+                  aria-expanded="false"
+                >
+                  ?
+                </button>
+                <div class="tooltip__bubble" role="tooltip">
+                  Выберите направленность мероприятия из списка или добавьте несколько вариантов. Чтобы удалить выбранное,
+                  нажмите на крестик на метке.
+                </div>
+              </div>
+            </div>
+            <div class="multi-select" data-name="curator_personal_event_directions">
+              <div
+                class="multi-select__control multi-select__control--input"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-owns="${directionDropdownId}"
+              >
+                <div class="multi-select__values multi-select__values--hidden" aria-live="polite"></div>
+                <input
+                  type="text"
+                  class="multi-select__input"
+                  placeholder="Начните вводить направленность"
+                  aria-labelledby="${directionLabelId}"
+                />
+                <button type="button" class="multi-select__chevron" aria-hidden="true">▾</button>
+              </div>
+              <div class="multi-select__dropdown" id="${directionDropdownId}" role="listbox"></div>
+              <div class="multi-select__hidden" aria-hidden="true"></div>
+              <input
+                type="text"
+                class="multi-select__validator"
+                name="curator_personal_event_directions_validator"
+                aria-hidden="true"
+                tabindex="-1"
+                required
+              />
+              <div class="multi-select__selection" aria-live="polite"></div>
             </div>
           </div>
           <label class="field field--compact">
@@ -1689,6 +1792,18 @@
     function addExtracurricularRow(options = {}) {
       const row = createExtracurricularRow(options);
       const removeButton = row.querySelector('.extracurricular-row__remove');
+
+      const directionSelect = setupSearchableMultiSelect({
+        name: 'curator_personal_event_directions',
+        options: curatorPersonalEventDirectionOptions,
+        placeholder: 'Начните вводить направленность',
+        container: row.querySelector('[data-name="curator_personal_event_directions"]'),
+        selectedContainer: row.querySelector('.multi-select__selection'),
+      });
+
+      if (directionSelect) {
+        curatorPersonalEventDirectionSelects.set(row, directionSelect);
+      }
 
       if (removeButton && !removeButton.dataset.fixed) {
         removeButton.addEventListener('click', () => {
@@ -3343,12 +3458,15 @@
           const dateStart = row.querySelector('.extracurricular-date__start')?.value || '';
           const dateEnd = row.querySelector('.extracurricular-date__end')?.value || '';
           const event = sanitizeText(row.querySelector('.extracurricular-event__description')?.value || '');
+          const directions = collectMultiSelectValues(
+            row.querySelector('[data-name="curator_personal_event_directions"]')
+          );
 
-          if (!dateStart && !dateEnd && !event) {
+          if (!dateStart && !dateEnd && !event && directions.length === 0) {
             return null;
           }
 
-          return { date_start: dateStart, date_end: dateEnd, event };
+          return { date_start: dateStart, date_end: dateEnd, event, directions };
         })
         .filter(Boolean);
     }
@@ -3368,6 +3486,9 @@
           row.querySelector('.extracurricular-date__end').value = item.date_end || '';
           const description = row.querySelector('.extracurricular-event__description');
           if (description) description.value = item.event || '';
+          const directionSelect = curatorPersonalEventDirectionSelects.get(row);
+          const directions = Array.isArray(item.directions) ? item.directions : [];
+          directionSelect?.setValues(directions);
         });
 
       updateExtracurricularRowRemovalState();
@@ -3801,6 +3922,8 @@
         (event, index) =>
           `${index + 1}. Период: ${formatDateRange(event.date_start, event.date_end)}, Мероприятие: ${
             event.event || '—'
+          }, Направленность: ${
+            formatList(event.directions)
           }`
       );
       addList(
