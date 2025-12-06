@@ -428,6 +428,17 @@ main {
   background: rgba(242, 177, 56, 0.08);
 }
 
+.multi-select__option--other {
+  background: linear-gradient(90deg, rgba(242, 177, 56, 0.14), rgba(242, 177, 56, 0.05));
+  box-shadow: inset 0 0 0 1px rgba(242, 177, 56, 0.55), 0 0 14px rgba(242, 177, 56, 0.35);
+  color: #fff;
+}
+
+.multi-select__option--other:hover,
+.multi-select__option--other:focus {
+  background: linear-gradient(90deg, rgba(242, 177, 56, 0.22), rgba(242, 177, 56, 0.08));
+}
+
 .input--datalist {
   padding-right: 44px;
 }
@@ -566,6 +577,13 @@ main {
   background: rgba(242, 177, 56, 0.1);
   color: var(--text);
   border: 1px solid rgba(242, 177, 56, 0.3);
+}
+
+.multi-select__chip--other {
+  background: linear-gradient(120deg, rgba(242, 177, 56, 0.24), rgba(242, 177, 56, 0.1));
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(242, 177, 56, 0.5), 0 0 14px rgba(242, 177, 56, 0.35);
+  color: #fff;
 }
 
 .multi-select__chip-remove {
