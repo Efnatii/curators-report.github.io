@@ -225,6 +225,7 @@
                 name="curator_primary_room"
                 class="input--datalist"
                 list="curator-primary-room-options"
+                data-manual-toggle="true"
                 placeholder="Начните вводить аудиторию"
                 required
               />
@@ -2778,6 +2779,10 @@
         .map((option) => option.value)
         .filter(Boolean);
       const normalizedOptions = new Set(options.map((option) => option.trim().toLowerCase()));
+      const allowManualToggle = input.dataset.manualToggle === 'true';
+      const manualToggleLabel = input.dataset.manualToggleLabel || 'Ввести вручную';
+      const manualToggleReturnLabel = input.dataset.manualToggleReturnLabel || 'Выбрать из списка';
+      let manualMode = false;
 
       const container = document.createElement('div');
       container.className = 'datalist';
@@ -2805,6 +2810,23 @@
 
       function renderOptions(term = '') {
         dropdown.innerHTML = '';
+        if (allowManualToggle) {
+          const manualButton = document.createElement('button');
+          manualButton.type = 'button';
+          manualButton.className = 'datalist__option';
+          manualButton.textContent = manualMode ? manualToggleReturnLabel : manualToggleLabel;
+          manualButton.addEventListener('click', () => {
+            manualMode = !manualMode;
+            input.value = '';
+            renderOptions(manualMode ? '' : input.value.trim());
+            input.focus();
+          });
+          dropdown.append(manualButton);
+          if (manualMode) {
+            return;
+          }
+        }
+
         const normalized = term.toLowerCase();
         const filtered = options.filter((option) => option.toLowerCase().includes(normalized));
 
@@ -2855,7 +2877,7 @@
             return;
           }
 
-          if (pendingValue && !normalizedOptions.has(pendingValue.toLowerCase())) {
+          if (pendingValue && !manualMode && !normalizedOptions.has(pendingValue.toLowerCase())) {
             input.value = '';
             input.dispatchEvent(new Event('input', { bubbles: true }));
           }
