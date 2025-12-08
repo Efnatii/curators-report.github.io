@@ -225,10 +225,12 @@
                 name="curator_primary_room"
                 class="input--datalist"
                 list="curator-primary-room-options"
+                data-allow-custom="true"
                 placeholder="Начните вводить аудиторию"
                 required
               />
               <datalist id="curator-primary-room-options">
+                <option value="Ввести вручную / другое"></option>
                 <option value="(Б. Морская 67)"></option>
                 <option value="11-01а (Б. Морская 67)"></option>
                 <option value="11-01б (Б. Морская 67)"></option>
@@ -2778,6 +2780,7 @@
         .map((option) => option.value)
         .filter(Boolean);
       const normalizedOptions = new Set(options.map((option) => option.trim().toLowerCase()));
+      const allowCustom = input.dataset.allowCustom === 'true';
 
       const container = document.createElement('div');
       container.className = 'datalist';
@@ -2855,7 +2858,7 @@
             return;
           }
 
-          if (pendingValue && !normalizedOptions.has(pendingValue.toLowerCase())) {
+          if (pendingValue && !allowCustom && !normalizedOptions.has(pendingValue.toLowerCase())) {
             input.value = '';
             input.dispatchEvent(new Event('input', { bubbles: true }));
           }
@@ -4312,8 +4315,10 @@
         ? buildingValue
         : '';
 
+      const roomInput = form.elements.curator_primary_room;
+      const allowCustomRoom = roomInput?.dataset.allowCustom === 'true';
       const roomValue = (data.curator_primary_room || '').trim();
-      form.elements.curator_primary_room.value = primaryRoomOptionsNormalized.has(roomValue.toLowerCase())
+      roomInput.value = allowCustomRoom || primaryRoomOptionsNormalized.has(roomValue.toLowerCase())
         ? roomValue
         : '';
 
