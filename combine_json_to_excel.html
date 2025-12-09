@@ -656,7 +656,7 @@
         };
 
         const headerStyle = {
-          alignment: { vertical: "top", horizontal: "left" },
+          alignment: { vertical: "top" },
         };
 
         const highlightStyle = {
@@ -694,9 +694,9 @@
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, worksheet, "Анкеты");
 
-        const arrayBuffer = XLSX.write(wb, { bookType: "xls", type: "array", cellStyles: true });
+        const arrayBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array", cellStyles: true });
         const blob = new Blob([arrayBuffer], {
-          type: "application/vnd.ms-excel",
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
 
         const url = URL.createObjectURL(blob);
@@ -712,8 +712,8 @@
       const bootstrap = async () => {
         setStatus("Загружаем библиотеки…");
         await loadLibrary("XLSX", [
-          "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.full.min.js",
-          "https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.full.min.js",
+          "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+          "https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js",
         ]);
         await loadLibrary("jsPDF", [
           "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js",
@@ -739,7 +739,7 @@
           const records = await readFiles(files);
           const { dataRows, merges, highlights, columnWidths, scoreColumnIndex } = buildWorkbook(records);
 
-          const filename = "combined.xls";
+          const filename = "combined.xlsx";
           exportWorkbook(dataRows, merges, columnWidths, highlights, filename, scoreColumnIndex);
 
           if (pdfCheckbox.checked) {
