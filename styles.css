@@ -347,11 +347,6 @@ main {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
     rgba(255, 255, 255, 0.02);
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
-  width: 100%;
-}
-
-.checkbox--full {
-  justify-content: space-between;
 }
 
 .checkbox--inline:hover {
@@ -364,12 +359,6 @@ main {
   display: inline-flex;
   flex-direction: column;
   gap: 2px;
-}
-
-.checkbox__note {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 0.95rem;
 }
 
 .status-panel {
@@ -445,15 +434,6 @@ main {
   max-width: 720px;
 }
 
-.field--interactive {
-  padding: 14px 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)), #0b0f18;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
-  gap: 12px;
-}
-
 .field__label-row {
   display: flex;
   justify-content: space-between;
@@ -474,21 +454,6 @@ main {
 
 .field__label {
   font-weight: 700;
-}
-
-.field__label--accent {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-  letter-spacing: 0.01em;
-}
-
-.field__hint {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-  font-weight: 600;
 }
 
 .multi-input {
