@@ -294,6 +294,61 @@ main {
   font-size: 0.95rem;
 }
 
+
+.file-input--hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  inset: auto;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.file-picker--dual .file-picker__control {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.file-picker__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.file-picker__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-picker__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.file-picker__count {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.file-picker__button--ghost {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(148, 163, 184, 0.25), rgba(148, 163, 184, 0)) border-box,
+    linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)) border-box;
+  border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.8);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
 .checkbox {
   display: inline-flex;
   align-items: center;
