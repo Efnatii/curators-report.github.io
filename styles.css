@@ -238,6 +238,19 @@ main {
   color: var(--muted);
 }
 
+.file-picker-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+@media (min-width: 640px) {
+  .file-picker-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .file-picker {
   position: relative;
   display: block;
@@ -256,15 +269,17 @@ main {
 
 .file-picker__control {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 16px 16px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(242, 177, 56, 0.1), rgba(255, 255, 255, 0.04)),
+  background: linear-gradient(135deg, rgba(242, 177, 56, 0.12), rgba(255, 255, 255, 0.04)),
     rgba(17, 24, 39, 0.7);
   border: 1px dashed rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 30px rgba(0, 0, 0, 0.3);
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  min-height: 96px;
 }
 
 .file-picker:hover .file-picker__control,
@@ -272,6 +287,12 @@ main {
   border-color: rgba(242, 177, 56, 0.55);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 16px 38px rgba(242, 177, 56, 0.18);
   transform: translateY(-1px);
+}
+
+.file-picker__label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
 
 .file-picker__button {
@@ -292,6 +313,33 @@ main {
   color: var(--muted);
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+.file-picker__counter {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-weight: 700;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox--inline {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  width: fit-content;
+}
+
+.file-picker--ghost .file-picker__control {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-style: solid;
 }
 
 .checkbox {
@@ -347,6 +395,8 @@ main {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
     rgba(255, 255, 255, 0.02);
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  min-height: 64px;
+  width: fit-content;
 }
 
 .checkbox--inline:hover {
