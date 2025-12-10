@@ -244,22 +244,6 @@ main {
   isolation: isolate;
 }
 
-.file-picker--split {
-  display: grid;
-  gap: 12px;
-}
-
-@media (min-width: 640px) {
-  .file-picker--split {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.file-picker__option {
-  position: relative;
-  display: block;
-}
-
 .file-input {
   position: absolute;
   inset: 0;
@@ -308,22 +292,6 @@ main {
   color: var(--muted);
   font-weight: 600;
   font-size: 0.95rem;
-}
-
-.file-picker__meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.file-picker__count {
-  color: var(--text);
-  font-weight: 700;
 }
 
 .checkbox {
@@ -379,8 +347,6 @@ main {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)),
     rgba(255, 255, 255, 0.02);
   transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
-  width: fit-content;
-  max-width: 100%;
 }
 
 .checkbox--inline:hover {
@@ -392,18 +358,7 @@ main {
 .checkbox__text {
   display: inline-flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.checkbox__title {
-  font-weight: 700;
-  color: var(--text);
-}
-
-.checkbox__hint {
-  color: var(--muted);
-  font-weight: 600;
-  max-width: 40ch;
+  gap: 2px;
 }
 
 .status-panel {

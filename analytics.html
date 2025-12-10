@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Аналитика отчетов</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="container hero__content">
+      <div class="hero__badge">Аналитика</div>
+      <h1>Аналитика отчетов кураторов</h1>
+      <p class="lede">
+        Выберите папку с JSON-файлами, чтобы построить сводные диаграммы по каждому вопросу анкеты.
+      </p>
+      <div class="hero__meta">
+        <button id="import-button" class="chip chip--interactive">Импортировать JSONы</button>
+        <input id="json-input" type="file" accept="application/json" webkitdirectory multiple hidden />
+        <div id="import-summary" class="pill" aria-live="polite">Файлы не загружены</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container analytics">
+      <section class="panel" id="overview">
+        <div class="section-header">
+          <div>
+            <p class="section-counter">Сводка</p>
+            <h2>Общая статистика</h2>
+            <p class="muted">Число загруженных файлов и охват ответов по вопросам.</p>
+          </div>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="muted" id="status-text">Загрузите папку с JSON-файлами, чтобы увидеть статистику.</div>
+      </section>
+
+      <section class="analytics-grid" id="charts-grid" aria-live="polite"></section>
+    </div>
+  </main>
+
+  <script>
+    const importButton = document.getElementById('import-button');
+    const fileInput = document.getElementById('json-input');
+    const importSummary = document.getElementById('import-summary');
+    const chartsGrid = document.getElementById('charts-grid');
+    const statsGrid = document.getElementById('stats-grid');
+    const statusText = document.getElementById('status-text');
+
+    const QUESTION_CONFIG = [
+      { key: 'reporting_period', label: 'Отчётный период', type: 'period' },
+      { key: 'full_name', label: 'ФИО куратора', type: 'text' },
+      { key: 'job_positions', label: 'Должности', type: 'multi' },
+      { key: 'department', label: 'Кафедра', type: 'text' },
+      { key: 'contact_phone_connected_to_telegram', label: 'Телефон (Telegram)', type: 'text' },
+      { key: 'telegram_username', label: 'Ник в Telegram', type: 'text' },
+      { key: 'email', label: 'E-mail', type: 'text' },
+      { key: 'curated_group_numbers', label: 'Номера курируемых групп', type: 'multi' },
+      { key: 'curator_primary_building', label: 'Корпус пребывания', type: 'text' },
+      { key: 'curator_primary_room', label: 'Аудитория пребывания', type: 'text' },
+      { key: 'institute_or_faculty', label: 'Институт/Факультет', type: 'multi' },
+      {
+        key: 'held_minimum_three_curator_sessions_in_reporting_period',
+        label: 'Проведено ≥3 кураторских часов',
+        type: 'boolean',
+      },
+      { key: 'curator_hours_details', label: 'Детали кураторских часов', type: 'objectList' },
+      { key: 'manages_group_chat', label: 'Ведение чата', type: 'boolean' },
+      { key: 'inform_group_about_events', label: 'Информирование о мероприятиях', type: 'boolean' },
+      { key: 'achievements', label: 'Достижения студентов', type: 'objectList' },
+      {
+        key: 'participated_in_two_events_with_group',
+        label: 'Совместное участие в мероприятиях',
+        type: 'boolean',
+      },
+      { key: 'joint_participation_events', label: 'Список совместных мероприятий', type: 'objectList' },
+      {
+        key: 'participated_in_two_curator_events',
+        label: 'Участие куратора в мероприятиях',
+        type: 'boolean',
+      },
+      { key: 'curator_personal_events', label: 'Список мероприятий куратора', type: 'objectList' },
+      { key: 'personal_program_participation', label: 'Личная внеучебная программа', type: 'objectList' },
+      { key: 'mentor_support_events', label: 'Наставничество в проектах', type: 'objectList' },
+      { key: 'scientific_publications', label: 'Научные публикации', type: 'objectList' },
+      { key: 'media_materials', label: 'Материалы для СМИ', type: 'objectList' },
+      { key: 'qualification_courses', label: 'Курсы повышения квалификации', type: 'objectList' },
+    ];
+
+    const CHART_REGISTRY = new Map();
+
+    importButton.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFilesSelected);
+
+    function handleFilesSelected() {
+      const files = Array.from(fileInput.files || []).filter((file) => file.name.endsWith('.json'));
+      if (!files.length) {
+        updateStatus('Файлы не выбраны');
+        return;
+      }
+
+      importSummary.textContent = `Загружено файлов: ${files.length}`;
+      updateStatus('Чтение файлов...');
+
+      Promise.all(files.map((file) => file.text().then((text) => parseJson(text, file.name)).catch(() => null)))
+        .then((results) => results.filter(Boolean))
+        .then((records) => {
+          if (!records.length) {
+            updateStatus('Не удалось прочитать JSON-файлы.');
+            return;
+          }
+
+          const analysis = analyzeResponses(records);
+          renderStats(records.length, analysis);
+          renderCharts(analysis, records.length);
+          updateStatus('Аналитика построена.');
+        })
+        .catch(() => updateStatus('Произошла ошибка при обработке файлов.'))
+        .finally(() => {
+          fileInput.value = '';
+        });
+    }
+
+    function parseJson(text, fileName) {
+      try {
+        const data = JSON.parse(text);
+        if (data && typeof data === 'object') return data;
+      } catch (error) {
+        console.warn(`Ошибка чтения ${fileName}:`, error);
+      }
+      return null;
+    }
+
+    function updateStatus(message) {
+      statusText.textContent = message;
+    }
+
+    function analyzeResponses(records) {
+      const summary = new Map();
+
+      QUESTION_CONFIG.forEach((question) => {
+        summary.set(question.key, {
+          label: question.label,
+          type: question.type,
+          values: [],
+          tokens: [],
+          lengths: [],
+        });
+      });
+
+      for (const record of records) {
+        for (const question of QUESTION_CONFIG) {
+          const value = record[question.key];
+          if (value === undefined || value === null || value === '') continue;
+
+          const bucket = summary.get(question.key);
+          bucket.values.push(value);
+
+          if (question.type === 'objectList') {
+            const items = Array.isArray(value) ? value : [];
+            bucket.lengths.push(items.length);
+            bucket.tokens.push(...extractTokens(items));
+          } else if (question.type === 'multi') {
+            bucket.tokens.push(...(Array.isArray(value) ? value : []));
+          } else {
+            bucket.tokens.push(value);
+          }
+        }
+      }
+
+      return summary;
+    }
+
+    function extractTokens(items) {
+      const tokens = [];
+      if (!Array.isArray(items)) return tokens;
+
+      for (const item of items) {
+        if (item === null || item === undefined) continue;
+        if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+          tokens.push(String(item));
+        } else if (Array.isArray(item)) {
+          tokens.push(...item.map((entry) => String(entry)));
+        } else if (typeof item === 'object') {
+          Object.values(item).forEach((val) => {
+            if (val === null || val === undefined) return;
+            if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+              tokens.push(String(val));
+            } else if (Array.isArray(val)) {
+              tokens.push(...val.map((entry) => String(entry)));
+            }
+          });
+        }
+      }
+
+      return tokens.filter(Boolean);
+    }
+
+    function renderStats(totalFiles, analysis) {
+      statsGrid.innerHTML = '';
+
+      const cards = [
+        createStatCard('Ответы', `${totalFiles}`),
+        createStatCard('Вопросы', `${analysis.size}`),
+        createStatCard(
+          'Заполненные поля',
+          `${Array.from(analysis.values()).filter((item) => item.values.length > 0).length}`
+        ),
+      ];
+
+      statsGrid.append(...cards);
+    }
+
+    function createStatCard(title, value) {
+      const card = document.createElement('div');
+      card.className = 'stat-card';
+      card.innerHTML = `
+        <p class="muted">${title}</p>
+        <p class="stat-card__value">${value}</p>
+      `;
+      return card;
+    }
+
+    function renderCharts(analysis, totalFiles) {
+      chartsGrid.innerHTML = '';
+
+      for (const [key, data] of analysis.entries()) {
+        const hasData = data.values.length > 0;
+        const card = document.createElement('article');
+        card.className = 'panel analytics-card';
+        const heading = document.createElement('div');
+        heading.className = 'section-header section-header--sub';
+        heading.innerHTML = `
+          <div>
+            <p class="section-counter">Вопрос</p>
+            <h3>${data.label}</h3>
+          </div>
+          <div class="muted">Ответов: ${data.values.length}/${totalFiles}</div>
+        `;
+        card.appendChild(heading);
+
+        if (!hasData) {
+          const empty = document.createElement('p');
+          empty.className = 'muted';
+          empty.textContent = 'Ответов нет';
+          card.appendChild(empty);
+          chartsGrid.appendChild(card);
+          continue;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart-${key}`;
+        card.appendChild(canvas);
+
+        const chartData = prepareChartData(data);
+        if (chartData) {
+          renderChart(canvas, chartData);
+        } else {
+          const fallback = document.createElement('p');
+          fallback.className = 'muted';
+          fallback.textContent = 'Недостаточно данных для построения диаграммы.';
+          card.appendChild(fallback);
+        }
+
+        const tags = createTagList(chartData?.topValues || []);
+        if (tags) card.appendChild(tags);
+
+        chartsGrid.appendChild(card);
+      }
+    }
+
+    function prepareChartData(data) {
+      switch (data.type) {
+        case 'boolean':
+          return buildBooleanChart(data.tokens);
+        case 'multi':
+          return buildFrequencyChart(data.tokens, {
+            title: 'Распределение по выбранным вариантам',
+            chartType: 'bar',
+          });
+        case 'objectList':
+          if (data.lengths.some((length) => length > 0)) {
+            return buildLengthChart(data.lengths, data.tokens);
+          }
+          return null;
+        case 'period':
+          return buildFrequencyChart(
+            data.values.map(formatPeriod),
+            { title: 'Выбранные периоды', chartType: 'bar' }
+          );
+        default:
+          return buildFrequencyChart(data.tokens, { title: 'Частота ответов', chartType: 'bar' });
+      }
+    }
+
+    function buildBooleanChart(tokens) {
+      const yes = tokens.filter((value) => value === true || value === 'true' || value === 'Да').length;
+      const no = tokens.filter((value) => value === false || value === 'false' || value === 'Нет').length;
+      const unknown = tokens.length - yes - no;
+
+      return {
+        type: 'pie',
+        labels: ['Да', 'Нет', 'Не указано'],
+        datasets: [
+          {
+            data: [yes, no, Math.max(0, unknown)],
+            backgroundColor: ['#f2b138', '#3b82f6', '#6b7280'],
+            borderWidth: 0,
+          },
+        ],
+        title: 'Доля ответов',
+        topValues: [
+          { label: 'Да', value: yes },
+          { label: 'Нет', value: no },
+          { label: 'Не указано', value: Math.max(0, unknown) },
+        ],
+      };
+    }
+
+    function buildLengthChart(lengths, tokens) {
+      const distribution = aggregateCounts(lengths.map((len) => `${len}`));
+      const topValues = Object.entries(distribution)
+        .map(([label, value]) => ({ label: `${label} записей`, value }))
+        .sort((a, b) => b.value - a.value);
+
+      return {
+        type: 'bar',
+        labels: Object.keys(distribution),
+        datasets: [
+          {
+            data: Object.values(distribution),
+            backgroundColor: '#f2b138',
+            borderRadius: 8,
+          },
+        ],
+        title: 'Количество заполненных строк',
+        topValues: topValues.slice(0, 5),
+        secondary: buildFrequencyChart(tokens, {
+          title: 'Частые значения',
+          chartType: 'bar',
+          limit: 5,
+        }),
+      };
+    }
+
+    function buildFrequencyChart(tokens, options = {}) {
+      const { title, chartType = 'bar', limit = 10 } = options;
+      const counts = aggregateCounts(tokens.map((token) => sanitizeValue(token)));
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, limit);
+      if (!sorted.length) return null;
+
+      return {
+        type: chartType,
+        labels: sorted.map(([label]) => label || '—'),
+        datasets: [
+          {
+            data: sorted.map(([, value]) => value),
+            backgroundColor: chartType === 'pie' ? ['#f2b138', '#3b82f6', '#10b981', '#8b5cf6'] : '#f2b138',
+            borderRadius: chartType === 'bar' ? 8 : 0,
+          },
+        ],
+        title: title || 'Распределение ответов',
+        topValues: sorted.map(([label, value]) => ({ label, value })),
+      };
+    }
+
+    function sanitizeValue(value) {
+      if (value === null || value === undefined) return '—';
+      return String(value).trim() || '—';
+    }
+
+    function aggregateCounts(items) {
+      return items.reduce((acc, item) => {
+        const key = sanitizeValue(item);
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    function formatPeriod(period) {
+      if (!period || typeof period !== 'object') return '—';
+      if (period.display) return period.display;
+
+      const start = period.date_start || '';
+      const end = period.date_end || '';
+      const range = start && end ? `${start} — ${end}` : start || end;
+      const suffix = period.deadline ? ` (Дедлайн: ${period.deadline})` : '';
+      return range ? `${range}${suffix}` : suffix || '—';
+    }
+
+    function renderChart(canvas, chartData) {
+      const context = canvas.getContext('2d');
+
+      if (CHART_REGISTRY.has(canvas.id)) {
+        CHART_REGISTRY.get(canvas.id).destroy();
+      }
+
+      const options = {
+        responsive: true,
+        plugins: {
+          legend: { display: chartData.type === 'pie' },
+          title: { display: Boolean(chartData.title), text: chartData.title, color: '#e9ecf2' },
+          tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.formattedValue}` } },
+        },
+        scales: chartData.type === 'bar'
+          ? {
+              x: { ticks: { color: '#e9ecf2' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+              y: { ticks: { color: '#e9ecf2', precision: 0 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            }
+          : {},
+      };
+
+      const chart = new Chart(context, {
+        type: chartData.type,
+        data: { labels: chartData.labels, datasets: chartData.datasets },
+        options,
+      });
+
+      CHART_REGISTRY.set(canvas.id, chart);
+    }
+
+    function createTagList(topValues) {
+      if (!topValues || !topValues.length) return null;
+      const list = document.createElement('div');
+      list.className = 'tag-list';
+      topValues.forEach((item) => {
+        const tag = document.createElement('span');
+        tag.className = 'chip';
+        tag.textContent = `${item.label}: ${item.value}`;
+        list.appendChild(tag);
+      });
+      return list;
+    }
+  </script>
+</body>
+</html>
