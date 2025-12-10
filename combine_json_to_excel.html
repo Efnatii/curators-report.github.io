@@ -202,6 +202,37 @@
         throw new Error(`Не удалось загрузить библиотеку ${label}. Проверьте подключение к Интернету или попробуйте снова.`);
       };
 
+      const loadXlsxLibrary = async () => {
+        const scriptUrls = [
+          "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.full.min.js",
+          "https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.full.min.js",
+          "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
+        ];
+
+        for (const url of scriptUrls) {
+          try {
+            await loadScript(url);
+            if (window.XLSX) return;
+          } catch (err) {
+            console.warn("XLSX fallback failed:", err);
+          }
+        }
+
+        try {
+          const moduleXlsx = await import("https://unpkg.com/xlsx/xlsx.mjs");
+          const cptable = await import("https://unpkg.com/xlsx/dist/cpexcel.full.mjs");
+          moduleXlsx.set_cptable(cptable);
+          window.XLSX = moduleXlsx;
+          return;
+        } catch (err) {
+          console.warn("XLSX ESM fallback failed:", err);
+        }
+
+        throw new Error(
+          "Не удалось загрузить библиотеку XLSX. Проверьте подключение к Интернету или попробуйте снова."
+        );
+      };
+
       const formatScalarList = (items) => {
         return [...items].map((item) => String(item)).sort((a, b) => a.localeCompare(b)).join(", ");
       };
@@ -656,7 +687,7 @@
         };
 
         const headerStyle = {
-          alignment: { vertical: "top" },
+          alignment: { vertical: "top", horizontal: "left" },
         };
 
         const highlightStyle = {
@@ -711,10 +742,7 @@
 
       const bootstrap = async () => {
         setStatus("Загружаем библиотеки…");
-        await loadLibrary("XLSX", [
-          "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
-          "https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js",
-        ]);
+        await loadXlsxLibrary();
         await loadLibrary("jsPDF", [
           "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js",
           "https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js",
