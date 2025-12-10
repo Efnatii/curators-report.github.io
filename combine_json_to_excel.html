@@ -371,17 +371,37 @@
         return flat;
       };
 
-      const adjustColumnWidths = (data) => {
-        const widths = [];
-        data.forEach((row) => {
-          row.forEach((value, idx) => {
-            const text = value == null ? "" : String(value);
-            const len = Math.max(...text.split("\n").map((line) => line.length), 0);
-            widths[idx] = Math.max(widths[idx] || 0, len + 2);
+        const adjustColumnWidths = (data) => {
+          const widths = [];
+          data.forEach((row) => {
+            row.forEach((value, idx) => {
+              const text = value == null ? "" : String(value);
+              const len = Math.max(...text.split("\n").map((line) => line.length), 0);
+              const padded = len + 3; // небольшое поле для читаемости
+              widths[idx] = Math.max(widths[idx] || 0, padded);
+            });
           });
-        });
-        return widths.map((w) => Math.min(Math.max(w, 12), 60));
-      };
+          // разумные пределы ширины колонок
+          return widths.map((w) => Math.min(Math.max(w, 16), 80));
+        };
+
+        const computeRowHeights = (dataRows, columnWidths) => {
+          const minHeight = 18; // базовая высота строки
+          return dataRows.map((row) => {
+            let maxLines = 1;
+            row.forEach((value, idx) => {
+              const text = value == null ? "" : String(value);
+              const width = Math.max(columnWidths[idx] || 16, 12);
+              const wrappedLines = text.split(/\r?\n/).reduce((total, line) => {
+                const length = Math.max(line.length, 1);
+                const lineWidth = Math.max(width - 2, 8);
+                return total + Math.max(1, Math.ceil(length / lineWidth));
+              }, 0);
+              maxLines = Math.max(maxLines, wrappedLines);
+            });
+            return Math.max(minHeight, maxLines * 16);
+          });
+        };
 
       const determineColumns = (records) => {
         const presentKeys = new Set();
@@ -420,6 +440,7 @@
 
         const dataRows = [header1, header2];
         const highlightCells = [];
+        const recordBoundaries = [];
 
         for (const [fileName, rawRecord] of records) {
           const record = normalizeRecordValues(rawRecord);
@@ -485,11 +506,23 @@
             }
             columnStart += span;
           }
+
+          const endRow = dataRows.length - 1;
+          recordBoundaries.push({ start: startRow, end: endRow });
         }
 
         const scoreColumnIndex = flatColumns.findIndex((col) => col.key === "score" && !col.subkey);
         const columnWidths = adjustColumnWidths(dataRows);
-        return { dataRows, merges, highlights: highlightCells, columnWidths, scoreColumnIndex: scoreColumnIndex >= 0 ? scoreColumnIndex + 1 : null };
+        const rowHeights = computeRowHeights(dataRows, columnWidths);
+        return {
+          dataRows,
+          merges,
+          highlights: highlightCells,
+          columnWidths,
+          rowHeights,
+          recordBoundaries,
+          scoreColumnIndex: scoreColumnIndex >= 0 ? scoreColumnIndex + 1 : null,
+        };
       };
 
       const wrapLines = (text, maxLen = 82) => {
@@ -625,57 +658,92 @@
         return records;
       };
 
-      const exportWorkbook = (dataRows, merges, columnWidths, highlights, filename, scoreColumnIndex) => {
-        const worksheet = XLSX.utils.aoa_to_sheet(dataRows);
-        worksheet["!merges"] = merges.map((m) => ({ s: m.s, e: m.e }));
-        worksheet["!cols"] = columnWidths.map((wch) => ({ wch }));
+        const exportWorkbook = (
+          dataRows,
+          merges,
+          columnWidths,
+          highlights,
+          rowHeights,
+          filename,
+          scoreColumnIndex,
+          recordBoundaries
+        ) => {
+          const worksheet = XLSX.utils.aoa_to_sheet(dataRows);
+          worksheet["!merges"] = merges.map((m) => ({ s: m.s, e: m.e }));
+          worksheet["!cols"] = columnWidths.map((wch) => ({ wch }));
+          worksheet["!rows"] = rowHeights.map((hpt) => ({ hpt }));
 
-        const encode = XLSX.utils.encode_cell;
+          const encode = XLSX.utils.encode_cell;
 
-        const applyStyle = (cellRef, style) => {
-          const cell = worksheet[cellRef] || { t: "s", v: "" };
-          cell.s = { ...(cell.s || {}), ...style };
-          worksheet[cellRef] = cell;
-        };
+          const applyStyle = (cellRef, style) => {
+            const cell = worksheet[cellRef] || { t: "s", v: "" };
+            cell.s = { ...(cell.s || {}), ...style };
+            worksheet[cellRef] = cell;
+          };
 
-        const headerStyle = {
-          alignment: { vertical: "top", horizontal: "left" },
-        };
+          const baseStyle = {
+            alignment: { vertical: "top", horizontal: "left", wrapText: true },
+          };
 
-        const highlightStyle = {
-          fill: { patternType: "solid", fgColor: { rgb: HIGHLIGHT_RGB } },
-        };
+          const headerStyle = {
+            alignment: { vertical: "top", horizontal: "left", wrapText: true },
+          };
 
-        for (let r = 0; r < 2; r++) {
-          for (let c = 0; c < dataRows[0].length; c++) {
-            const hasValue = dataRows[r][c] !== "" && dataRows[r][c] !== undefined && dataRows[r][c] !== null;
-            if (hasValue) {
-              applyStyle(encode({ r, c }), headerStyle);
+          const highlightStyle = {
+            fill: { patternType: "solid", fgColor: { rgb: HIGHLIGHT_RGB } },
+          };
+
+          const separatorStyle = {
+            border: {
+              bottom: { style: "medium", color: { rgb: "000000" } },
+            },
+          };
+
+          for (let r = 0; r < dataRows.length; r++) {
+            for (let c = 0; c < dataRows[0].length; c++) {
+              const hasValue = dataRows[r][c] !== undefined && dataRows[r][c] !== null;
+              if (hasValue) {
+                applyStyle(encode({ r, c }), baseStyle);
+              }
             }
           }
-        }
 
-        highlights.forEach(({ r, c }) => {
-          applyStyle(encode({ r, c }), highlightStyle);
-        });
-
-        if (scoreColumnIndex !== null) {
-          const c = scoreColumnIndex;
-          for (let r = 2; r < dataRows.length; r++) {
-            const ref = encode({ r, c });
-            const cell = worksheet[ref];
-            if (!cell) continue;
-            const hasValue = cell.v !== undefined && cell.v !== null && cell.v !== "";
-            const style = {
-              alignment: { vertical: "top", horizontal: "left" },
-              ...(hasValue ? { font: { bold: true } } : {}),
-            };
-            applyStyle(ref, style);
+          for (let r = 0; r < 2; r++) {
+            for (let c = 0; c < dataRows[0].length; c++) {
+              const hasValue = dataRows[r][c] !== "" && dataRows[r][c] !== undefined && dataRows[r][c] !== null;
+              if (hasValue) {
+                applyStyle(encode({ r, c }), headerStyle);
+              }
+            }
           }
-        }
 
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, worksheet, "Анкеты");
+          highlights.forEach(({ r, c }) => {
+            applyStyle(encode({ r, c }), highlightStyle);
+          });
+
+          if (scoreColumnIndex !== null) {
+            const c = scoreColumnIndex;
+            for (let r = 2; r < dataRows.length; r++) {
+              const ref = encode({ r, c });
+              const cell = worksheet[ref];
+              if (!cell) continue;
+              const hasValue = cell.v !== undefined && cell.v !== null && cell.v !== "";
+              const style = {
+                alignment: { vertical: "top", horizontal: "left", wrapText: true },
+                ...(hasValue ? { font: { bold: true } } : {}),
+              };
+              applyStyle(ref, style);
+            }
+          }
+
+          recordBoundaries.forEach(({ end }) => {
+            for (let c = 0; c < dataRows[0].length; c++) {
+              applyStyle(encode({ r: end, c }), separatorStyle);
+            }
+          });
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, worksheet, "Анкеты");
 
         const arrayBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array", cellStyles: true });
         const blob = new Blob([arrayBuffer], {
@@ -716,11 +784,28 @@
         setStatus("Обработка файлов… это может занять немного времени.");
 
         try {
-          const records = await readFiles(files);
-          const { dataRows, merges, highlights, columnWidths, scoreColumnIndex } = buildWorkbook(records);
+            const records = await readFiles(files);
+            const {
+              dataRows,
+              merges,
+              highlights,
+              columnWidths,
+              rowHeights,
+              recordBoundaries,
+              scoreColumnIndex,
+            } = buildWorkbook(records);
 
-          const filename = "combined.xlsx";
-          exportWorkbook(dataRows, merges, columnWidths, highlights, filename, scoreColumnIndex);
+            const filename = "combined.xlsx";
+            exportWorkbook(
+              dataRows,
+              merges,
+              columnWidths,
+              highlights,
+              rowHeights,
+              filename,
+              scoreColumnIndex,
+              recordBoundaries
+            );
 
           if (pdfCheckbox.checked) {
             const pdfSections = records.map(([name, record]) => buildPdfSection(name, record));
