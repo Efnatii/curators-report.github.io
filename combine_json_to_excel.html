@@ -34,12 +34,18 @@
           <div class="tool-card__actions">
             <label class="field">
               <span class="field__label">Выберите JSON-файлы (можно несколько):</span>
-              <input id="jsonFiles" type="file" accept="application/json" multiple class="file-input" />
+              <div class="file-picker">
+                <input id="jsonFiles" type="file" accept="application/json" multiple class="file-input" />
+                <div class="file-picker__control" aria-hidden="true">
+                  <span class="file-picker__button">Добавить файлы</span>
+                  <span class="file-picker__hint">Поддерживается множественный выбор JSON</span>
+                </div>
+              </div>
             </label>
 
-            <label class="checkbox checkbox--inline">
+            <label class="checkbox checkbox--inline" for="generatePdfs">
               <input id="generatePdfs" type="checkbox" />
-              <span>Сформировать PDF по баллам</span>
+              <span class="checkbox__text">Сформировать PDF по баллам</span>
             </label>
 
             <div class="actions actions--stacked">
