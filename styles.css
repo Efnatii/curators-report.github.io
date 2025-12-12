@@ -65,9 +65,9 @@ a {
 
 .hero__score {
   position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 1000;
+  top: calc(max(12px, env(safe-area-inset-top)) + 4px);
+  right: calc(max(12px, env(safe-area-inset-right)) + 4px);
+  z-index: 1200;
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1605,8 +1605,8 @@ select:focus {
   }
 
   .hero__score {
-    top: 12px;
-    right: 12px;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
     padding: 10px 12px;
     width: auto;
     max-width: calc(100vw - 24px);
