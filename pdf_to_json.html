@@ -308,9 +308,9 @@
     const pageCountBadge = document.getElementById('page-count');
 
     const pdfLibraryCandidates = [
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js',
-      'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/build/pdf.min.js',
-      'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.mjs',
+      'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.mjs',
+      'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/+esm',
     ];
 
     let pdfJsReady = typeof window.pdfjsLib !== 'undefined';
@@ -324,7 +324,16 @@
       'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.mjs',
     ];
 
-    function loadScript(url) {
+    function loadPdfLibrary(url) {
+      if (url.endsWith('.mjs') || url.includes('+esm')) {
+        return import(url)
+          .then((module) => {
+            window.pdfjsLib = module;
+            return true;
+          })
+          .catch(() => Promise.reject(new Error(`Failed to import module: ${url}`)));
+      }
+
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = url;
@@ -340,7 +349,7 @@
 
       for (const candidate of pdfLibraryCandidates) {
         try {
-          await loadScript(candidate);
+          await loadPdfLibrary(candidate);
           if (typeof window.pdfjsLib !== 'undefined') {
             pdfJsReady = true;
             return true;
