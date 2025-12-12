@@ -60,6 +60,40 @@ a {
   box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   border-radius: 14px;
   backdrop-filter: blur(8px);
+  position: relative;
+}
+
+.hero__score {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  min-width: 170px;
+}
+
+.hero__score-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--muted-light, rgba(255, 255, 255, 0.85));
+}
+
+.hero__score-value {
+  margin: 4px 0 2px;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.hero__score-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted-light, rgba(255, 255, 255, 0.8));
 }
 
 .hero__badge {
@@ -1566,6 +1600,16 @@ select:focus {
 @media (max-width: 720px) {
   .hero__meta {
     width: 100%;
+  }
+
+  .hero__score {
+    position: static;
+    margin-left: auto;
+    width: 100%;
+  }
+
+  .hero__score-value {
+    font-size: 1.8rem;
   }
 
   .period-picker {
