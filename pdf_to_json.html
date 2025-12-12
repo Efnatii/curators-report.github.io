@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF → JSON Конвертер</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at 20% 20%, rgba(73, 115, 255, 0.07), transparent 30%),
+                  radial-gradient(circle at 80% 0%, rgba(255, 133, 153, 0.07), transparent 28%),
+                  #0e0f1a;
+      color: #f5f7fb;
+      min-height: 100vh;
+    }
+
+    .converter {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+
+    .converter__header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .converter__eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #a0b4ff;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .converter__title {
+      font-size: clamp(32px, 5vw, 44px);
+      margin: 16px 0 8px;
+      line-height: 1.1;
+    }
+
+    .converter__lead {
+      color: #c5cee6;
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: 18px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
+    }
+
+    .card + .card {
+      margin-top: 16px;
+    }
+
+    .card__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card__icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #486bff, #9a6bff);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 12px 30px rgba(88, 123, 255, 0.4);
+    }
+
+    .card__title {
+      font-weight: 700;
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .card__description {
+      color: #d0d6ec;
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    .field-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr 1fr;
+      align-items: flex-end;
+    }
+
+    .field {
+      position: relative;
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-weight: 600;
+      color: #e4e9f5;
+    }
+
+    .field input[type="file"] {
+      border: 1px dashed rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      border-radius: 12px;
+      color: #f5f7fb;
+    }
+
+    .field input[type="text"] {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 12px;
+      border-radius: 12px;
+      color: #f5f7fb;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .button-row .button {
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .button--primary {
+      background: linear-gradient(120deg, #6c8cff, #4f61ff);
+      color: #fff;
+      box-shadow: 0 14px 32px rgba(84, 114, 255, 0.4);
+    }
+
+    .button--ghost {
+      background: rgba(255, 255, 255, 0.06);
+      color: #e4e9f5;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.25);
+    }
+
+    .output-area {
+      width: 100%;
+      min-height: 260px;
+      background: rgba(0, 0, 0, 0.35);
+      color: #e9ecf7;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      resize: vertical;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(80, 214, 125, 0.12);
+      color: #4af18b;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: #c5cee6;
+      font-size: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+
+      .converter {
+        padding: 48px 16px 72px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="converter">
+    <header class="converter__header">
+      <div class="converter__eyebrow">
+        <span>Утилита</span>
+        <span aria-hidden="true">•</span>
+        <span>PDF → JSON</span>
+      </div>
+      <h1 class="converter__title">Преобразование PDF в JSON</h1>
+      <p class="converter__lead">Загрузите PDF-файл и получите структурированный JSON c текстом каждого листа. Интерфейс и валидация основаны на логике из основной анкеты.</p>
+    </header>
+
+    <section class="card" aria-labelledby="input-card-title">
+      <div class="card__header">
+        <div class="card__icon">1</div>
+        <div>
+          <h2 id="input-card-title" class="card__title">Файл для конвертации</h2>
+          <p class="card__description">Поддерживаются документы в формате PDF. Файл читается только в вашем браузере.</p>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="pdf-file">Выберите PDF</label>
+          <input type="file" id="pdf-file" accept="application/pdf" />
+          <p class="status" id="file-status">Файл не выбран</p>
+        </div>
+        <div class="field">
+          <label for="output-name">Имя выходного файла</label>
+          <input type="text" id="output-name" placeholder="Например, Отчет_о_кураторской_деятельности.json" />
+          <p class="status">Если оставить поле пустым, имя будет сгенерировано автоматически.</p>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button class="button button--primary" id="convert-button" disabled>Конвертировать</button>
+        <button class="button button--ghost" id="download-button" disabled>Скачать JSON</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="output-card-title">
+      <div class="card__header">
+        <div class="card__icon">2</div>
+        <div>
+          <h2 id="output-card-title" class="card__title">Результат конвертации</h2>
+          <p class="card__description">Готовый JSON можно скопировать вручную или сохранить через кнопку скачивания.</p>
+        </div>
+      </div>
+
+      <textarea class="output-area" id="json-output" aria-label="JSON результат" readonly placeholder="Здесь появится результат..."></textarea>
+      <div class="status" id="conversion-status">Ожидаю загрузку файла.</div>
+      <div class="badge" id="page-count" hidden>Страниц: 0</div>
+    </section>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js" integrity="sha512-Jv/NoNW7u4r9I4mnGJtqo1acRlbAcRy6Epj+MiQlc8mP/FyHmwGoKKnv5BAwPN19Zf8vj+fNF2gNsXcD7E5Z6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    const pdfInput = document.getElementById('pdf-file');
+    const outputNameInput = document.getElementById('output-name');
+    const convertButton = document.getElementById('convert-button');
+    const downloadButton = document.getElementById('download-button');
+    const jsonOutput = document.getElementById('json-output');
+    const conversionStatus = document.getElementById('conversion-status');
+    const fileStatus = document.getElementById('file-status');
+    const pageCountBadge = document.getElementById('page-count');
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+
+    function generateFileName(pdfName = 'document.pdf') {
+      const baseName = pdfName.replace(/\.pdf$/i, '') || 'document';
+      return `${baseName.replace(/\s+/g, '_')}.json`;
+    }
+
+    function setConversionState(message, isError = false) {
+      conversionStatus.textContent = message;
+      conversionStatus.style.color = isError ? '#ffb4c0' : '#c5cee6';
+    }
+
+    async function extractPageText(pdf, pageNumber) {
+      const page = await pdf.getPage(pageNumber);
+      const content = await page.getTextContent();
+      const strings = content.items.map((item) => item.str).filter(Boolean);
+      return strings.join(' ').replace(/\s+/g, ' ').trim();
+    }
+
+    async function convertPdfToJson(file) {
+      if (!file || file.type !== 'application/pdf') {
+        setConversionState('Пожалуйста, выберите PDF-файл.', true);
+        return;
+      }
+
+      setConversionState('Чтение файла...');
+      const buffer = await file.arrayBuffer();
+
+      setConversionState('Извлечение страниц...');
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const pages = [];
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        setConversionState(`Обработка страницы ${pageNumber} из ${pdf.numPages}...`);
+        const text = await extractPageText(pdf, pageNumber);
+        pages.push({ page: pageNumber, text });
+      }
+
+      const payload = {
+        file_name: file.name,
+        page_count: pdf.numPages,
+        pages,
+      };
+
+      const json = JSON.stringify(payload, null, 2);
+      jsonOutput.value = json;
+      pageCountBadge.hidden = false;
+      pageCountBadge.textContent = `Страниц: ${pdf.numPages}`;
+      setConversionState('Готово! Можно скачать JSON.');
+      downloadButton.disabled = false;
+    }
+
+    function resetOutput() {
+      jsonOutput.value = '';
+      downloadButton.disabled = true;
+      pageCountBadge.hidden = true;
+      setConversionState('Ожидаю загрузку файла.');
+    }
+
+    pdfInput.addEventListener('change', () => {
+      const [file] = pdfInput.files || [];
+      if (!file) {
+        fileStatus.textContent = 'Файл не выбран';
+        convertButton.disabled = true;
+        resetOutput();
+        return;
+      }
+
+      fileStatus.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} КБ)`;
+      convertButton.disabled = false;
+      resetOutput();
+      const suggestedName = generateFileName(file.name);
+      outputNameInput.placeholder = suggestedName;
+    });
+
+    convertButton.addEventListener('click', () => {
+      const [file] = pdfInput.files || [];
+      if (!file) {
+        setConversionState('Файл не выбран.', true);
+        return;
+      }
+
+      downloadButton.disabled = true;
+      convertPdfToJson(file).catch((error) => {
+        console.error(error);
+        setConversionState('Не удалось прочитать PDF. Проверьте файл и попробуйте снова.', true);
+      });
+    });
+
+    downloadButton.addEventListener('click', () => {
+      const [file] = pdfInput.files || [];
+      if (!file || !jsonOutput.value) return;
+
+      const blob = new Blob([jsonOutput.value], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const userFileName = (outputNameInput.value || outputNameInput.placeholder || generateFileName(file.name)).trim();
+      link.download = userFileName || generateFileName(file.name);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
