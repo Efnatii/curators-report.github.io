@@ -311,7 +311,7 @@
     const pdfJsReady = typeof window.pdfjsLib !== 'undefined';
 
     if (pdfJsReady) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs';
     } else {
       setConversionState('Не удалось загрузить библиотеку PDF.js. Проверьте подключение к интернету и обновите страницу.', true);
       convertButton.disabled = true;
