@@ -297,7 +297,6 @@
     </section>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js" integrity="sha512-Jv/NoNW7u4r9I4mnGJtqo1acRlbAcRy6Epj+MiQlc8mP/FyHmwGoKKnv5BAwPN19Zf8vj+fNF2gNsXcD7E5Z6A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
     const pdfInput = document.getElementById('pdf-file');
     const outputNameInput = document.getElementById('output-name');
@@ -308,7 +307,13 @@
     const fileStatus = document.getElementById('file-status');
     const pageCountBadge = document.getElementById('page-count');
 
-    const pdfJsReady = typeof window.pdfjsLib !== 'undefined';
+    const pdfLibraryCandidates = [
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js',
+      'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.2.67/build/pdf.min.js',
+      'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.min.js',
+    ];
+
+    let pdfJsReady = typeof window.pdfjsLib !== 'undefined';
     let pdfWorkerReady = false;
     const workerCandidates = [
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.mjs',
@@ -318,6 +323,37 @@
       'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.min.mjs',
       'https://unpkg.com/pdfjs-dist@4.2.67/build/pdf.worker.mjs',
     ];
+
+    function loadScript(url) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function ensurePdfJs() {
+      if (pdfJsReady) return true;
+
+      for (const candidate of pdfLibraryCandidates) {
+        try {
+          await loadScript(candidate);
+          if (typeof window.pdfjsLib !== 'undefined') {
+            pdfJsReady = true;
+            return true;
+          }
+        } catch (error) {
+          // Переходим к следующему кандидату.
+        }
+      }
+
+      setConversionState('Не удалось загрузить библиотеку PDF.js. Проверьте подключение к интернету и обновите страницу.', true);
+      convertButton.disabled = true;
+      return false;
+    }
 
     async function ensurePdfWorker() {
       if (!pdfJsReady) {
@@ -348,10 +384,14 @@
       convertButton.disabled = !(hasFile && pdfWorkerReady);
     }
 
-    ensurePdfWorker().then((isReady) => {
-      pdfWorkerReady = isReady;
+    async function bootstrapPdfJs() {
+      setConversionState('Загружаю библиотеку PDF.js...');
+      pdfJsReady = await ensurePdfJs();
+      pdfWorkerReady = pdfJsReady ? await ensurePdfWorker() : false;
       updateConvertAvailability();
-    });
+    }
+
+    bootstrapPdfJs();
 
     function generateFileName(pdfName = 'document.pdf') {
       const baseName = pdfName.replace(/\.pdf$/i, '') || 'document';
