@@ -419,6 +419,43 @@
       return strings.join(' ').replace(/\s+/g, ' ').trim();
     }
 
+    function createEmptyReportTemplate() {
+      return {
+        _comments: {},
+        reporting_period: {
+          label: '',
+          date_start: '',
+          date_end: '',
+          deadline: '',
+          display: '',
+        },
+        full_name: '',
+        job_positions: [],
+        department: '',
+        contact_phone_connected_to_telegram: '',
+        telegram_username: '',
+        email: '',
+        curated_group_numbers: [],
+        curator_primary_building: '',
+        curator_primary_room: '',
+        institute_or_faculty: [],
+        held_minimum_three_curator_sessions_in_reporting_period: null,
+        curator_hours_details: [],
+        manages_group_chat: null,
+        inform_group_about_events: null,
+        achievements: [],
+        participated_in_two_events_with_group: null,
+        joint_participation_events: [],
+        participated_in_two_curator_events: null,
+        curator_personal_events: [],
+        personal_program_participation: [],
+        mentor_support_events: [],
+        scientific_publications: [],
+        media_materials: [],
+        qualification_courses: [],
+      };
+    }
+
     async function convertPdfToJson(file) {
       const isPdf = file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''));
       if (!isPdf) {
@@ -439,8 +476,9 @@
         pages.push({ page: pageNumber, text });
       }
 
-      const payload = {
-        file_name: file.name,
+      const payload = createEmptyReportTemplate();
+      payload._comments = {
+        source_pdf_file: file.name,
         page_count: pdf.numPages,
         pages,
       };
