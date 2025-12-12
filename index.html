@@ -12,6 +12,11 @@
 <body>
   <header class="hero">
     <div class="container hero__content">
+      <div class="hero__score" id="score-counter" aria-live="polite">
+        <p class="hero__score-label">Текущие баллы</p>
+        <p class="hero__score-value" id="score-counter-value">0</p>
+        <p class="hero__score-hint" id="score-counter-hint">Автоподсчёт по критериям</p>
+      </div>
       <div class="hero__badge">Анкета</div>
       <h1>Отчет по кураторской деятельности</h1>
       <p class="lede">Анкета для фиксации данных кураторской деятельности.</p>
@@ -876,6 +881,9 @@
     const addInterviewRowButton = document.getElementById('add-interview-row');
     const qualificationCourseRowsContainer = document.getElementById('qualification-course-rows');
     const addQualificationCourseRowButton = document.getElementById('add-qualification-course-row');
+    const scoreCounter = document.getElementById('score-counter');
+    const scoreCounterValue = document.getElementById('score-counter-value');
+    const scoreCounterHint = document.getElementById('score-counter-hint');
     const achievementDirectionSelects = new WeakMap();
     const curatorHoursDirectionSelects = new WeakMap();
     const interviewDirectionSelects = new WeakMap();
@@ -4025,6 +4033,127 @@
       return false;
     }
 
+    function isAffirmative(value) {
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') return value.trim().toLowerCase() === 'да';
+      return false;
+    }
+
+    function rowHasContent(row) {
+      if (!row) return false;
+      if (Array.isArray(row)) return row.some(Boolean);
+      if (typeof row === 'object') return Object.values(row).some((value) => Boolean(value) || (Array.isArray(value) && value.length));
+      return Boolean(row);
+    }
+
+    function countFilledRows(value) {
+      if (!Array.isArray(value)) return 0;
+      return value.filter((row) => rowHasContent(row)).length;
+    }
+
+    function countRowsWithSpecialists(value) {
+      if (!Array.isArray(value)) return 0;
+
+      return value.reduce((total, row) => {
+        if (!row || typeof row !== 'object') return total;
+
+        const { specialists } = row;
+        if (typeof specialists === 'string' && specialists.trim()) return total + 1;
+        if (Array.isArray(specialists) && specialists.some(Boolean)) return total + 1;
+        return total;
+      }, 0);
+    }
+
+    function computePointComponents(reportData) {
+      const value11 = reportData.held_minimum_three_curator_sessions_in_reporting_period;
+      const value12 = reportData.curator_hours_details;
+      const value13 = reportData.manages_group_chat;
+      const value14 = reportData.inform_group_about_events;
+      const value16 = reportData.participated_in_two_events_with_group;
+      const value17 = reportData.joint_participation_events;
+      const value18 = reportData.participated_in_two_curator_events;
+      const value19 = reportData.curator_personal_events;
+
+      const count12 = countFilledRows(value12);
+      const count17 = countFilledRows(value17);
+      const count19 = countFilledRows(value19);
+
+      const components = [];
+
+      const baseConditionMet =
+        isAffirmative(value11) &&
+        count12 >= 3 &&
+        isAffirmative(value13) &&
+        isAffirmative(value14) &&
+        isAffirmative(value16) &&
+        count17 >= 2 &&
+        isAffirmative(value18) &&
+        count19 >= 2;
+
+      components.push([
+        'Базовое условие (пп. 11, 12, 13, 14, 16, 17, 18, 19)',
+        baseConditionMet ? 30 : 0,
+      ]);
+
+      components.push([
+        'Личное участие в программах и конкурсах (п.20)',
+        countFilledRows(reportData.personal_program_participation) * 10,
+      ]);
+
+      components.push([
+        'Опубликование научной работы (п.22)',
+        countFilledRows(reportData.scientific_publications) * 20,
+      ]);
+
+      components.push([
+        'Интервью и статьи для "Дзен.Гуап" и соцсетей (п.23)',
+        countFilledRows(reportData.media_materials) * 10,
+      ]);
+
+      components.push([
+        'Наставничество в проектах (п.21)',
+        countFilledRows(reportData.mentor_support_events) * 10,
+      ]);
+
+      components.push([
+        'Призовые места обучающихся (п.15)',
+        countFilledRows(reportData.achievements) * 10,
+      ]);
+
+      components.push([
+        'Курсы повышения квалификации (п.24)',
+        countFilledRows(reportData.qualification_courses) * 20,
+      ]);
+
+      components.push([
+        'Приглашённые специалисты на кураторских часах (п.12)',
+        countRowsWithSpecialists(value12) * 20,
+      ]);
+
+      components.push([
+        'Дополнительные кураторские часы сверх трёх (п.12)',
+        count12 > 3 ? (count12 - 3) * 5 : 0,
+      ]);
+
+      components.push([
+        'Совместные мероприятия с группой сверх двух (п.17)',
+        count17 > 2 ? (count17 - 2) * 10 : 0,
+      ]);
+
+      components.push([
+        'Мероприятия для кураторов сверх двух (п.19)',
+        count19 > 2 ? (count19 - 2) * 5 : 0,
+      ]);
+
+      return components;
+    }
+
+    function calculateTotalPoints(reportData) {
+      const components = computePointComponents(reportData);
+      const total = components.reduce((sum, [, points]) => sum + points, 0);
+      return { components, total };
+    }
+
     function buildReportData() {
       const heldMinimumThreeCuratorSessions = getBooleanRadio('held_minimum_three_curator_sessions_in_reporting_period');
       const participatedInCuratorEvents = getBooleanRadio('participated_in_two_curator_events');
@@ -4058,6 +4187,27 @@
         media_materials: collectInterviews(),
         qualification_courses: collectQualificationCourses(),
       };
+    }
+
+    function updateScoreCounter() {
+      if (!scoreCounterValue) return;
+
+      const reportData = buildReportData();
+      const { components, total } = calculateTotalPoints(reportData);
+
+      scoreCounterValue.textContent = total;
+      const breakdown = components.map(([description, points]) => `${points} — ${description}`).join('\n');
+
+      if (scoreCounter) {
+        scoreCounter.title = breakdown || 'Нет начисленных баллов';
+      }
+
+      if (scoreCounterHint) {
+        scoreCounterHint.textContent =
+          total > 0
+            ? 'Подсчёт обновляется при каждом изменении формы'
+            : 'Заполните критерии, чтобы начислить баллы';
+      }
     }
 
     function buildReport() {
@@ -4391,6 +4541,8 @@
       toggleJointActivitiesDetails();
       toggleJointParticipationDetails();
       toggleExtracurricularDetails();
+
+      updateScoreCounter();
     }
 
     enhanceDatalistInput(form.elements.department);
@@ -4399,6 +4551,9 @@
     addSelectBlurValidation(form.elements.curator_primary_building);
 
     setupTooltips();
+
+    form.addEventListener('input', updateScoreCounter);
+    form.addEventListener('change', updateScoreCounter);
 
     jobPositionsSelect = setupSearchableMultiSelect({
       name: 'job_positions',
@@ -4533,6 +4688,8 @@
         pdfMake.createPdf(pdfDefinition).download(generateFileName('pdf'));
       });
     }
+
+    updateScoreCounter();
   </script>
 </body>
 </html>
