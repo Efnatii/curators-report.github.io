@@ -308,7 +308,14 @@
     const fileStatus = document.getElementById('file-status');
     const pageCountBadge = document.getElementById('page-count');
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+    const pdfJsReady = typeof window.pdfjsLib !== 'undefined';
+
+    if (pdfJsReady) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js';
+    } else {
+      setConversionState('Не удалось загрузить библиотеку PDF.js. Проверьте подключение к интернету и обновите страницу.', true);
+      convertButton.disabled = true;
+    }
 
     function generateFileName(pdfName = 'document.pdf') {
       const baseName = pdfName.replace(/\.pdf$/i, '') || 'document';
@@ -378,7 +385,10 @@
       }
 
       fileStatus.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} КБ)`;
-      convertButton.disabled = false;
+      convertButton.disabled = !pdfJsReady;
+      if (!pdfJsReady) {
+        setConversionState('Библиотека PDF.js не загружена. Проверьте подключение к интернету и обновите страницу.', true);
+      }
       resetOutput();
       const suggestedName = generateFileName(file.name);
       outputNameInput.placeholder = suggestedName;
@@ -388,6 +398,11 @@
       const [file] = pdfInput.files || [];
       if (!file) {
         setConversionState('Файл не выбран.', true);
+        return;
+      }
+
+      if (!pdfJsReady) {
+        setConversionState('Библиотека PDF.js не загружена. Перезагрузите страницу после восстановления подключения.', true);
         return;
       }
 
