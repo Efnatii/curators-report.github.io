@@ -104,7 +104,7 @@
       display: grid;
       gap: 12px;
       grid-template-columns: 1fr 1fr;
-      align-items: flex-end;
+      align-items: start;
     }
 
     .field {
@@ -124,6 +124,31 @@
       padding: 12px;
       border-radius: 12px;
       color: #f5f7fb;
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+
+    .field input[type="file"]:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .field input[type="file"]::file-selector-button {
+      background: linear-gradient(120deg, #6c8cff, #4f61ff);
+      border: none;
+      color: #fff;
+      padding: 10px 14px;
+      margin-right: 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(84, 114, 255, 0.35);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .field input[type="file"]::file-selector-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(84, 114, 255, 0.4);
     }
 
     .field input[type="text"] {
@@ -303,7 +328,8 @@
     }
 
     async function convertPdfToJson(file) {
-      if (!file || file.type !== 'application/pdf') {
+      const isPdf = file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''));
+      if (!isPdf) {
         setConversionState('Пожалуйста, выберите PDF-файл.', true);
         return;
       }
