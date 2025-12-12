@@ -68,34 +68,48 @@ a {
   top: calc(max(12px, env(safe-area-inset-top)) + 4px);
   right: calc(max(12px, env(safe-area-inset-right)) + 4px);
   z-index: 1200;
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 8px 12px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  background: rgba(12, 15, 22, 0.8);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   color: var(--text);
-  min-width: 170px;
-  max-width: calc(100vw - 32px);
+  max-width: min(320px, calc(100vw - 32px));
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  padding-left: 14px;
 }
 
 .hero__score-label {
   margin: 0;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   color: var(--muted-light, rgba(255, 255, 255, 0.85));
+  letter-spacing: 0.02em;
 }
 
 .hero__score-value {
-  margin: 4px 0 2px;
-  font-size: 2rem;
+  margin: 0;
+  font-size: 1.7rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .hero__score-hint {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--muted-light, rgba(255, 255, 255, 0.8));
+  line-height: 1.3;
+}
+
+.hero__score-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .hero__badge {
@@ -1605,15 +1619,15 @@ select:focus {
   }
 
   .hero__score {
-    top: max(12px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
-    padding: 10px 12px;
-    width: auto;
-    max-width: calc(100vw - 24px);
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+    padding: 8px 10px;
+    gap: 10px;
+    max-width: calc(100vw - 20px);
   }
 
   .hero__score-value {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
   .period-picker {
