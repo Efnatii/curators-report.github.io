@@ -64,9 +64,10 @@ a {
 }
 
 .hero__score {
-  position: absolute;
+  position: fixed;
   top: 16px;
   right: 16px;
+  z-index: 1000;
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -74,6 +75,7 @@ a {
   box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
   color: var(--text);
   min-width: 170px;
+  max-width: calc(100vw - 32px);
 }
 
 .hero__score-label {
@@ -1603,9 +1605,11 @@ select:focus {
   }
 
   .hero__score {
-    position: static;
-    margin-left: auto;
-    width: 100%;
+    top: 12px;
+    right: 12px;
+    padding: 10px 12px;
+    width: auto;
+    max-width: calc(100vw - 24px);
   }
 
   .hero__score-value {
