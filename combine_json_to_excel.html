@@ -536,6 +536,45 @@
         const highlightCells = [];
         const recordBoundaries = [];
 
+        // --- Base 30 points (обязательные 30 баллов): раскраска ячеек по соответствию критериям ---
+        const base30Marks = [];
+
+        const columnRangesByKey = (() => {
+          const map = {};
+          let start = 1; // после колонки "Источник"
+          for (const q of questions) {
+            const span = Math.max(q.subfields ? Object.keys(q.subfields).length : 1, 1);
+            map[q.key] = { start, span };
+            start += span;
+          }
+          return map;
+        })();
+
+        const reserveRowCount = (value) => (Array.isArray(value) ? Math.max(value.length, 1) : 1);
+
+        const yesNoState = (value) => {
+          if (value === null || value === undefined || value === "") return "empty";
+          return isYes(value) ? "yes" : "no";
+        };
+
+        const statusByCount = (count, required) => {
+          if (count >= required) return "good";
+          if (count > 0) return "warn";
+          return "bad";
+        };
+
+        const markKeyRange = (startRow, key, level, rowCount = 1) => {
+          const range = columnRangesByKey[key];
+          if (!range) return;
+          const rows = Math.max(rowCount, 1);
+          for (let dr = 0; dr < rows; dr++) {
+            for (let dc = 0; dc < range.span; dc++) {
+              base30Marks.push({ r: startRow + dr, c: range.start + dc, level });
+            }
+          }
+        };
+
+
         for (const [fileName, rawRecord] of records) {
           const record = normalizeRecordValues(rawRecord);
           record.score = computePoints(rawRecord);
@@ -601,6 +640,49 @@
             columnStart += span;
           }
 
+          // Базовые 30 баллов: правила подсветки
+          const v11 = record["held_minimum_three_curator_sessions_in_reporting_period"];
+          const v12 = record["curator_hours_details"];
+          const v13 = record["manages_group_chat"];
+          const v14 = record["inform_group_about_events"];
+          const v16 = record["participated_in_two_events_with_group"];
+          const v17 = record["joint_participation_events"];
+          const v18 = record["participated_in_two_curator_events"];
+          const v19 = record["curator_personal_events"];
+
+          const count12 = countFilledRows(v12);
+          const count17 = countFilledRows(v17);
+          const count19 = countFilledRows(v19);
+
+          const yn11 = yesNoState(v11);
+          const yn13 = yesNoState(v13);
+          const yn14 = yesNoState(v14);
+          const yn16 = yesNoState(v16);
+          const yn18 = yesNoState(v18);
+
+          // Если "Нет" (или пусто) — связанные табличные вопросы считаем несоответствующими (bad)
+          const status12 = yn11 === "yes" ? statusByCount(count12, 3) : "bad";
+          const status17 = yn16 === "yes" ? statusByCount(count17, 2) : "bad";
+          const status19 = yn18 === "yes" ? statusByCount(count19, 2) : "bad";
+
+          const status11 = yn11 === "yes" ? (status12 === "good" ? "good" : "warn") : "bad";
+          const status13 = yn13 === "yes" ? "good" : "bad";
+          const status14 = yn14 === "yes" ? "good" : "bad";
+          const status16 = yn16 === "yes" ? (status17 === "good" ? "good" : "warn") : "bad";
+          const status18 = yn18 === "yes" ? (status19 === "good" ? "good" : "warn") : "bad";
+
+          // Вопросы Да/Нет
+          markKeyRange(startRow, "held_minimum_three_curator_sessions_in_reporting_period", status11, 1);
+          markKeyRange(startRow, "manages_group_chat", status13, 1);
+          markKeyRange(startRow, "inform_group_about_events", status14, 1);
+          markKeyRange(startRow, "participated_in_two_events_with_group", status16, 1);
+          markKeyRange(startRow, "participated_in_two_curator_events", status18, 1);
+
+          // Табличные/связанные вопросы: если пусто — резервируем 1 строку и красим в "bad"
+          markKeyRange(startRow, "curator_hours_details", status12, reserveRowCount(v12));
+          markKeyRange(startRow, "joint_participation_events", status17, reserveRowCount(v17));
+          markKeyRange(startRow, "curator_personal_events", status19, reserveRowCount(v19));
+
           const endRow = dataRows.length - 1;
           recordBoundaries.push({ start: startRow, end: endRow });
         }
@@ -612,6 +694,7 @@
           dataRows,
           merges,
           highlights: highlightCells,
+          base30Marks,
           columnWidths,
           rowHeights,
           recordBoundaries,
@@ -757,6 +840,7 @@
           merges,
           columnWidths,
           highlights,
+          base30Marks,
           rowHeights,
           filename,
           scoreColumnIndex,
@@ -787,6 +871,17 @@
             fill: { patternType: "solid", fgColor: { rgb: HIGHLIGHT_RGB } },
           };
 
+          // Base-30 coloring (good/warn/bad)
+          const BASE30_GOOD_RGB = "C6EFCE"; // зеленеватый
+          const BASE30_WARN_RGB = "FFEB9C"; // оранжеватый/желтоватый
+          const BASE30_BAD_RGB = "FFC7CE"; // красноватый
+
+          const base30Styles = {
+            good: { fill: { patternType: "solid", fgColor: { rgb: BASE30_GOOD_RGB } } },
+            warn: { fill: { patternType: "solid", fgColor: { rgb: BASE30_WARN_RGB } } },
+            bad: { fill: { patternType: "solid", fgColor: { rgb: BASE30_BAD_RGB } } },
+          };
+
           const separatorStyle = {
             border: {
               bottom: { style: "medium", color: { rgb: "000000" } },
@@ -813,6 +908,11 @@
 
           highlights.forEach(({ r, c }) => {
             applyStyle(encode({ r, c }), highlightStyle);
+          });
+
+          (base30Marks || []).forEach(({ r, c, level }) => {
+            const style = base30Styles[level] || base30Styles.bad;
+            applyStyle(encode({ r, c }), style);
           });
 
           if (scoreColumnIndex !== null) {
@@ -889,6 +989,7 @@
             dataRows,
             merges,
             highlights,
+            base30Marks,
             columnWidths,
             rowHeights,
             recordBoundaries,
@@ -901,6 +1002,7 @@
             merges,
             columnWidths,
             highlights,
+            base30Marks,
             rowHeights,
             filename,
             scoreColumnIndex,
